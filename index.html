@@ -543,7 +543,7 @@ let filterStatus = 'todos';
 let editingId = null;
 
 // ─── Form state ───
-const formState = { routeId:null, durationLabel:null, signal:0, customValue:0, quantity:1, discount:0, status:'confirmado' };
+const formState = { tipo:'buggy', routeId:null, durationLabel:null, signal:0, customValue:0, quantity:1, discount:0, status:'confirmado', poolAdults:1, poolChildren:0, poolIndividualPrice:0, poolName:'' };
 
 // ─── Settings ───
 let appSettings = { companyName:'Agenda Serviços Turísticos', tagline:'Serviços Turísticos - Maragogi-AL', location:'Maragogi-AL', logoDataUrl:'', logoZoom:1 };
@@ -636,6 +636,38 @@ function removeLogo(){
   applyLogoZoom();
 }
 
+// ─── Version & Service Worker ───
+const APP_VERSION = '4';
+
+// Force-kill old service workers and caches on version mismatch
+(async ()=>{
+  const v = localStorage.getItem('appVersion');
+  if (v !== APP_VERSION) {
+    localStorage.setItem('appVersion', APP_VERSION);
+    try {
+      if (navigator.serviceWorker) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+    } catch(e) {}
+    // Reload once with a cache-busting parameter
+    if (!window.location.search.includes('_v=')) {
+      window.location.href = window.location.pathname + '?_v=' + APP_VERSION;
+      return;
+    }
+  }
+  // Register the service worker (with version param so URL changes on update)
+  if ('serviceWorker' in navigator) {
+    try {
+      await navigator.serviceWorker.register('sw.js?_v=' + APP_VERSION);
+    } catch(e) { console.warn('SW registration failed:', e); }
+  }
+})();
+
 // ─── Init ───
 let initDone = false;
 document.addEventListener('DOMContentLoaded',()=>{
@@ -672,7 +704,7 @@ function loadBookings(){
     const d = localStorage.getItem(STORAGE_KEY);
     let raw = d ? JSON.parse(d) : [];
     // Sanitize: remove entries without required fields
-    bookings = raw.filter(b => b && b.client && b.date && b.routeId && b.durationLabel && typeof b.value === 'number').map(b => { b.companions = b.companions||''; b.customStops = b.customStops||''; b.quantity = b.quantity||1; b.discount = b.discount||0; return b; });
+    bookings = raw.filter(b => b && b.client && b.date && typeof b.value === 'number').map(b => { b.tipo = b.tipo||'buggy'; b.companions = b.companions||''; b.customStops = b.customStops||''; b.quantity = b.quantity||1; b.discount = b.discount||0; b.poolAdults = b.poolAdults||1; b.poolChildren = b.poolChildren||0; b.poolIndividualPrice = b.poolIndividualPrice||0; b.poolName = b.poolName||''; b.boardingPoint = b.boardingPoint||''; return b; });
   }catch(e){ bookings=[]; }
   if(!localStorage.getItem(STORAGE_KEY) || bookings.length===0){
     localStorage.setItem(STORAGE_KEY,'[]');
@@ -717,10 +749,14 @@ function getDayName(dateStr){
   return DAY_NAMES[d.getDay()];
 }
 function calcEndTime(start,routeId,durationLabel){
-  const dur = getDuration(routeId,durationLabel);
-  if(!dur||!start) return '';
+  if(!start) return '';
+  let hours = 3;
+  if(routeId!=='piscinas'){
+    const dur = getDuration(routeId,durationLabel);
+    if(dur) hours = dur.hours;
+  }
   const [h,m]=start.split(':').map(Number);
-  const totalMin = h*60+m+dur.hours*60;
+  const totalMin = h*60+m+hours*60;
   const eh = Math.floor(totalMin/60)%24;
   const em = totalMin%60;
   return String(eh).padStart(2,'0')+':'+String(em).padStart(2,'0');
@@ -785,21 +821,22 @@ function renderAgenda(){
         <span class="day-count">(${items.length})</span>
       </div>
       ${items.map(b=>{
-        const route = getRoute(b.routeId);
-        const dur = getDuration(b.routeId,b.durationLabel);
-        const timeStr = `${b.startTime} - ${b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel)}`;
+        const isPiscinas = b.tipo==='piscinas';
+        const route = isPiscinas ? null : getRoute(b.routeId);
+        const timeStr = `${b.startTime} - ${b.endTime||calcEndTime(b.startTime,b.routeId||'piscinas',b.durationLabel)}`;
         return `<div class="booking-card bc-${b.status}" onclick="openDetail('${b.id}')">
           <div class="bc-top">
             <div>
               <div class="bc-time">${timeStr}</div>
               <div class="bc-client">${escHtml(b.client)}</div>
-              <div class="bc-route">${route?route.name:''} <span class="route-badge">${b.durationLabel}</span></div>
+              <div class="bc-route">${isPiscinas?'🏝️ Piscinas Naturais':(route?route.name:'')} ${b.durationLabel?`<span class="route-badge">${b.durationLabel}</span>`:''}</div>
             </div>
             <span class="pill pill-${b.status}">${statusLabel(b.status)}</span>
           </div>
           <div class="bc-bottom">
             <span class="bc-value">${fmtCurr(b.value)}</span>
-            ${b.quantity>1?`<span style="font-size:11px;color:var(--text2)">${b.quantity} buggy's</span>`:''}
+            ${!isPiscinas && b.quantity>1?`<span style="font-size:11px;color:var(--text2)">${b.quantity} buggy's</span>`:''}
+            ${isPiscinas && b.poolAdults?(()=>{ const s=b.poolChildren>1?'s':''; const vi=b.vesselType?((b.vesselType==='lancha'?'🚤':b.vesselType==='jangada'?'⛵':'🛥️')+' '+b.vesselType+(b.vesselMode?' '+b.vesselMode:'')):''; return `<span style="font-size:11px;color:var(--text2)">${vi?vi+' · ':''}${b.poolAdults} adulto${b.poolAdults>1?'s':''}${b.poolChildren>0?', '+b.poolChildren+' criança'+s:''}</span>`; })():''}
             ${b.signal>0?`<span style="font-size:12px;color:#27ae60">Pago: ${fmtCurr(b.signal)}</span>`:''}
           </div>
         </div>`;
@@ -942,12 +979,15 @@ function showDayPopup(dateStr){
     <div class="popup-handle"></div>
     <div class="popup-day">${dayName}, ${d.getDate()}/${d.getMonth()+1}</div>
     ${bks.map(b=>{
-      const route = getRoute(b.routeId);
+      const isPiscinas = b.tipo==='piscinas';
+      const title = isPiscinas ? '🏝️ Piscinas Naturais' : (getRoute(b.routeId)?.name||'');
       const endTime = b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel);
+      const subtitle = isPiscinas ? `${b.vesselType?b.vesselType==='lancha'?'🚤':b.vesselType==='jangada'?'⛵':'🛥️':''} ${b.vesselType||''} ${b.vesselMode||''} · ${b.poolAdults||0} adulto${b.poolAdults>1?'s':''}` : '';
       return `<div class="day-popup-item" onclick="removeDayPopup();showDayDetail('${dateStr}')">
         <div class="ppi-left">
-          <span class="ppi-title">${route?route.name:''}</span>
+          <span class="ppi-title">${title}</span>
           <span class="ppi-time">${b.startTime} - ${endTime} · ${b.client}</span>
+          ${subtitle?`<div style="font-size:11px;color:#4A6A6A;margin-top:1px">${subtitle}</div>`:''}
         </div>
         <span class="pill pill-${b.status} ppi-status">${statusLabel(b.status)}</span>
       </div>`;
@@ -1046,21 +1086,24 @@ function showDayDetail(dateStr){
 
   // Render booking blocks
   bks.forEach(b=>{
-    const route = getRoute(b.routeId);
-    const dur = getDuration(b.routeId,b.durationLabel);
+    const isPiscinas = b.tipo==='piscinas';
+    const route = isPiscinas ? null : getRoute(b.routeId);
+    const dur = isPiscinas ? null : getDuration(b.routeId,b.durationLabel);
     const startMin = timeToMinutes(b.startTime);
     const hours = dur ? dur.hours : 3;
     const topPx = Math.max(0, startMin - 420);
     const heightPx = hours * 60;
     const endTime = b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel);
-    // Client + companions
     let people = escHtml(b.client);
     if(b.companions) people += ', '+escHtml(b.companions);
+    const title = isPiscinas ? '🏝️ Piscinas Naturais' : (route?route.name:'');
+    const embarque = isPiscinas ? (b.boardingPoint||b.pickupDetail||'') : (b.pickupDetail||'');
+    const vesselInfo = isPiscinas && b.vesselType ? `${b.vesselType==='lancha'?'🚤':b.vesselType==='jangada'?'⛵':'🛥️'} ${b.vesselType==='lancha'?'Lancha':b.vesselType==='jangada'?'Jangada':'Catamarã'} ${b.vesselMode==='privada'?'🔒 Privada':'👥 Comp.'}` : '';
     html += `<div class="tl-block status-${b.status}" style="top:${topPx}px;height:${Math.max(heightPx,40)}px" onclick="openDetailFromCalendar('${b.id}')">
-      <div class="tlb-title">${route?route.name:''}</div>
+      <div class="tlb-title">${title}</div>
       <div class="tlb-client">${people}</div>
       <div class="tlb-time">Início: ${b.startTime} · Término: ${endTime}</div>
-      <div class="tlb-pickup">Embarque: ${escHtml(b.pickupDetail)}</div>
+      <div class="tlb-pickup">${vesselInfo?`${vesselInfo} | `:''}Embarque: ${escHtml(embarque)}</div>
     </div>`;
   });
 
@@ -1237,6 +1280,7 @@ function openForm(bookingId){
   editingId = bookingId||null;
   const edit = editingId ? bookings.find(b=>b.id===editingId) : null;
   if(edit){
+    formState.tipo = edit.tipo||'buggy';
     formState.routeId = edit.routeId;
     formState.durationLabel = edit.durationLabel;
     formState.signal = edit.signal;
@@ -1244,7 +1288,14 @@ function openForm(bookingId){
     formState.quantity = edit.quantity||1;
     formState.discount = edit.discount||0;
     formState.status = edit.status;
+    formState.poolAdults = edit.poolAdults||1;
+    formState.poolChildren = edit.poolChildren||0;
+    formState.poolIndividualPrice = edit.poolIndividualPrice||0;
+    formState.poolName = edit.poolName||'';
+    formState.vesselType = edit.vesselType||'lancha';
+    formState.vesselMode = edit.vesselMode||'compartilhada';
   }else{
+    formState.tipo = 'buggy';
     formState.routeId = null;
     formState.durationLabel = null;
     formState.signal = 0;
@@ -1252,6 +1303,12 @@ function openForm(bookingId){
     formState.quantity = 1;
     formState.discount = 0;
     formState.status = 'confirmado';
+    formState.poolAdults = 1;
+    formState.poolChildren = 0;
+    formState.poolIndividualPrice = 0;
+    formState.poolName = '';
+    formState.vesselType = 'lancha';
+    formState.vesselMode = 'compartilhada';
   }
   renderForm();
   if(formState.routeId&&formState.durationLabel) updateTotalDisplay();
@@ -1261,6 +1318,7 @@ function renderForm(){
   const container = document.getElementById('formContainer');
   const edit = editingId ? bookings.find(b=>b.id===editingId) : null;
   const title = edit ? 'Editar Agendamento' : 'Novo Agendamento';
+  const t = formState.tipo||'buggy';
 
   container.innerHTML = `
     <div class="card">
@@ -1269,9 +1327,17 @@ function renderForm(){
           <div class="card-title">${title}</div>
           <div class="card-sub">Preencha os dados do passeio</div>
         </div>
-        <button onclick="openRouteEditor()" style="width:44px;height:44px;border-radius:50%;border:none;background:var(--o);color:#fff;font-size:32px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font);transition:.15s;box-shadow:0 2px 8px rgba(0,0,0,.12);line-height:1;padding:0 0 2px 0" title="Gerenciar roteiros">+</button>
       </div>
 
+      <div class="form-group">
+        <label>Tipo de Passeio</label>
+        <div style="display:flex;gap:8px" id="tipoSelector">
+          <button type="button" class="btn ${t==='buggy'?'btn-primary':'btn-outline'}" data-tipo="buggy" style="flex:1;text-align:center">🚙 Buggy</button>
+          <button type="button" class="btn ${t==='piscinas'?'btn-primary':'btn-outline'}" data-tipo="piscinas" style="flex:1;text-align:center">🏝️ Piscinas Naturais</button>
+        </div>
+      </div>
+
+      ${t==='buggy' ? `
       <div class="form-group">
         <label>Roteiro</label>
         <div class="route-grid" id="routeGrid">
@@ -1312,6 +1378,75 @@ function renderForm(){
       </div>
 
       <div class="form-group">
+        <label>Local de Embarque</label>
+        <select class="form-input" id="fPickup">
+          <option value="hotel">Hotel / Pousada</option>
+          <option value="ponto_encontro"${edit&&edit.pickup==='ponto_encontro'?' selected':''}>Ponto de Encontro (Posto Ipiranga)</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="pickupDetailGroup">
+        <label>Qual hotel/pousada?</label>
+        <input class="form-input" id="fPickupDetail" placeholder="Ex: Hotel Salinas Maragogi" value="${edit&&edit.pickup==='hotel'?escHtml(edit.pickupDetail||''):''}" autocomplete="off">
+      </div>
+      ` : `
+      <div class="form-group">
+        <label>Nome da Piscina Natural</label>
+        <input class="form-input" id="fPoolName" placeholder="Ex: Piscina do Gostoso, Piscina do Davi..." value="${edit?escHtml(edit.poolName||''):''}">
+      </div>
+
+      <div class="form-group">
+        <label>Tipo de Embarcação</label>
+        <div class="btn-group" id="vesselTypeSelector" style="display:flex;gap:4px">
+          <button type="button" class="btn ${formState.vesselType==='lancha'?'btn-primary':'btn-outline'}" data-vessel="lancha" style="flex:1;text-align:center">🚤 Lancha</button>
+          <button type="button" class="btn ${formState.vesselType==='jangada'?'btn-primary':'btn-outline'}" data-vessel="jangada" style="flex:1;text-align:center">⛵ Jangada</button>
+          <button type="button" class="btn ${formState.vesselType==='catamara'?'btn-primary':'btn-outline'}" data-vessel="catamara" style="flex:1;text-align:center">🛥️ Catamarã</button>
+        </div>
+      </div>
+
+      <div class="form-group" id="vesselModeGroup" style="display:${formState.vesselType==='catamara'?'none':'block'}">
+        <label>Modalidade</label>
+        <div class="btn-group" id="vesselModeSelector" style="display:flex;gap:4px">
+          <button type="button" class="btn ${formState.vesselMode==='privada'?'btn-primary':'btn-outline'}" data-vesselmode="privada" style="flex:1;text-align:center">🔒 Privada</button>
+          <button type="button" class="btn ${formState.vesselMode==='compartilhada'?'btn-primary':'btn-outline'}" data-vesselmode="compartilhada" style="flex:1;text-align:center">👥 Compartilhada</button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="form-group">
+          <label>Quantidade de Adultos</label>
+          <input class="form-input" id="fPoolAdults" type="number" min="0" step="1" value="${formState.poolAdults}" onchange="formState.poolAdults=Math.max(0,parseInt(this.value)||0);updatePoolTotal()" style="text-align:center;font-weight:700">
+        </div>
+        <div class="form-group">
+          <label>Crianças (meia)</label>
+          <input class="form-input" id="fPoolChildren" type="number" min="0" step="1" value="${formState.poolChildren}" onchange="formState.poolChildren=Math.max(0,parseInt(this.value)||0);updatePoolTotal()" style="text-align:center;font-weight:700">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Valor Individual (por pessoa)</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:16px;font-weight:700;color:var(--t)">R$</span>
+          <input class="form-input" id="fPoolPrice" type="number" min="0" step="any" placeholder="130,00" value="${formState.poolIndividualPrice}" oninput="formState.poolIndividualPrice=parseFloat(this.value)||0;updatePoolTotal()" style="width:140px;text-align:center;font-weight:700;font-size:16px">
+        </div>
+      </div>
+
+      <div id="poolValueDisplay" class="${formState.poolIndividualPrice>0?'':'hidden'}">
+        <div class="value-display">${fmtCurr(poolCalcTotal())}<span class="value-label">Valor Total</span></div>
+      </div>
+
+      <div class="form-group">
+        <label>Ponto de Embarque / Referência</label>
+        <input class="form-input" id="fBoardingPoint" placeholder="Ex: Hotel Salinas, Posto Ipiranga..." value="${edit?escHtml(edit.boardingPoint||''):''}">
+      </div>
+
+      <div class="form-group">
+        <label>Observações do Passeio <span style="font-weight:400;color:#aab">(opcional)</span></label>
+        <textarea class="form-input" id="fCustomStops" placeholder="Informações adicionais sobre o passeio">${edit?escHtml(edit.customStops||''):''}</textarea>
+      </div>
+      `}
+
+      <div class="form-group">
         <label>Nome do Cliente</label>
         <input class="form-input" id="fClient" placeholder="Ex: Maria Silva" value="${edit?escHtml(edit.client):''}" autocomplete="off">
       </div>
@@ -1333,7 +1468,7 @@ function renderForm(){
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="form-group">
-          <label>Início</label>
+          <label>Horário de Embarque</label>
           <input class="form-input" id="fStart" type="time" value="${edit?edit.startTime:'08:00'}">
         </div>
         <div class="form-group">
@@ -1362,19 +1497,6 @@ function renderForm(){
       </div>
 
       <div class="form-group">
-        <label>Local de Embarque</label>
-        <select class="form-input" id="fPickup">
-          <option value="hotel">Hotel / Pousada</option>
-          <option value="ponto_encontro"${edit&&edit.pickup==='ponto_encontro'?' selected':''}>Ponto de Encontro (Posto Ipiranga)</option>
-        </select>
-      </div>
-
-      <div class="form-group" id="pickupDetailGroup">
-        <label>Qual hotel/pousada?</label>
-        <input class="form-input" id="fPickupDetail" placeholder="Ex: Hotel Salinas Maragogi" value="${edit&&edit.pickup==='hotel'?escHtml(edit.pickupDetail||''):''}" autocomplete="off">
-      </div>
-
-      <div class="form-group">
         <label>Status</label>
         <div class="status-selector" id="statusSelector">
           ${['confirmado','concluido','cancelado'].map(s=>`
@@ -1399,21 +1521,37 @@ function renderForm(){
 
   // ─── Attach events (delegation — survives re-render) ───
 
-  // Route card selection
-  document.getElementById('routeGrid').addEventListener('click', function(e){
-    const card = e.target.closest('.route-card');
-    if(card && !e.target.closest('.duration-btn')){
-      selectRoute(card.dataset.route);
+  // Tipo selector
+  document.getElementById('tipoSelector').addEventListener('click', function(e){
+    const btn = e.target.closest('[data-tipo]');
+    if(btn){
+      formState.tipo = btn.dataset.tipo;
+      renderForm();
     }
   });
 
-  // Duration button selection
-  document.getElementById('routeGrid').addEventListener('click', function(e){
-    const btn = e.target.closest('.duration-btn');
-    if(btn) selectDuration(btn.dataset.route, btn.dataset.duration);
-  });
+  // Buggy-specific events
+  const routeGrid = document.getElementById('routeGrid');
+  if(routeGrid){
+    routeGrid.addEventListener('click', function(e){
+      const card = e.target.closest('.route-card');
+      if(card && !e.target.closest('.duration-btn')){
+        selectRoute(card.dataset.route);
+      }
+    });
+    routeGrid.addEventListener('click', function(e){
+      const btn = e.target.closest('.duration-btn');
+      if(btn) selectDuration(btn.dataset.route, btn.dataset.duration);
+    });
+    document.getElementById('fStart').addEventListener('change', updateEndTime);
+    document.getElementById('fPickup').addEventListener('change', function(){
+      const g = document.getElementById('pickupDetailGroup');
+      g.style.display = this.value === 'hotel' ? 'block' : 'none';
+    });
+    document.getElementById('fPickup').dispatchEvent(new Event('change'));
+  }
 
-  // Signal buttons
+  // Shared events
   document.getElementById('signalGroup').addEventListener('click', function(e){
     const btn = e.target.closest('.signal-btn');
     if(!btn) return;
@@ -1424,34 +1562,42 @@ function renderForm(){
       customSignal();
     }
   });
-
-  // Custom signal input
   document.getElementById('fSignalCustom').addEventListener('input', function(){
     formState.signal = parseFloat(this.value) || 0;
   });
-
-  // Status selector
   document.getElementById('statusSelector').addEventListener('click', function(e){
     const btn = e.target.closest('.status-option');
     if(btn) selectStatus(btn.dataset.status);
   });
-
-  // Save button
   document.getElementById('btnSaveBooking').addEventListener('click', saveBooking);
-
-  // Cancel edit button
   const cancelBtn = document.getElementById('btnCancelEdit');
   if(cancelBtn) cancelBtn.addEventListener('click', cancelEdit);
 
-  // Start time change → update end time
-  document.getElementById('fStart').addEventListener('change', updateEndTime);
-
-  // Pickup toggle
-  document.getElementById('fPickup').addEventListener('change', function(){
-    const g = document.getElementById('pickupDetailGroup');
-    g.style.display = this.value === 'hotel' ? 'block' : 'none';
-  });
-  document.getElementById('fPickup').dispatchEvent(new Event('change'));
+  // Piscinas-specific events
+  if(t==='piscinas'){
+    updatePoolTotal();
+    const vesselSel = document.getElementById('vesselTypeSelector');
+    if(vesselSel){
+      vesselSel.onclick = function(e){
+        const btn = e.target.closest('[data-vessel]');
+        if(btn){
+          formState.vesselType = btn.dataset.vessel;
+          formState.vesselMode = formState.vesselType==='catamara' ? 'compartilhada' : formState.vesselMode;
+          renderForm();
+        }
+      };
+    }
+    const modeSel = document.getElementById('vesselModeSelector');
+    if(modeSel){
+      modeSel.onclick = function(e){
+        const btn = e.target.closest('[data-vesselmode]');
+        if(btn){
+          formState.vesselMode = btn.dataset.vesselmode;
+          renderForm();
+        }
+      };
+    }
+  }
 
   // Show custom signal input if already set
   if(![0,50,100].includes(formState.signal)){
@@ -1519,6 +1665,20 @@ function calcValue(){
   if(!dur) return 0;
   return (dur.price * formState.quantity) + formState.customValue - formState.discount;
 }
+function poolCalcTotal(){
+  const adults = formState.poolAdults||0;
+  const children = formState.poolChildren||0;
+  const price = formState.poolIndividualPrice||0;
+  return (adults * price) + (children * price * 0.5) - formState.discount;
+}
+function updatePoolTotal(){
+  const total = poolCalcTotal();
+  const vd = document.getElementById('poolValueDisplay');
+  if(vd){
+    vd.classList.toggle('hidden', formState.poolIndividualPrice<=0);
+    vd.innerHTML = `<div class="value-display">${fmtCurr(total)}<span class="value-label">Valor Total${formState.discount>0?' · desconto: -'+fmtCurr(formState.discount):''}</span></div>`;
+  }
+}
 function updateCustomValue(el){
   formState.customValue = parseFloat(el.value) || 0;
   updateTotalDisplay();
@@ -1556,30 +1716,25 @@ function updateEndTime(){
 }
 
 function saveBooking(){
-  // Step 1: validate selections
-  const routeId = formState.routeId;
-  const durationLabel = formState.durationLabel;
-  if(!routeId||!durationLabel){
-    alert('Selecione um roteiro e uma duração.');
-    return;
-  }
-  const dur = getDuration(routeId,durationLabel);
-  if(!dur){ alert('Duração inválida. Selecione novamente.'); return; }
+  const tipo = formState.tipo||'buggy';
 
-  // Step 2: read form fields
+  if(tipo==='buggy'){
+    const routeId = formState.routeId;
+    const durationLabel = formState.durationLabel;
+    if(!routeId||!durationLabel){
+      alert('Selecione um roteiro e uma duração.');
+      return;
+    }
+    const dur = getDuration(routeId,durationLabel);
+    if(!dur){ alert('Duração inválida. Selecione novamente.'); return; }
+  }
+
   const client = document.getElementById('fClient').value.trim();
   const contact = document.getElementById('fContact').value.trim();
   const companions = document.getElementById('fCompanions').value.trim();
   const date = document.getElementById('fDate').value;
   const startTime = document.getElementById('fStart').value;
-  const endTime = document.getElementById('fEnd').value||calcEndTime(startTime,routeId,durationLabel);
-  const pickup = document.getElementById('fPickup').value;
-  const pickupDetail = pickup==='hotel'?document.getElementById('fPickupDetail').value.trim():'Ponto de Encontro (Posto Ipiranga)';
-  const customStops = document.getElementById('fCustomStops').value.trim();
-  const customValue = formState.customValue;
-  const quantity = formState.quantity;
   const discount = formState.discount;
-  const totalValue = calcValue();
   const status = formState.status;
   const signal = formState.signal;
   const notes = document.getElementById('fNotes').value.trim();
@@ -1589,18 +1744,47 @@ function saveBooking(){
   if(!date){ alert('Selecione a data.'); return; }
   if(!startTime){ alert('Selecione o horário de início.'); return; }
 
-  // Step 3: build booking object
-  const booking = {
-    id: editingId || Date.now().toString(36)+Math.random().toString(36).slice(2,6),
-    routeId, durationLabel, value: totalValue, customValue, quantity, discount,
-    client, contact, companions,
-    date, startTime, endTime,
-    signal, pickup, pickupDetail,
-    status, notes, customStops,
-    createdAt: editingId ? (bookings.find(b=>b.id===editingId)?.createdAt||new Date().toISOString()) : new Date().toISOString()
-  };
+  let booking;
+  if(tipo==='buggy'){
+    const routeId = formState.routeId;
+    const durationLabel = formState.durationLabel;
+    const dur = getDuration(routeId,durationLabel);
+    const endTime = document.getElementById('fEnd').value||calcEndTime(startTime,routeId,durationLabel);
+    const pickup = document.getElementById('fPickup').value;
+    const pickupDetail = pickup==='hotel'?document.getElementById('fPickupDetail').value.trim():'Ponto de Encontro (Posto Ipiranga)';
+    const customStops = document.getElementById('fCustomStops').value.trim();
+    const customValue = formState.customValue;
+    const quantity = formState.quantity;
+    const totalValue = calcValue();
+    booking = {
+      id: editingId || Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+      tipo:'buggy', routeId, durationLabel, value: totalValue, customValue, quantity, discount,
+      client, contact, companions, date, startTime, endTime,
+      signal, pickup, pickupDetail, status, notes, customStops,
+      createdAt: editingId ? (bookings.find(b=>b.id===editingId)?.createdAt||new Date().toISOString()) : new Date().toISOString()
+    };
+  }else{
+    const endTime = document.getElementById('fEnd').value||calcEndTime(startTime,'piscinas','3h');
+    const poolName = document.getElementById('fPoolName').value.trim();
+    const poolAdults = formState.poolAdults||0;
+    const poolChildren = formState.poolChildren||0;
+    const poolIndividualPrice = formState.poolIndividualPrice||0;
+    const boardingPoint = document.getElementById('fBoardingPoint')?.value.trim()||'';
+    const customStops = document.getElementById('fCustomStops')?.value.trim()||'';
+    const vesselType = formState.vesselType||'lancha';
+    const vesselMode = formState.vesselType==='catamara' ? 'compartilhada' : (formState.vesselMode||'compartilhada');
+    const totalValue = poolCalcTotal();
+    if(poolIndividualPrice<=0){ alert('Informe o valor individual do passeio.'); return; }
+    if(poolAdults<=0){ alert('Informe a quantidade de adultos.'); return; }
+    booking = {
+      id: editingId || Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+      tipo:'piscinas', poolName, poolAdults, poolChildren, poolIndividualPrice, vesselType, vesselMode, value: totalValue, discount,
+      client, contact, companions, date, startTime, endTime,
+      signal, pickupDetail:boardingPoint, status, notes, customStops, boardingPoint,
+      createdAt: editingId ? (bookings.find(b=>b.id===editingId)?.createdAt||new Date().toISOString()) : new Date().toISOString()
+    };
+  }
 
-  // Step 4: save
   if(editingId){
     const idx = bookings.findIndex(b=>b.id===editingId);
     if(idx>=0) bookings[idx]=booking;
@@ -1624,30 +1808,52 @@ function cancelEdit(){
 function openDetail(id){
   const b = bookings.find(b=>b.id===id);
   if(!b) return;
-  const route = getRoute(b.routeId);
-  const dur = getDuration(b.routeId,b.durationLabel);
+  const isPiscinas = b.tipo==='piscinas';
   const body = document.getElementById('detailBody');
   const actions = document.getElementById('detailActions');
 
   document.getElementById('detailTitle').textContent = b.client;
 
-  body.innerHTML = `
-    <div class="detail-row"><span class="label">Roteiro</span><span class="value">${route?route.name:''} (${b.durationLabel})</span></div>
-    <div class="detail-row"><span class="label">Data</span><span class="value">${fmtDate(b.date)} — ${getDayName(b.date)}</span></div>
-    <div class="detail-row"><span class="label">Horário</span><span class="value">${b.startTime} - ${b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel)}</span></div>
-    <div class="detail-row"><span class="label">Contato</span><span class="value"><a href="https://wa.me/55${b.contact.replace(/\D/g,'')}" target="_blank" style="color:var(--t);text-decoration:none">${escHtml(b.contact)}</a></span></div>
-    <div class="detail-row"><span class="label">Acompanhantes</span><span class="value">${b.companions||'—'}</span></div>
-    <div class="detail-row"><span class="label">Embarque</span><span class="value">${escHtml(b.pickupDetail)}</span></div>
-    <div class="detail-row"><span class="label">🛞 Buggy's</span><span class="value">${b.quantity||1} privativo${(b.quantity||1)>1?'s':''}</span></div>
-    ${b.customValue>0?`<div class="detail-row"><span class="label">Personalização (+)</span><span class="value">${fmtCurr(b.customValue)}</span></div>`:''}
-    ${b.discount>0?`<div class="detail-row"><span class="label">Desconto (-)</span><span class="value" style="color:#e74c3c">${fmtCurr(b.discount)}</span></div>`:''}
-    <div class="detail-row"><span class="label">Valor Total</span><span class="value">${fmtCurr(b.value)}</span></div>
-    <div class="detail-row"><span class="label">Valor Pago</span><span class="value" style="color:#27ae60">${fmtCurr(b.signal)}</span></div>
-    <div class="detail-row"><span class="label">Restante</span><span class="value" style="color:${b.value-b.signal>0?'#e74c3c':'#27ae60'}">${fmtCurr(b.value-b.signal)}</span></div>
-    <div class="detail-row"><span class="label">Status</span><span class="value"><span class="pill pill-${b.status}">${statusLabel(b.status)}</span></span></div>
-    ${b.customStops?`<div class="detail-row"><span class="label">Personalização</span><span class="value">${escHtml(b.customStops)}</span></div>`:''}
-    ${b.notes?`<div class="detail-row"><span class="label">Obs</span><span class="value">${escHtml(b.notes)}</span></div>`:''}
-  `;
+  if(isPiscinas){
+    body.innerHTML = `
+      <div class="detail-row"><span class="label">Passeio</span><span class="value">🏝️ Piscinas Naturais</span></div>
+      <div class="detail-row"><span class="label">Piscina</span><span class="value">${escHtml(b.poolName||'—')}</span></div>
+      ${b.vesselType?`<div class="detail-row"><span class="label">Embarcação</span><span class="value">${b.vesselType==='lancha'?'🚤 Lancha':b.vesselType==='jangada'?'⛵ Jangada':'🛥️ Catamarã'} ${b.vesselMode==='privada'?'🔒 Privada':'👥 Compartilhada'}</span></div>`:''}
+      <div class="detail-row"><span class="label">Data</span><span class="value">${fmtDate(b.date)} — ${getDayName(b.date)}</span></div>
+      <div class="detail-row"><span class="label">Horário</span><span class="value">${b.startTime} - ${b.endTime||'12:00'}</span></div>
+      <div class="detail-row"><span class="label">Adultos</span><span class="value">${b.poolAdults||0}</span></div>
+      <div class="detail-row"><span class="label">Crianças (meia)</span><span class="value">${b.poolChildren||0}</span></div>
+      <div class="detail-row"><span class="label">Valor indiv.</span><span class="value">${fmtCurr(b.poolIndividualPrice||0)}</span></div>
+      ${b.discount>0?`<div class="detail-row"><span class="label">Desconto (-)</span><span class="value" style="color:#e74c3c">${fmtCurr(b.discount)}</span></div>`:''}
+      <div class="detail-row"><span class="label">Valor Total</span><span class="value">${fmtCurr(b.value)}</span></div>
+      <div class="detail-row"><span class="label">Valor Pago</span><span class="value" style="color:#019391">${fmtCurr(b.signal)}</span></div>
+      <div class="detail-row"><span class="label">Restante</span><span class="value" style="color:${b.value-b.signal>0?'#D14C4C':'#019391'}">${fmtCurr(b.value-b.signal)}</span></div>
+      <div class="detail-row"><span class="label">Contato</span><span class="value"><a href="https://wa.me/55${b.contact.replace(/\D/g,'')}" target="_blank" style="color:var(--t);text-decoration:none">${escHtml(b.contact)}</a></span></div>
+      <div class="detail-row"><span class="label">Acompanhantes</span><span class="value">${b.companions||'—'}</span></div>
+      <div class="detail-row"><span class="label">Embarque</span><span class="value">${escHtml(b.boardingPoint||b.pickupDetail||'—')}</span></div>
+      <div class="detail-row"><span class="label">Status</span><span class="value"><span class="pill pill-${b.status}">${statusLabel(b.status)}</span></span></div>
+      ${b.customStops?`<div class="detail-row"><span class="label">Obs</span><span class="value">${escHtml(b.customStops)}</span></div>`:''}
+    `;
+  }else{
+    const route = getRoute(b.routeId);
+    body.innerHTML = `
+      <div class="detail-row"><span class="label">Roteiro</span><span class="value">${route?route.name:''} (${b.durationLabel})</span></div>
+      <div class="detail-row"><span class="label">Data</span><span class="value">${fmtDate(b.date)} — ${getDayName(b.date)}</span></div>
+      <div class="detail-row"><span class="label">Horário</span><span class="value">${b.startTime} - ${b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel)}</span></div>
+      <div class="detail-row"><span class="label">Contato</span><span class="value"><a href="https://wa.me/55${b.contact.replace(/\D/g,'')}" target="_blank" style="color:var(--t);text-decoration:none">${escHtml(b.contact)}</a></span></div>
+      <div class="detail-row"><span class="label">Acompanhantes</span><span class="value">${b.companions||'—'}</span></div>
+      <div class="detail-row"><span class="label">Embarque</span><span class="value">${escHtml(b.pickupDetail)}</span></div>
+      <div class="detail-row"><span class="label">Buggy's</span><span class="value">${b.quantity||1} privativo${(b.quantity||1)>1?'s':''}</span></div>
+      ${b.customValue>0?`<div class="detail-row"><span class="label">Personalização (+)</span><span class="value">${fmtCurr(b.customValue)}</span></div>`:''}
+      ${b.discount>0?`<div class="detail-row"><span class="label">Desconto (-)</span><span class="value" style="color:#e74c3c">${fmtCurr(b.discount)}</span></div>`:''}
+      <div class="detail-row"><span class="label">Valor Total</span><span class="value">${fmtCurr(b.value)}</span></div>
+      <div class="detail-row"><span class="label">Valor Pago</span><span class="value" style="color:#019391">${fmtCurr(b.signal)}</span></div>
+      <div class="detail-row"><span class="label">Restante</span><span class="value" style="color:${b.value-b.signal>0?'#D14C4C':'#019391'}">${fmtCurr(b.value-b.signal)}</span></div>
+      <div class="detail-row"><span class="label">Status</span><span class="value"><span class="pill pill-${b.status}">${statusLabel(b.status)}</span></span></div>
+      ${b.customStops?`<div class="detail-row"><span class="label">Personalização</span><span class="value">${escHtml(b.customStops)}</span></div>`:''}
+      ${b.notes?`<div class="detail-row"><span class="label">Obs</span><span class="value">${escHtml(b.notes)}</span></div>`:''}
+    `;
+  }
 
   actions.innerHTML = `
     <button class="btn btn-primary btn-sm" onclick="editBooking('${b.id}')">✏️ Editar</button>
@@ -1711,9 +1917,9 @@ function ric(n){ return RICONS[n]||''; }
 function generateReceipt(id){
   const b = bookings.find(b=>b.id===id);
   if(!b) return;
-  const route = getRoute(b.routeId);
-  const dur = getDuration(b.routeId,b.durationLabel);
-  const endTime = b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel);
+  const isPiscinas = b.tipo==='piscinas';
+  const route = isPiscinas ? null : getRoute(b.routeId);
+  const endTime = b.endTime||(isPiscinas ? calcEndTime(b.startTime,'piscinas','3h') : calcEndTime(b.startTime,b.routeId,b.durationLabel));
   const remaining = b.value-b.signal;
 
   window._receiptCanvas = null;
@@ -1780,11 +1986,23 @@ function generateReceipt(id){
       <div class="r-row"><span class="r-label">${ric('user')}Cliente</span><span class="r-value" style="font-weight:700">${escHtml(b.client)}</span></div>
       <div class="r-row"><span class="r-label">${ric('phone')}Contato</span><span class="r-value">${escHtml(b.contact)}</span></div>
       <div class="r-row"><span class="r-label">${ric('group')}Acompanhantes</span><span class="r-value">${b.companions||'—'}</span></div>
-      <div class="r-row"><span class="r-label">${ric('pin')}Embarque</span><span class="r-value">${escHtml(b.pickupDetail)}</span></div>
+      <div class="r-row"><span class="r-label">${ric('pin')}Embarque</span><span class="r-value">${escHtml(b.pickupDetail||b.boardingPoint||'—')}</span></div>
+
+      ${isPiscinas ? `
+      <div class="r-row"><span class="r-label">${ric('loc')}Piscina</span><span class="r-value">${escHtml(b.poolName||'—')}</span></div>
+      ${b.vesselType?`<div class="r-row"><span class="r-label">${ric('pin')}Embarcação</span><span class="r-value">${b.vesselType==='lancha'?'🚤 Lancha':b.vesselType==='jangada'?'⛵ Jangada':'🛥️ Catamarã'} ${b.vesselMode==='privada'?'🔒 Privada':'👥 Compartilhada'}</span></div>`:''}
+      <div class="r-row"><span class="r-label">${ric('group')}Adultos</span><span class="r-value">${b.poolAdults||0} × ${fmtCurr(b.poolIndividualPrice||0)}</span></div>
+      ${b.poolChildren>0?`<div class="r-row"><span class="r-label">${ric('group')}Crianças</span><span class="r-value">${b.poolChildren} × ${fmtCurr((b.poolIndividualPrice||0)*0.5)} (meia)</span></div>`:''}
+      ` : `
       <div class="r-row"><span class="r-label">${ric('buggy')}Quantidade</span><span class="r-value">${b.quantity||1} buggy${(b.quantity||1)>1?'\'s':''} privativo${(b.quantity||1)>1?'s':''}</span></div>
+      `}
 
       <hr class="receipt-divider">
 
+      ${isPiscinas ? `
+      <div style="font-weight:700;font-size:14px;margin-bottom:4px;letter-spacing:.2px;color:var(--t)">🏝️ Piscinas Naturais</div>
+      ${b.customStops?`<div style="font-size:12px;color:#4A6A6A;margin:6px 0 0;padding:6px 0 0;border-top:1px dashed var(--border);display:flex;align-items:center"><span style="font-weight:700;display:flex;align-items:center">${ric('alert')} Obs:</span>&nbsp;${escHtml(b.customStops)}</div>`:''}
+      ` : `
       <div style="font-weight:700;font-size:13px;margin-bottom:4px;letter-spacing:.2px;color:var(--t)">${route?route.name:''} <span style="font-weight:400;color:#4A6A6A">(${b.durationLabel})</span></div>
       <ul class="r-stops">${route?route.stops.map(s=>{
         if(s.startsWith('Rota ')) return `<li class="r-section">${s}</li>`;
@@ -1792,12 +2010,17 @@ function generateReceipt(id){
         return `<li>${icon} ${s}</li>`;
       }).join(''):''}</ul>
       ${b.customStops?`<div style="font-size:12px;color:#4A6A6A;margin:6px 0 0;padding:6px 0 0;border-top:1px dashed var(--border);display:flex;align-items:center"><span style="font-weight:700;display:flex;align-items:center">${ric('alert')} Personalização:</span>&nbsp;${escHtml(b.customStops)}</div>`:''}
+      `}
 
       <hr class="receipt-divider">
 
       <div class="r-highlight">
+        ${isPiscinas ? `
+        <div class="r-row"><span class="r-label">Valor Total</span><span class="r-value" style="font-weight:800">${fmtCurr(b.value)}</span></div>
+        ` : `
         ${(()=>{ const base = (b.value-(b.customValue||0)+(b.discount||0))/Math.max(b.quantity||1,1); return `<div class="r-row"><span class="r-label">Roteiro base${b.quantity>1?` (${b.quantity}× ${fmtCurr(base)})`:''}</span><span class="r-value" style="font-weight:700">${fmtCurr(base*Math.max(b.quantity||1,1))}</span></div>`; })()}
         ${b.customValue>0?`<div class="r-row"><span class="r-label">Personalização</span><span class="r-value" style="font-weight:700">+ ${fmtCurr(b.customValue)}</span></div>`:''}
+        `}
         ${b.discount>0?`<div class="r-row"><span class="r-label">Desconto</span><span class="r-value" style="font-weight:700;color:#D14C4C">- ${fmtCurr(b.discount)}</span></div>`:''}
         <div class="r-row"><span class="r-label">Valor Total</span><span class="r-value" style="font-weight:800">${fmtCurr(b.value)}</span></div>
         <div class="r-row"><span class="r-label">Valor Pago</span><span class="r-value" style="color:#019391;font-weight:700">${fmtCurr(b.signal)}</span></div>
@@ -1895,6 +2118,10 @@ function renderStats(){
     const bs = bookings.filter(b=>b.routeId===r.id);
     return {name:r.name, total:bs.length, receita:bs.reduce((s,b)=>s+b.value,0)};
   });
+  const piscinasBS = bookings.filter(b=>b.tipo==='piscinas');
+  if(piscinasBS.length>0){
+    routeStats.push({name:'🏝️ Piscinas Naturais', total:piscinasBS.length, receita:piscinasBS.reduce((s,b)=>s+b.value,0)});
+  }
 
   container.innerHTML = `
     <div class="stats-grid">
@@ -1924,9 +2151,11 @@ function renderStats(){
     <div class="card">
       <div class="card-title">📅 Últimos Agendamentos</div>
       ${bookings.slice(-5).reverse().map(b=>{
-        const route = getRoute(b.routeId);
+        const isPiscinas = b.tipo==='piscinas';
+        const route = isPiscinas ? null : getRoute(b.routeId);
+        const label = isPiscinas ? '🏝️ Piscinas' : (route?route.name:'');
         return `<div class="stat-row" style="cursor:pointer" onclick="openDetail('${b.id}')">
-          <span>${fmtDate(b.date)} — ${escHtml(b.client)}</span>
+          <span>${fmtDate(b.date)} — ${escHtml(b.client)} <span style="font-size:11px;color:var(--text2)">${label}</span></span>
           <span><span class="pill pill-${b.status}">${statusLabel(b.status)}</span></span>
         </div>`;
       }).join('')||'<div style="padding:8px;color:var(--text2);font-size:13px">Nenhum agendamento ainda.</div>'}

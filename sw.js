@@ -1,7 +1,5 @@
-const CACHE = "destinos-maragogi-v2";
+const CACHE = "destinos-maragogi-v3";
 const ASSETS = [
-  ".",
-  "index.html",
   "manifest.json",
   "icon-192.png",
   "icon-512.png",
@@ -24,6 +22,17 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request).then(response => {
+        return caches.open(CACHE).then(cache => {
+          cache.put(e.request, response.clone());
+          return response;
+        });
+      }).catch(() => caches.match(e.request))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then((cached) => cached || fetch(e.request))
   );
