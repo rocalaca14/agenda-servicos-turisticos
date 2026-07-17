@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#00606C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Agenda ST">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-startup-image" href="icon-512.png">
+<title>Agenda Serviços Turísticos</title>
+<script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+#loading{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;font-family:var(--font);color:var(--text2);font-size:14px;background:var(--bg)}
+#loading .sp{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--t);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--t:#00606C;--t2:#019391;--o:#00DFC3;--o2:#00BFA8;--bg:#F4FAFA;--white:#FFFFFF;--border:#B7E5E2;--text:#102A30;--text2:#527178;--shadow:0 4px 20px rgba(0,0,0,.12);--radius:14px;--radius-sm:10px;--font:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif}
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+svg{shape-rendering:geometricPrecision}
+body{padding-bottom:80px;overflow-x:hidden}
+
+/* Header */
+.header{background:var(--t);color:var(--white);padding:14px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.header .h-left{width:32px;flex-shrink:0}
+.header .h-center{flex:1;display:flex;align-items:center;justify-content:center;gap:10px}
+.logo-round{display:flex;border-radius:50%;overflow:hidden;flex-shrink:0;align-items:center;justify-content:center}
+.logo-round img{width:100%;height:100%;object-fit:cover;display:block}
+.header-logo-wrap{width:36px;height:36px}
+.header h1{font-size:16px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+.header span{font-size:10px;color:rgba(255,255,255,.75);display:block;margin-top:-1px;white-space:nowrap}
+
+/* Bottom Nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;border-top:1.5px solid var(--border);z-index:200;padding-bottom:env(safe-area-inset-bottom,0);box-shadow:0 -4px 16px rgba(0,0,0,.08)}
+.nav-item{flex:1;text-align:center;padding:8px 4px 6px;font-size:11px;color:var(--text2);cursor:pointer;transition:.2s;border:none;background:none;font-family:var(--font)}
+.nav-item svg{display:block;margin:0 auto 2px;width:24px;height:24px;fill:currentColor}
+.nav-item.active{color:var(--t);font-weight:600}
+.nav-item:active{opacity:.6}
+
+/* FAB */
+.fab{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);width:56px;height:56px;border-radius:50%;background:var(--o);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,223,195,.45);z-index:250;transition:.15s}
+.fab:active{transform:translateX(-50%) scale(.92)}
+
+/* Views */
+.view{display:none;padding:16px;max-width:640px;margin:0 auto}
+.view.active{display:block}
+
+/* Cards */
+.card{background:var(--white);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
+.card-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.card-sub{font-size:13px;color:var(--text2)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);border:none;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;font-family:var(--font);text-decoration:none}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--t);color:var(--white)}
+.btn-primary:hover{background:var(--t2)}
+.btn-secondary{background:var(--o);color:var(--white)}
+.btn-secondary:hover{background:var(--o2)}
+.btn-outline{background:transparent;border:2px solid var(--t);color:var(--t)}
+.btn-danger{background:#e74c3c;color:var(--white)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-block{width:100%}
+.btn:disabled{opacity:.5;cursor:default}
+
+/* Form */
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text2)}
+.form-input{width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-family:var(--font);transition:.2s;background:var(--white);color:var(--text)}
+.form-input:focus{outline:none;border-color:var(--t)}
+.form-input::placeholder{color:#aab}
+select.form-input{appearance:none;background:var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%235a6a7a' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 12px center;padding-right:36px}
+textarea.form-input{resize:vertical;min-height:70px}
+
+/* Pill tags */
+.pill{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600}
+.pill-confirmado{background:#D7F8F3;color:#00606C}
+.pill-concluido{background:#D9EEEE;color:#019391}
+.pill-cancelado{background:#EBEBEB;color:#707070}
+
+/* Status selector */
+.status-selector{display:flex;gap:8px;flex-wrap:wrap}
+.status-option{padding:8px 16px;border-radius:var(--radius-sm);border:2px solid var(--border);cursor:pointer;font-size:13px;font-weight:600;transition:.2s;background:var(--white);font-family:var(--font)}
+.status-option.selected-confirmado{border-color:#28a745;background:#d4edda;color:#155724}
+.status-option.selected-concluido{border-color:#007bff;background:#cce5ff;color:#004085}
+.status-option.selected-cancelado{border-color:#dc3545;background:#f8d7da;color:#721c24}
+
+/* Route cards */
+.route-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:16px}
+.route-card{border:2px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:.2s;background:var(--white)}
+.route-card:hover{border-color:var(--t)}
+.route-card.selected{border-color:var(--t);background:#e6f7f7}
+.route-card .route-name{font-size:14px;font-weight:700;color:var(--text)}
+.route-card .route-stops{font-size:12px;color:var(--text2);margin:4px 0 8px}
+.route-card .route-stops span{display:inline-block;background:var(--bg);padding:1px 8px;border-radius:10px;margin:2px;font-size:11px}
+.route-duration-options{display:flex;gap:6px;flex-wrap:wrap}
+.duration-btn{padding:5px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;background:var(--white);transition:.2s;font-family:var(--font)}
+.duration-btn.selected{border-color:var(--o);background:#fff3e0;color:var(--o2)}
+.duration-btn:disabled{opacity:.4;cursor:default}
+
+/* Signal buttons */
+.signal-group{display:flex;gap:8px;flex-wrap:wrap}
+.signal-btn{padding:8px 18px;border-radius:var(--radius-sm);border:2px solid var(--border);background:var(--white);font-size:14px;font-weight:700;cursor:pointer;transition:.2s;font-family:var(--font);color:var(--text)}
+.signal-btn.selected{border-color:#27ae60;background:#d4edda;color:#155724}
+.signal-btn.custom{border-style:dashed}
+
+/* Agenda group */
+.date-group{margin-bottom:16px}
+.date-header{display:flex;align-items:center;gap:8px;padding:8px 4px;font-size:14px;font-weight:700;color:var(--text);border-bottom:2px solid var(--t);margin-bottom:10px}
+.date-header.today{color:var(--t)}
+.date-header .day-count{font-weight:400;color:var(--text2);font-size:12px}
+.booking-card{padding:12px;background:var(--white);border-radius:var(--radius-sm);box-shadow:var(--shadow);margin-bottom:8px;cursor:pointer;transition:.2s;border-left:4px solid var(--border)}
+.booking-card:active{transform:scale(.98)}
+.booking-card .bc-top{display:flex;justify-content:space-between;align-items:start;gap:8px}
+.booking-card .bc-time{font-size:13px;font-weight:700;color:var(--text)}
+.booking-card .bc-client{font-size:14px;font-weight:600}
+.booking-card .bc-route{font-size:12px;color:var(--text2)}
+.booking-card .bc-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:8px}
+.booking-card .bc-value{font-size:13px;font-weight:600}
+.booking-card.bc-confirmado{border-left-color:#28a745}
+.booking-card.bc-concluido{border-left-color:#007bff}
+.booking-card.bc-cancelado{border-left-color:#dc3545;opacity:.7}
+
+/* Filter bar */
+.filter-bar{display:flex;gap:6px;overflow-x:auto;padding:0 0 12px;margin-bottom:4px;-webkit-overflow-scrolling:touch}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-btn{white-space:nowrap;padding:6px 16px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:13px;font-weight:500;cursor:pointer;transition:.2s;font-family:var(--font);color:var(--text2)}
+.filter-btn.active{background:var(--t);color:var(--white);border-color:var(--t)}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat-card{background:var(--white);border-radius:var(--radius-sm);padding:14px;text-align:center;box-shadow:var(--shadow)}
+.stat-card .stat-num{font-size:24px;font-weight:800;color:var(--t)}
+.stat-card .stat-label{font-size:12px;color:var(--text2);margin-top:2px}
+.stat-card.stat-orange .stat-num{color:var(--o)}
+.stat-card.stat-red .stat-num{color:#e74c3c}
+.stat-card.stat-green .stat-num{color:#27ae60}
+.stat-card.stat-blue .stat-num{color:#007bff}
+.stat-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.stat-row:last-child{border:none}
+
+/* Modal overlay */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:300;justify-content:center;align-items:flex-end;padding-bottom:env(safe-area-inset-bottom,0)}
+.modal-overlay.active{display:flex}
+.modal-content{background:var(--white);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;padding:20px;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 16px}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:12px}
+.detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px}
+.detail-row:last-child{border:none}
+.detail-row .label{color:var(--text2);font-weight:500}
+.detail-row .value{font-weight:600;text-align:right;max-width:60%}
+
+/* Receipt */
+.receipt{position:relative;overflow:hidden;padding:28px 24px;border-radius:16px;max-width:380px;margin:0 auto;background:#fff;box-shadow:0 4px 24px rgba(0,96,108,.08)}
+.receipt::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--t),var(--o),var(--o2));z-index:2}
+.receipt-pattern{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:.35;z-index:0}
+.receipt-pattern svg{width:100%;height:100%}
+.receipt>:not(.receipt-pattern){position:relative;z-index:1}
+
+.receipt h2{text-align:center;font-size:18px;font-weight:700;letter-spacing:.5px;color:var(--t);margin-bottom:2px}
+.receipt .receipt-sub{text-align:center;font-size:11px;color:var(--text2);letter-spacing:.3px;margin-bottom:14px}
+.receipt .receipt-divider{border:none;height:1px;background:linear-gradient(90deg,transparent,var(--border),var(--o),var(--border),transparent);margin:14px 0;opacity:1}
+.receipt .r-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;letter-spacing:.2px}
+.receipt .r-row .r-label{color:#00606C;font-weight:600;opacity:.85;display:flex;align-items:center}
+.receipt .r-row .r-value{font-weight:700;text-align:right;color:#1A2E2E}
+.receipt .r-stops{margin:8px 0 0;padding-left:0;font-size:12px;color:#4A6A6A;list-style:none}
+.receipt .r-stops li{padding:3px 0;display:flex;align-items:center}
+.receipt .r-stops .r-section{font-weight:700;color:var(--t);margin:8px 0 4px;font-size:11px;letter-spacing:.5px;text-transform:uppercase;opacity:.6;padding-left:0;display:block}
+.receipt .r-footer{text-align:center;margin-top:14px;padding-top:12px;font-size:11px;color:var(--text2);letter-spacing:.5px;border-top:1px solid var(--border);opacity:.7}
+.receipt .r-highlight{background:linear-gradient(135deg,rgba(0,223,195,.07),rgba(0,96,108,.04));border-radius:10px;padding:12px 16px;margin:12px 0;border:1px solid rgba(0,223,195,.15)}
+.receipt .r-highlight .r-row{font-size:14px}
+.receipt .r-highlight .r-row:last-child{padding-top:8px;margin-top:6px;border-top:1px solid rgba(0,223,195,.12)}
+
+/* Sidebar */
+.sidebar{position:fixed;top:0;left:-280px;bottom:0;width:280px;background:var(--white);z-index:400;box-shadow:4px 0 24px rgba(0,0,0,.12);transition:left .3s ease;display:flex;flex-direction:column;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+.sidebar.open{left:0}
+.sidebar-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.35);z-index:399}
+.sidebar-overlay.active{display:block}
+.sidebar-head{padding:24px 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.sidebar-head h2{font-size:15px;font-weight:700;color:var(--t)}
+.sidebar-head span{font-size:11px;color:var(--text2);display:block;margin-top:-1px}
+.sidebar-section{padding:16px 20px 8px}
+.sidebar-section h3{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.sidebar-btn{display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border:none;background:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;transition:.15s;font-family:var(--font);text-align:left}
+.sidebar-btn:hover{background:var(--bg)}
+.sidebar-btn.active{background:#e6f7f7;color:var(--t);font-weight:700}
+.sidebar-btn .sb-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.sb-dot.confirmado{background:#28a745}
+.sb-dot.concluido{background:#007bff}
+.sb-dot.cancelado{background:#dc3545}
+.sidebar-placeholder{padding:20px;color:var(--border);font-size:12px;text-align:center;border-top:1px dashed var(--border);margin:16px 20px 0}
+
+/* Calendar */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:0 0 16px}
+.cal-nav button{width:36px;height:36px;border-radius:50%;border:none;background:var(--white);box-shadow:var(--shadow);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);transition:.15s;font-family:var(--font)}
+.cal-nav button:active{transform:scale(.92)}
+.cal-nav .cal-month{font-size:16px;font-weight:700;color:var(--text)}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:8px;gap:2px}
+.cal-weekdays span{padding:4px 0}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal-day{position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border-radius:50%;transition:.15s;padding:2px;background:#fff;border:1.5px solid var(--border)}
+.cal-day:active{transform:scale(.92)}
+.cal-day .day-num{font-size:16px;font-weight:700;color:var(--text);z-index:1;position:relative}
+.cal-day.today .day-num{color:var(--o);font-weight:900;font-size:22px}
+.cal-day.other-month .day-num{color:var(--border)}
+.cal-day.has-bookings{cursor:pointer}
+.cal-day-badge{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;border-radius:9px;background:var(--o);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,.2);padding:0 4px}
+.cal-day-ring{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.cal-day-ring svg{width:100%;height:100%;shape-rendering:geometricPrecision}
+
+/* Day popup */
+.day-popup{position:fixed;bottom:0;left:0;right:0;z-index:350;background:var(--white);border-radius:var(--radius) var(--radius) 0 0;padding:16px;max-height:65vh;overflow-y:auto;animation:slideUp .25s ease;box-shadow:0 -4px 24px rgba(0,0,0,.1)}
+.day-popup .popup-handle{width:36px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 10px}
+.day-popup .popup-day{font-size:14px;font-weight:700;margin-bottom:8px;color:var(--t)}
+.day-popup-item{padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.day-popup-item:last-child{border:none}
+.day-popup-item .ppi-left{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.day-popup-item .ppi-title{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day-popup-item .ppi-time{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day-popup-item .ppi-status{font-size:11px;flex-shrink:0}
+
+/* Day Detail Timeline */
+.timeline-month-bar{background:var(--border);padding:4px 0;font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.5px;display:flex;align-items:center;justify-content:space-between}
+.timeline-month-bar button{background:none;border:none;color:var(--text2);font-size:16px;cursor:pointer;padding:0 12px;font-family:var(--font);line-height:1;flex-shrink:0}
+.timeline-month-bar span{flex:1;text-align:center}
+.timeline-weekdays-wrap{display:flex;align-items:center;background:var(--white);border-bottom:1px solid var(--border)}
+.timeline-weekdays{display:flex;flex:1;gap:4px;padding:6px 4px}
+.timeline-weekdays button{flex:1;text-align:center;padding:6px 2px;border:none;border-radius:8px;background:var(--bg);font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;font-family:var(--font);transition:.15s;min-width:0}
+.timeline-weekdays button:active{transform:scale(.92)}
+.timeline-weekdays button.active{background:var(--t);color:#fff}
+.tl-week-nav{background:none;border:none;color:var(--text2);font-size:16px;cursor:pointer;padding:8px 6px;font-family:var(--font);flex-shrink:0;line-height:1}
+.tl-wday-badge{position:absolute;bottom:-2px;right:-2px;min-width:14px;height:14px;border-radius:7px;background:var(--o);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;box-shadow:0 1px 3px rgba(0,0,0,.2);line-height:1;pointer-events:none}
+.timeline-header{display:flex;align-items:center;gap:8px;padding:8px 4px}
+.timeline-header .back-btn{width:34px;height:34px;border-radius:50%;border:none;background:var(--white);box-shadow:var(--shadow);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);font-family:var(--font);flex-shrink:0}
+.timeline-header .back-btn:active{transform:scale(.92)}
+.timeline-header .tl-title{font-size:15px;font-weight:700;color:var(--text)}
+.timeline-header .tl-sub{font-size:11px;color:var(--text2);display:block;margin-top:-1px}
+.timeline-scroll{overflow-y:auto;overflow-x:visible;max-height:calc(100vh - 210px);-webkit-overflow-scrolling:touch;padding:0 4px}
+.timeline{position:relative;padding-left:64px;min-height:720px}
+.timeline-hour{position:absolute;left:64px;right:0;height:30px;border-top:1px solid var(--border)}
+.timeline-hour .tl-label{position:absolute;left:-58px;width:54px;text-align:right;font-size:11px;color:var(--border);top:-6px}
+.tl-block{position:absolute;left:76px;right:12px;border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;overflow:hidden;transition:.15s;border-left:4px solid}
+.tl-block:active{transform:scale(.98)}
+.tl-block .tlb-title{font-weight:700;font-size:15px}
+.tl-block .tlb-client{font-size:14px;opacity:.95;margin-top:2px}
+.tl-block .tlb-time{font-size:13px;opacity:.85;margin-top:3px}
+.tl-block .tlb-pickup{font-size:12px;opacity:.75;margin-top:2px}
+.tl-block.status-confirmado{background:var(--t);border-left-color:var(--o);color:#fff}
+.tl-block.status-concluido{background:#019391;border-left-color:var(--o);color:#fff}
+.tl-block.status-cancelado{background:#8A8A8A;border-left-color:var(--o);color:#fff}
+
+/* Transitions */
+.view-transition{animation:slideIn .3s ease}
+@keyframes slideIn{from{transform:translateX(60px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* Responsive for calendar */
+@media(min-width:600px){
+  .cal-grid{gap:8px}
+  .cal-day .day-num{font-size:16px}
+}
+
+/* Empty state */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text2)}
+.empty-state svg{width:64px;height:64px;fill:var(--border);margin-bottom:12px}
+.empty-state p{font-size:14px}
+
+/* Duration badge on booking card */
+.route-badge{display:inline-block;background:var(--bg);padding:2px 10px;border-radius:10px;font-size:11px;color:var(--text2)}
+
+/* Misc */
+.flex-between{display:flex;justify-content:space-between;align-items:center}
+.gap-8{gap:8px}
+.mt-8{margin-top:8px}
+.mb-8{margin-bottom:8px}
+.text-center{text-align:center}
+.hidden{display:none!important}
+.value-display{font-size:22px;font-weight:800;color:var(--t);text-align:center;padding:8px 0}
+.value-display .value-label{font-size:12px;font-weight:400;color:var(--text2);display:block}
+
+/* Responsive */
+@media(min-width:480px){
+  .route-grid{grid-template-columns:1fr 1fr}
+  .stats-grid{grid-template-columns:1fr 1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="loading"><div class="sp"></div>Carregando...</div>
+
+<!-- Header -->
+<header class="header" id="appHeader" style="display:none">
+  <div class="h-left">
+    <button onclick="toggleSidebar()" style="background:none;border:none;color:var(--white);font-size:22px;cursor:pointer;padding:2px;line-height:1">☰</button>
+  </div>
+  <div class="h-center">
+    <div class="logo-round header-logo-wrap">
+      <img class="js-logo" src="Logo%20Destinos%20Maragogi.png" alt="Logo" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='icon.svg'}">
+    </div>
+    <div>
+      <h1 class="js-company">Destinos Maragogi</h1>
+      <span class="js-tagline">Serviços Turísticos - Maragogi-AL</span>
+    </div>
+  </div>
+</header>
+
+<!-- ===== VIEW: AGENDA ===== -->
+<div class="view" id="viewAgenda">
+  <div class="filter-bar" id="filterBar"></div>
+  <div id="agendaList"></div>
+</div>
+
+<!-- ===== VIEW: FORM ===== -->
+<div class="view" id="viewForm">
+  <div id="formContainer"></div>
+</div>
+
+<!-- ===== VIEW: STATS ===== -->
+<div class="view" id="viewStats">
+  <div id="statsContainer"></div>
+</div>
+
+<!-- ===== MODAL: DETAIL ===== -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-content">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="detailTitle">Detalhes</div>
+    <div id="detailBody"></div>
+    <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap" id="detailActions"></div>
+  </div>
+</div>
+
+<!-- ===== MODAL: RECEIPT ===== -->
+<div class="modal-overlay" id="receiptModal">
+  <div class="modal-content" style="padding:16px;background:var(--bg)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:0 4px">
+      <span style="font-size:15px;font-weight:700;color:var(--text)">📄 Comprovante</span>
+      <button class="btn btn-sm" onclick="closeModal('receiptModal')" style="background:var(--bg);color:var(--text2);border:1.5px solid var(--border);padding:4px 14px;border-radius:20px;font-size:13px">Fechar</button>
+    </div>
+    <div id="receiptContent"></div>
+    <div id="receiptProgress" style="display:none;text-align:center;padding:8px;color:var(--text2);font-size:13px">⏳ Gerando imagem…</div>
+    <button id="shareButton" onclick="shareReceipt()" style="display:none;width:100%;margin-top:16px;padding:14px;background:var(--t);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;gap:8px;align-items:center;justify-content:center">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Compartilhar Comprovante
+    </button>
+  </div>
+</div>
+
+<!-- ===== MODAL: SETTINGS ===== -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-content">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="margin-bottom:16px">⚙️ Personalização</div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="form-group">
+        <label>Nome da empresa</label>
+        <input class="form-input" id="settCompany" placeholder="Ex: Destinos Maragogi" maxlength="60">
+      </div>
+      <div class="form-group">
+        <label>Subtítulo / Serviço</label>
+        <input class="form-input" id="settTagline" placeholder="Ex: Serviços Turísticos - Maragogi-AL" maxlength="80">
+      </div>
+      <div class="form-group">
+        <label>Localização</label>
+        <input class="form-input" id="settLocation" placeholder="Ex: Maragogi-AL" maxlength="40">
+      </div>
+      <div class="form-group">
+        <label>Logo (PNG/JPG, recomendado 200×200px, máx 500KB)</label>
+        <input type="file" id="settLogoInput" accept="image/png,image/jpeg" style="font-size:13px;color:var(--text2)">
+        <div id="settLogoPreview" style="display:none;margin-top:8px">
+          <div style="margin:0 auto;width:120px;text-align:center">
+            <div class="logo-round" style="width:120px;height:120px;margin:0 auto;box-shadow:0 0 0 2px var(--border)">
+              <img id="settLogoImg">
+            </div>
+            <div id="settZoomControls" style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:10px">
+              <button class="zoom-btn" onclick="adjustZoom(-0.1)" title="Reduzir zoom" style="width:32px;height:32px;border:1.5px solid var(--border);background:#fff;border-radius:50%;cursor:pointer;font-size:16px;line-height:1;color:var(--t);display:flex;align-items:center;justify-content:center">−</button>
+              <span id="settZoomLabel" style="font-size:13px;color:var(--text2);min-width:40px;text-align:center">100%</span>
+              <button class="zoom-btn" onclick="adjustZoom(0.1)" title="Aumentar zoom" style="width:32px;height:32px;border:1.5px solid var(--border);background:#fff;border-radius:50%;cursor:pointer;font-size:16px;line-height:1;color:var(--t);display:flex;align-items:center;justify-content:center">+</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-sm" onclick="removeLogo()" style="margin-top:6px;background:var(--bg);color:var(--text2);border:none;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px">Remover logo</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:20px">
+      <button class="btn btn-primary" onclick="saveSettings()" style="flex:1">Salvar</button>
+      <button class="btn" onclick="closeModal('settingsModal')" style="flex:1;background:var(--bg);color:var(--text2)">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: ROUTE EDITOR ===== -->
+<div class="modal-overlay" id="routeEditorModal">
+  <div class="modal-content" style="padding-bottom:20px">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="margin-bottom:16px">📋 Gerenciar Roteiros</div>
+    <div id="routeEditorBody" style="max-height:60vh;overflow-y:auto"></div>
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn" onclick="closeModal('routeEditorModal')" style="background:var(--bg);color:var(--text2);display:inline-flex">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FAB ===== -->
+<button class="fab" onclick="openForm()">
+  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<!-- ===== NAV ===== -->
+<nav class="bottom-nav">
+  <button class="nav-item active" data-view="calendar">
+    <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+    Calendário
+  </button>
+  <button class="nav-item" data-view="stats">
+    <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+    Estatísticas
+  </button>
+</nav>
+
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-head">
+    <div class="logo-round" style="width:42px;height:42px">
+      <img class="js-logo" src="Logo%20Destinos%20Maragogi.png" alt="Logo" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='icon.svg'}">
+    </div>
+    <div>
+      <h2 class="js-company">Destinos Maragogi</h2>
+      <span class="js-tagline">Serviços Turísticos - Maragogi-AL</span>
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <h3>Agendamentos</h3>
+    <button class="sidebar-btn active" data-filter="todos" onclick="setSidebarFilter('todos')">
+      <span class="sb-dot" style="background:var(--t)"></span> Todos
+    </button>
+    <button class="sidebar-btn" data-filter="confirmado" onclick="setSidebarFilter('confirmado')">
+      <span class="sb-dot confirmado"></span> Confirmados
+    </button>
+    <button class="sidebar-btn" data-filter="concluido" onclick="setSidebarFilter('concluido')">
+      <span class="sb-dot concluido"></span> Concluídos
+    </button>
+    <button class="sidebar-btn" data-filter="cancelado" onclick="setSidebarFilter('cancelado')">
+      <span class="sb-dot cancelado"></span> Cancelados
+    </button>
+  </div>
+  <div class="sidebar-placeholder">🚁 Voos — em breve</div>
+  <div class="sidebar-placeholder">🚁 Voos — em breve</div>
+  <div style="margin-top:auto;padding:12px 20px;border-top:1px solid var(--border)">
+    <button class="sidebar-btn" onclick="toggleSidebar();openSettings()" style="font-size:12px;color:var(--text2)">⚙️ Personalização</button>
+    <button class="sidebar-btn" onclick="toggleSidebar();showView('agenda');renderAgenda()" style="font-size:12px;color:var(--text2)">📋 Lista de Agendamentos</button>
+    <button class="sidebar-btn" onclick="toggleSidebar();showView('stats');renderStats()" style="font-size:12px;color:var(--text2)">📊 Estatísticas</button>
+  </div>
+</div>
+
+<!-- ===== VIEW: CALENDAR ===== -->
+<div class="view active" id="viewCalendar">
+  <div id="calendarContainer"></div>
+</div>
+
+<!-- ===== VIEW: DAY DETAIL ===== -->
+  <div class="view" id="viewDayDetail" style="padding:0">
+  <div id="dayDetailContainer"></div>
+</div>
+
+<script>
+const STORAGE_KEY = 'destinos_maragogi_bookings';
+
+let ROUTES = [
+  { id:'norte', name:'Roteiro Norte (Básico)', stops:[
+      'Praia de Burgalhau',
+      'Praia de Barra Grande',
+      'Praia de Antunes',
+      'Praia de Xaréu (Praia da Bruna)'
+    ],
+    durations:[{label:'2h',hours:2,price:230},{label:'2h30',hours:2.5,price:250},{label:'4h',hours:4,price:350}] },
+  { id:'ponta_a_ponta', name:'Ponta a Ponta', stops:[
+      'Ruínas do Mosteiro de São Bento',
+      'Praia de Burgalhau',
+      'Praia de Barra Grande',
+      'Praia de Antunes',
+      'Praia de Xaréu (Praia da Bruna)',
+      'Praia de Ponta de Mangue',
+      'Praia do Dourado / Praia de Peroba',
+      'parada p/ almoço (custo à parte)'
+    ],
+    durations:[{label:'5h',hours:5,price:450},{label:'7h',hours:7,price:500}] },
+  { id:'sul', name:'Roteiro Sul (Básico)', stops:[
+      'Ruínas da Igreja de São Bento',
+      'Praia do Salgado',
+      'Praia de Bitingui',
+      'Praia de Barreiras de Boqueirão'
+    ],
+    durations:[{label:'3h',hours:3,price:300},{label:'4h',hours:4,price:350}] },
+  { id:'norte_sul', name:'Norte & Sul', stops:[
+      'Rota Norte Maragogi',
+      'Praia de Burgalhau',
+      'Praia de Barra Grande',
+      'Praia de Antunes',
+      'Praia de Xaréu (Praia da Bruna)',
+      'Rota Sul Maragogi Japaratinga',
+      'Ruínas da Igreja de São Bento (Maragogi)',
+      'Praia do Salgado (Japaratinga)',
+      'Praia de Bitingui (Japaratinga)',
+      'Praia de Barreiras de Boqueirão (Japaratinga)',
+      'parada p/ almoço (custo à parte)'
+    ],
+    durations:[{label:'6h',hours:6,price:500},{label:'8h',hours:8,price:600}] },
+  { id:'milagres', name:'São Miguel dos Milagres', stops:[
+      'Travessia da Balsa',
+      'Praia de Patacho',
+      'Praia de Lages',
+      'Fonte Milagrosa',
+      'Praia Principal de São Miguel dos Milagres',
+      'parada p/ almoço (custo à parte)'
+    ],
+    durations:[{label:'7-8h',hours:8,price:650}] }
+];
+
+const ROUTES_KEY = 'destinos_maragogi_routes';
+const ROUTES_DEFAULTS = JSON.parse(JSON.stringify(ROUTES));
+function loadRoutes(){
+  try{
+    const d = localStorage.getItem(ROUTES_KEY);
+    if(d){ ROUTES.length = 0; ROUTES.push(...JSON.parse(d)); }
+  }catch(e){}
+}
+function saveRoutes(){
+  localStorage.setItem(ROUTES_KEY, JSON.stringify(ROUTES));
+}
+
+const DAY_NAMES = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+
+let bookings = [];
+let currentView = 'calendar';
+let filterStatus = 'todos';
+let editingId = null;
+
+// ─── Form state ───
+const formState = { routeId:null, durationLabel:null, signal:0, customValue:0, quantity:1, discount:0, status:'confirmado' };
+
+// ─── Settings ───
+let appSettings = { companyName:'Agenda Serviços Turísticos', tagline:'Serviços Turísticos - Maragogi-AL', location:'Maragogi-AL', logoDataUrl:'', logoZoom:1 };
+const SETTINGS_KEY = 'destinos_maragogi_settings';
+function loadSettings(){
+  try{
+    const d = localStorage.getItem(SETTINGS_KEY);
+    if(d) Object.assign(appSettings, JSON.parse(d));
+  }catch(e){}
+}
+function saveSettings(){
+  appSettings.companyName = document.getElementById('settCompany').value.trim() || 'Destinos Maragogi';
+  appSettings.tagline = document.getElementById('settTagline').value.trim() || 'Serviços Turísticos - Maragogi-AL';
+  appSettings.location = document.getElementById('settLocation').value.trim() || 'Maragogi-AL';
+  // If preview is hidden, logo was removed
+  const preview = document.getElementById('settLogoPreview');
+  if(preview.style.display==='none') appSettings.logoDataUrl = '';
+  delete appSettings.primaryColor;
+  delete appSettings.accentColor;
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(appSettings));
+  applySettings();
+  closeModal('settingsModal');
+}
+function applySettings(){
+  document.querySelectorAll('.js-company').forEach(el => el.textContent = appSettings.companyName);
+  document.querySelectorAll('.js-tagline').forEach(el => el.textContent = appSettings.tagline);
+  document.querySelectorAll('.js-location').forEach(el => el.textContent = appSettings.location);
+  document.title = appSettings.companyName;
+  // Logo
+  document.querySelectorAll('.js-logo').forEach(el => {
+    if(appSettings.logoDataUrl){
+      el.src = appSettings.logoDataUrl;
+      el.style.display = '';
+    }else{
+      el.src = 'Logo%20Destinos%20Maragogi.png';
+      el.onerror = function(){ if(!this.dataset.fallback){ this.dataset.fallback='1'; this.src='icon.svg'; } };
+    }
+  });
+  applyLogoZoom();
+}
+function openSettings(){
+  document.getElementById('settCompany').value = appSettings.companyName;
+  document.getElementById('settTagline').value = appSettings.tagline;
+  document.getElementById('settLocation').value = appSettings.location;
+  if(appSettings.logoDataUrl){
+    document.getElementById('settLogoImg').src = appSettings.logoDataUrl;
+    document.getElementById('settLogoPreview').style.display = '';
+  }else{
+    document.getElementById('settLogoPreview').style.display = 'none';
+  }
+  applyLogoZoom();
+  openModal('settingsModal');
+}
+// Logo upload handler
+document.addEventListener('change', function(e){
+  if(e.target.id==='settLogoInput'){
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      const dataUrl = ev.target.result;
+      // Store in settings
+      document.getElementById('settLogoImg').src = dataUrl;
+      document.getElementById('settLogoPreview').style.display = '';
+      appSettings.logoDataUrl = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+function applyLogoZoom(){
+  const z = appSettings.logoZoom || 1;
+  document.querySelectorAll('.logo-round img').forEach(el => {
+    el.style.transform = 'scale('+z+')';
+  });
+  const lbl = document.getElementById('settZoomLabel');
+  if(lbl) lbl.textContent = Math.round(z*100)+'%';
+}
+function adjustZoom(delta){
+  const z = Math.min(3, Math.max(0.3, (appSettings.logoZoom||1)+delta));
+  appSettings.logoZoom = Math.round(z*10)/10;
+  applyLogoZoom();
+}
+function removeLogo(){
+  document.getElementById('settLogoInput').value='';
+  document.getElementById('settLogoPreview').style.display='none';
+  document.getElementById('settLogoImg').src='';
+  appSettings.logoDataUrl='';
+  appSettings.logoZoom=1;
+  applyLogoZoom();
+}
+
+// ─── Init ───
+let initDone = false;
+document.addEventListener('DOMContentLoaded',()=>{
+  if(initDone) return;
+  initDone = true;
+  try {
+    const ld = document.getElementById('loading');
+    if(ld) ld.style.display='none';
+    const hd = document.getElementById('appHeader');
+    if(hd) hd.style.display='';
+    loadSettings();
+    loadRoutes();
+    loadBookings();
+    // Recalculate endTime for all bookings
+    bookings.forEach(b => {
+      if(b.startTime && b.routeId && b.durationLabel){
+        try { b.endTime = calcEndTime(b.startTime, b.routeId, b.durationLabel); } catch(e) {}
+      }
+    });
+    saveBookings();
+    setupNav();
+    renderCalendar();
+    applySettings();
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  } catch(e) {
+    alert('Erro ao iniciar: '+e.message);
+  }
+});
+
+// ─── Storage ───
+function loadBookings(){
+  try{
+    const d = localStorage.getItem(STORAGE_KEY);
+    let raw = d ? JSON.parse(d) : [];
+    // Sanitize: remove entries without required fields
+    bookings = raw.filter(b => b && b.client && b.date && b.routeId && b.durationLabel && typeof b.value === 'number').map(b => { b.companions = b.companions||''; b.customStops = b.customStops||''; b.quantity = b.quantity||1; b.discount = b.discount||0; return b; });
+  }catch(e){ bookings=[]; }
+  if(!localStorage.getItem(STORAGE_KEY) || bookings.length===0){
+    localStorage.setItem(STORAGE_KEY,'[]');
+  }
+}
+function saveBookings(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(bookings));
+}
+
+// ─── Navigation ───
+function setupNav(){
+  document.querySelectorAll('.nav-item').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const v = el.dataset.view;
+      if(v==='form'){ openForm(); return; }
+      showView(v);
+    });
+  });
+}
+function showView(view){
+  currentView = view;
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  const el = document.getElementById(`view${view.charAt(0).toUpperCase()+view.slice(1)}`);
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===view));
+  if(view==='agenda') renderAgenda();
+  if(view==='calendar') renderCalendar();
+  if(view==='stats') renderStats();
+}
+
+// ─── Helpers ───
+function fmtCurr(v){
+  if(v===undefined||v===null||isNaN(v)) return 'R$ 0,00';
+  return 'R$ '+Number(v).toFixed(2).replace('.',',');
+}
+function fmtDate(dateStr){
+  const [y,m,d]=dateStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+function getDayName(dateStr){
+  const d=new Date(dateStr+'T12:00:00');
+  return DAY_NAMES[d.getDay()];
+}
+function calcEndTime(start,routeId,durationLabel){
+  const dur = getDuration(routeId,durationLabel);
+  if(!dur||!start) return '';
+  const [h,m]=start.split(':').map(Number);
+  const totalMin = h*60+m+dur.hours*60;
+  const eh = Math.floor(totalMin/60)%24;
+  const em = totalMin%60;
+  return String(eh).padStart(2,'0')+':'+String(em).padStart(2,'0');
+}
+function getRoute(id){ return ROUTES.find(r=>r.id===id); }
+function getDuration(routeId,label){
+  const r=getRoute(routeId);
+  return r ? r.durations.find(d=>d.label===label) : null;
+}
+function todayStr(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+// ─── RENDER: Agenda ───
+function renderAgenda(){
+  const list = document.getElementById('agendaList');
+  const filterBar = document.getElementById('filterBar');
+
+  // Filters
+  const filters = [
+    {id:'todos',label:'Todos'},
+    {id:'confirmado',label:'✅ Confirmado'},
+    {id:'concluido',label:'✅ Concluído'},
+    {id:'cancelado',label:'❌ Cancelado'}
+  ];
+  filterBar.innerHTML = filters.map(f=>
+    `<button class="filter-btn${filterStatus===f.id?' active':''}" data-filter="${f.id}">${f.label}</button>`
+  ).join('');
+  filterBar.querySelectorAll('.filter-btn').forEach(el=>{
+    el.addEventListener('click',()=>{
+      filterStatus = el.dataset.filter;
+      renderAgenda();
+    });
+  });
+
+  let filtered = [...bookings];
+  // Skip invalid entries
+  filtered = filtered.filter(b => b && b.client && b.date && b.value !== undefined);
+  if(filterStatus!=='todos') filtered = filtered.filter(b=>b.status===filterStatus);
+
+  // Group by date
+  const groups = {};
+  const today = todayStr();
+  filtered.sort((a,b)=>a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
+  filtered.forEach(b=>{
+    if(!groups[b.date]) groups[b.date]=[];
+    groups[b.date].push(b);
+  });
+
+  const entries = Object.entries(groups);
+  if(entries.length===0){
+    list.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg><p>Nenhum agendamento encontrado</p></div>`;
+    return;
+  }
+
+  list.innerHTML = entries.map(([date,items])=>{
+    const isToday = date===today;
+    return `<div class="date-group">
+      <div class="date-header${isToday?' today':''}">
+        ${isToday?'📌 ':''}${fmtDate(date)} — ${getDayName(date)}
+        <span class="day-count">(${items.length})</span>
+      </div>
+      ${items.map(b=>{
+        const route = getRoute(b.routeId);
+        const dur = getDuration(b.routeId,b.durationLabel);
+        const timeStr = `${b.startTime} - ${b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel)}`;
+        return `<div class="booking-card bc-${b.status}" onclick="openDetail('${b.id}')">
+          <div class="bc-top">
+            <div>
+              <div class="bc-time">${timeStr}</div>
+              <div class="bc-client">${escHtml(b.client)}</div>
+              <div class="bc-route">${route?route.name:''} <span class="route-badge">${b.durationLabel}</span></div>
+            </div>
+            <span class="pill pill-${b.status}">${statusLabel(b.status)}</span>
+          </div>
+          <div class="bc-bottom">
+            <span class="bc-value">${fmtCurr(b.value)}</span>
+            ${b.quantity>1?`<span style="font-size:11px;color:var(--text2)">${b.quantity} buggy's</span>`:''}
+            ${b.signal>0?`<span style="font-size:12px;color:#27ae60">Pago: ${fmtCurr(b.signal)}</span>`:''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+function statusLabel(s){
+  return s==='confirmado'?'Confirmado':s==='concluido'?'Concluído':'Cancelado';
+}
+
+// ─── Calendar State ───
+let calMonth = new Date().getMonth();
+let calYear = new Date().getFullYear();
+
+let currentDayStr = ''; // YYYY-MM-DD currently shown in day detail
+let sidebarFilter = 'todos';
+
+// ─── Calendar ───
+function renderCalendar(){
+  const container = document.getElementById('calendarContainer');
+  if(!container) return;
+  const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const firstDay = new Date(calYear,calMonth,1).getDay();
+  const daysInMonth = new Date(calYear,calMonth+1,0).getDate();
+  const daysInPrev = new Date(calYear,calMonth,0).getDate();
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  // Filter bookings for the visible month
+  const monthStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}`;
+  const fb = bookings.filter(b=>{
+    if(sidebarFilter!=='todos' && b.status!==sidebarFilter) return false;
+    return b.date && b.date.startsWith(monthStr);
+  });
+
+  // Group bookings by date
+  const dayBookings = {};
+  fb.forEach(b=>{
+    if(!dayBookings[b.date]) dayBookings[b.date] = [];
+    dayBookings[b.date].push(b);
+  });
+
+  let html = `
+    <div class="cal-nav">
+      <button onclick="calMonth--;if(calMonth<0){calMonth=11;calYear--}renderCalendar()">◀</button>
+      <span class="cal-month">${monthNames[calMonth]} ${calYear}</span>
+      <button onclick="calMonth++;if(calMonth>11){calMonth=0;calYear++}renderCalendar()">▶</button>
+    </div>
+    <div class="cal-weekdays">
+      <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+    </div>
+    <div class="cal-grid">`;
+
+  // Previous month days
+  for(let i=firstDay-1;i>=0;i--){
+    const d = daysInPrev - i;
+    html += `<div class="cal-day other-month"><span class="day-num">${d}</span></div>`;
+  }
+
+  // Current month days
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = dateStr === todayStr;
+    const bks = dayBookings[dateStr]||[];
+    const cls = ['cal-day'];
+    if(isToday) cls.push('today');
+    if(bks.length>0) cls.push('has-bookings');
+
+    // Generate ring segments — sequential accumulation (07:00-19:00 = 12h)
+    let segments = '';
+    if(bks.length>0){
+      try {
+        const circ = 2 * Math.PI * 42;
+        const rangeTotal = 720;
+        const sorted = [...bks].sort((a,b)=>timeToMinutes(a.startTime)-timeToMinutes(b.startTime));
+        let accumMin = 0;
+        sorted.forEach(b=>{
+          const dur = getDuration(b.routeId,b.durationLabel);
+          const hours = dur ? dur.hours : 3;
+          const dashLen = Math.max((hours / 12) * circ, 2);
+          const gapLen = circ - dashLen;
+          const offset = -((accumMin / rangeTotal) * circ);
+          let color = '#999';
+          if(b.status==='confirmado') color = '#00606C';
+          else if(b.status==='concluido') color = '#019391';
+          else if(b.status==='cancelado') color = '#707070';
+          segments += `<circle cx="50" cy="50" r="42" fill="none" stroke="${color}" stroke-width="9" stroke-dasharray="${dashLen.toFixed(2)} ${gapLen.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}" transform="rotate(-90 50 50)" opacity="0.75" stroke-linecap="round"/>`;
+          accumMin += hours * 60;
+        });
+      } catch(e) { segments = '<!-- error: '+e.message+' -->'; }
+    }
+
+    html += `
+      <div class="${cls.join(' ')}" onclick="showDayDetail('${dateStr}')">
+        <svg class="cal-day-ring" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="var(--border)" stroke-width="9" opacity="0.3"/>
+          ${segments}
+        </svg>
+        <span class="day-num">${d}</span>
+        ${bks.length>0?`<span class="cal-day-badge">${bks.length}</span>`:''}
+      </div>`;
+  }
+
+  // Next month days
+  const totalCells = firstDay + daysInMonth;
+  const remaining = (7 - (totalCells % 7)) % 7;
+  for(let d=1;d<=remaining;d++){
+    html += `<div class="cal-day other-month"><span class="day-num">${d}</span></div>`;
+  }
+
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+function timeToMinutes(t){
+  if(!t) return 0;
+  const p = t.split(':');
+  return parseInt(p[0])*60 + parseInt(p[1]||0);
+}
+
+// ─── Day Popup ───
+function showDayPopup(dateStr){
+  const bks = bookings.filter(b=>b.date===dateStr && (sidebarFilter==='todos'||b.status===sidebarFilter));
+  if(bks.length===0){ showDayDetail(dateStr); return; }
+  removeDayPopup();
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.35);z-index:349';
+  overlay.id = 'dayPopupOverlay';
+  overlay.onclick = removeDayPopup;
+  document.body.appendChild(overlay);
+
+  const popup = document.createElement('div');
+  popup.className = 'day-popup';
+  popup.id = 'dayPopup';
+  const d = new Date(dateStr+'T12:00:00');
+  const dayName = DAY_NAMES[d.getDay()];
+  popup.innerHTML = `
+    <div class="popup-handle"></div>
+    <div class="popup-day">${dayName}, ${d.getDate()}/${d.getMonth()+1}</div>
+    ${bks.map(b=>{
+      const route = getRoute(b.routeId);
+      const endTime = b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel);
+      return `<div class="day-popup-item" onclick="removeDayPopup();showDayDetail('${dateStr}')">
+        <div class="ppi-left">
+          <span class="ppi-title">${route?route.name:''}</span>
+          <span class="ppi-time">${b.startTime} - ${endTime} · ${b.client}</span>
+        </div>
+        <span class="pill pill-${b.status} ppi-status">${statusLabel(b.status)}</span>
+      </div>`;
+    }).join('')}
+    <div style="text-align:center;margin-top:8px">
+      <button class="btn btn-sm btn-primary" onclick="removeDayPopup();showDayDetail('${dateStr}')">Ver Dia Completo →</button>
+    </div>`;
+  document.body.appendChild(popup);
+}
+
+function removeDayPopup(){
+  const p = document.getElementById('dayPopup');
+  if(p) p.remove();
+  const o = document.getElementById('dayPopupOverlay');
+  if(o) o.remove();
+}
+
+function monthStep(delta){
+  const d = new Date(currentDayStr + 'T12:00:00');
+  if(!d||isNaN(d.getTime())) return;
+  d.setMonth(d.getMonth() + delta);
+  const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  showDayDetail(ds);
+}
+function weekStep(delta){
+  const d = new Date(currentDayStr + 'T12:00:00');
+  if(!d||isNaN(d.getTime())) return;
+  d.setDate(d.getDate() + delta * 7);
+  const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  showDayDetail(ds);
+}
+
+// ─── Day Detail / Timeline ───
+function showDayDetail(dateStr){
+  currentDayStr = dateStr;
+  removeDayPopup();
+  // Close any open modals
+  document.querySelectorAll('.modal-overlay.active').forEach(el=>el.classList.remove('active'));
+  showView('dayDetail');
+  const container = document.getElementById('dayDetailContainer');
+  if(!container) return;
+  const d = new Date(dateStr+'T12:00:00');
+  const dayName = DAY_NAMES[d.getDay()];
+  const bks = bookings.filter(b=>b.date===dateStr && (sidebarFilter==='todos'||b.status===sidebarFilter));
+
+  // Month bar
+  const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  let html = `<div class="timeline-month-bar">
+    <button onclick="monthStep(-1)">◀</button>
+    <span>${monthNames[d.getMonth()]} ${d.getFullYear()}</span>
+    <button onclick="monthStep(1)">▶</button>
+  </div>`;
+
+  // Week days row with booking badges
+  const weekStart = new Date(d);
+  weekStart.setDate(d.getDate() - d.getDay());
+  html += `<div class="timeline-weekdays-wrap">
+    <button class="tl-week-nav" onclick="weekStep(-1)">◀</button>
+    <div class="timeline-weekdays">`;
+  const dayAbbr = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  for(let i=0;i<7;i++){
+    const wd = new Date(weekStart);
+    wd.setDate(weekStart.getDate() + i);
+    const wdStr = `${wd.getFullYear()}-${String(wd.getMonth()+1).padStart(2,'0')}-${String(wd.getDate()).padStart(2,'0')}`;
+    const isActive = wdStr === dateStr;
+    const dayCount = bookings.filter(b=>b.date===wdStr && (sidebarFilter==='todos'||b.status===sidebarFilter)).length;
+    html += `<button onclick="showDayDetail('${wdStr}')"${isActive?' class="active"':''} style="position:relative">
+      ${dayAbbr[i]}-${wd.getDate()}
+      ${dayCount>0?`<span class="tl-wday-badge">${dayCount}</span>`:''}
+    </button>`;
+  }
+  html += `</div>
+    <button class="tl-week-nav" onclick="weekStep(1)">▶</button>
+  </div>`;
+
+  html += `
+    <div class="timeline-header">
+      <button class="back-btn" onclick="showView('calendar');renderCalendar()">◀</button>
+      <div>
+        <span class="tl-title">${dayName}, ${d.getDate()}/${d.getMonth()+1}</span>
+        <span class="tl-sub">${bks.length} passeio${bks.length!==1?'s':''}</span>
+      </div>
+    </div>
+    <div class="timeline-scroll">
+      <div class="timeline">`;
+
+  // Render 24 half-hour marks (07:00 to 19:00, 30px each = 720px total)
+  for(let h=0;h<24;h++){
+    const minutes = h * 30;
+    const hourNum = 7 + Math.floor(h / 2);
+    const minPart = h % 2 === 0 ? 'h' : 'h30';
+    html += `<div class="timeline-hour" style="top:${minutes}px">
+      <span class="tl-label">${hourNum}${minPart}</span>
+    </div>`;
+  }
+
+  // Render booking blocks
+  bks.forEach(b=>{
+    const route = getRoute(b.routeId);
+    const dur = getDuration(b.routeId,b.durationLabel);
+    const startMin = timeToMinutes(b.startTime);
+    const hours = dur ? dur.hours : 3;
+    const topPx = Math.max(0, startMin - 420);
+    const heightPx = hours * 60;
+    const endTime = b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel);
+    // Client + companions
+    let people = escHtml(b.client);
+    if(b.companions) people += ', '+escHtml(b.companions);
+    html += `<div class="tl-block status-${b.status}" style="top:${topPx}px;height:${Math.max(heightPx,40)}px" onclick="openDetailFromCalendar('${b.id}')">
+      <div class="tlb-title">${route?route.name:''}</div>
+      <div class="tlb-client">${people}</div>
+      <div class="tlb-time">Início: ${b.startTime} · Término: ${endTime}</div>
+      <div class="tlb-pickup">Embarque: ${escHtml(b.pickupDetail)}</div>
+    </div>`;
+  });
+
+  html += `</div></div>`;
+  container.innerHTML = html;
+}
+
+function openDetailFromCalendar(id){
+  // Reuse the existing openDetail function, but return to day detail after closing detail modal
+  openDetail(id);
+  // Store callback to return to day detail
+  window._afterDetailClose = ()=>{
+    const day = bookings.find(b=>b.id===id);
+    if(day) showDayDetail(day.date);
+  };
+}
+
+// ─── Sidebar ───
+function toggleSidebar(){
+  const s = document.getElementById('sidebar');
+  const o = document.getElementById('sidebarOverlay');
+  if(!s) return;
+  s.classList.toggle('open');
+  if(o) o.classList.toggle('active');
+}
+function setSidebarFilter(f){
+  sidebarFilter = f;
+  document.querySelectorAll('.sidebar-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.filter===f);
+  });
+  toggleSidebar();
+  if(currentView==='calendar' || currentView==='dayDetail'){
+    showView('calendar');
+    renderCalendar();
+  }else{
+    renderAgenda();
+  }
+}
+function switchCalendarView(){
+  if(currentView==='calendar') return;
+  showView('calendar');
+}
+
+
+function escHtml(s){
+  const d=document.createElement('div');
+  d.textContent=s;
+  return d.innerHTML;
+}
+function openModal(id){
+  document.getElementById(id).classList.add('active');
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('active');
+  if(id==='receiptModal'){
+    document.getElementById('shareButton').style.display = 'none';
+    window._receiptCanvas = null;
+  }
+}
+
+// ─── Route Editor ───
+let _editRouteIdx = -1;
+function openRouteEditor(idx){
+  _editRouteIdx = (idx===undefined||idx===null) ? -1 : idx;
+  openModal('routeEditorModal');
+  renderRouteEditor();
+}
+function renderRouteEditor(){
+  const isNew = _editRouteIdx === -1;
+  const r = isNew
+    ? { name:'', stops:['','','',''], durations:[{label:'1h',hours:1,price:0}] }
+    : ROUTES[_editRouteIdx];
+
+  const body = document.getElementById('routeEditorBody');
+  // ── Form (top) ──
+  let html = `<div style="background:var(--white);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px;box-shadow:var(--shadow)">
+    <div style="font-size:15px;font-weight:700;margin-bottom:12px;color:var(--text1)">${isNew ? 'Novo Roteiro' : 'Editar: '+escHtml(r.name)}</div>
+    <input id="routeEditName" class="form-input" value="${escHtml(r.name||'')}" placeholder="Nome do roteiro" style="width:100%;margin-bottom:12px;font-weight:700;box-sizing:border-box">
+
+    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px">Paradas:</div>
+    <div id="routeEditStops"></div>
+
+    <div style="font-size:12px;font-weight:600;color:var(--text2);margin:8px 0 4px">Duração / Preço:</div>
+    <div id="routeEditDurations"></div>
+
+    <button onclick="saveRouteForm()" style="background:var(--o);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-top:12px">
+      ${isNew ? 'Adicionar Roteiro' : 'Atualizar Roteiro'}
+    </button>
+  </div>`;
+
+  // ── Existing routes (below) ──
+  html += `<div style="font-size:14px;font-weight:700;color:var(--text1);margin-bottom:8px">Roteiros Existentes</div>`;
+  html += ROUTES.map((ex,i)=>{
+    const isEditing = _editRouteIdx === i;
+    return `<div style="background:${isEditing?'rgba(0,186,185,.06)':'var(--white)'};border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;box-shadow:var(--shadow);${isEditing?'border:2px solid var(--t);':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-weight:700;font-size:14px;color:var(--text1)">${escHtml(ex.name)}</span>
+        <span style="font-size:11px;color:var(--text2)">${ex.stops.length} paradas · ${ex.durations.length} durações</span>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button onclick="openRouteEditor(${i})" style="background:var(--o);color:#fff;border:none;border-radius:20px;padding:6px 28px;font-size:13px;font-weight:600;cursor:pointer">Editar</button>
+        ${ROUTES.length>1?`<button onclick="deleteRoute(${i})" style="background:none;border:1.5px solid #dc3545;color:#dc3545;border-radius:20px;padding:6px 16px;font-size:13px;font-weight:600;cursor:pointer">Excluir</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  body.innerHTML = html;
+  // render stops & durations
+  renderEditStops(isNew ? r.stops : ROUTES[_editRouteIdx].stops);
+  renderEditDurations(isNew ? r.durations : ROUTES[_editRouteIdx].durations);
+}
+function renderEditStops(stops){
+  const c = document.getElementById('routeEditStops');
+  if(!c) return;
+  c.innerHTML = stops.map((s,i)=>`
+    <div style="display:flex;gap:4px;margin-bottom:4px">
+      <input class="form-input" value="${escHtml(s)}" onchange="_editStops[${i}]=this.value" placeholder="Parada" style="flex:1;font-size:12px;padding:6px 10px;box-sizing:border-box">
+      <button onclick="_editStops.splice(${i},1);renderEditStops(_editStops)" style="background:none;border:none;color:#dc3545;font-size:14px;cursor:pointer;padding:2px 6px">✕</button>
+    </div>
+  `).join('') + `
+    <button onclick="_editStops.push('');renderEditStops(_editStops)" style="background:none;border:1px dashed var(--border);border-radius:6px;padding:4px 12px;font-size:11px;color:var(--text2);cursor:pointer;margin-top:2px">+ Parada</button>`;
+  _editStops = stops;
+}
+function renderEditDurations(durations){
+  const c = document.getElementById('routeEditDurations');
+  if(!c) return;
+  c.innerHTML = durations.map((d,i)=>{
+    const opts = [];
+    for(let h=1;h<=10;h+=0.5){
+      const label = h%1===0 ? h+'h' : Math.floor(h)+'h30';
+      opts.push(`<option value="${h}" ${d.hours===h?'selected':''}>${label}</option>`);
+    }
+    return `<div style="display:flex;gap:4px;margin-bottom:4px;align-items:center">
+      <select onchange="var v=parseFloat(this.value);_editDurations[${i}].hours=v;_editDurations[${i}].label=this.options[this.selectedIndex].text" style="flex:1;padding:6px 8px;border:2px solid var(--border);border-radius:6px;font-size:12px;background:var(--white);font-family:var(--font)">
+        ${opts.join('')}
+      </select>
+      <input type="number" value="${d.price}" onchange="_editDurations[${i}].price=parseFloat(this.value)||0" style="width:90px;padding:6px 8px;border:2px solid var(--border);border-radius:6px;font-size:12px;box-sizing:border-box" placeholder="R$" step="5" min="0">
+      <button onclick="_editDurations.splice(${i},1);renderEditDurations(_editDurations)" style="background:none;border:none;color:#dc3545;font-size:14px;cursor:pointer;padding:2px 6px">✕</button>
+    </div>`;
+  }).join('') + `
+    <button onclick="_editDurations.push({label:'1h',hours:1,price:0});renderEditDurations(_editDurations)" style="background:none;border:1px dashed var(--border);border-radius:6px;padding:4px 12px;font-size:11px;color:var(--text2);cursor:pointer;margin-top:2px">+ Duração</button>`;
+  _editDurations = durations;
+}
+let _editStops = [];
+let _editDurations = [];
+function saveRouteForm(){
+  const nameInput = document.getElementById('routeEditName');
+  if(!nameInput) return;
+  const name = nameInput.value.trim();
+  if(!name){ alert('Digite um nome para o roteiro.'); return; }
+  const route = { id:'route_'+Date.now().toString(36), name:name, stops:[..._editStops.map(s=>s.trim()).filter(s=>s)], durations:JSON.parse(JSON.stringify(_editDurations)) };
+  if(_editRouteIdx === -1){
+    ROUTES.push(route);
+  } else {
+    route.id = ROUTES[_editRouteIdx].id;
+    ROUTES[_editRouteIdx] = route;
+  }
+  saveRoutes();
+  _editRouteIdx = -1;
+  renderRouteEditor();
+  if(currentView==='form' || document.getElementById('viewForm').classList.contains('active')) renderForm();
+}
+function deleteRoute(idx){
+  if(ROUTES.length<=1){ alert('Deve ter pelo menos um roteiro.'); return; }
+  if(!confirm(`Excluir "${ROUTES[idx].name}"?`)) return;
+  ROUTES.splice(idx,1);
+  if(_editRouteIdx === idx) _editRouteIdx = -1;
+  renderRouteEditor();
+}
+
+// ─── RENDER: Form ───
+function openForm(bookingId){
+  showView('form');
+  editingId = bookingId||null;
+  const edit = editingId ? bookings.find(b=>b.id===editingId) : null;
+  if(edit){
+    formState.routeId = edit.routeId;
+    formState.durationLabel = edit.durationLabel;
+    formState.signal = edit.signal;
+    formState.customValue = edit.customValue||0;
+    formState.quantity = edit.quantity||1;
+    formState.discount = edit.discount||0;
+    formState.status = edit.status;
+  }else{
+    formState.routeId = null;
+    formState.durationLabel = null;
+    formState.signal = 0;
+    formState.customValue = 0;
+    formState.quantity = 1;
+    formState.discount = 0;
+    formState.status = 'confirmado';
+  }
+  renderForm();
+  if(formState.routeId&&formState.durationLabel) updateTotalDisplay();
+  setTimeout(updateEndTime,0);
+}
+function renderForm(){
+  const container = document.getElementById('formContainer');
+  const edit = editingId ? bookings.find(b=>b.id===editingId) : null;
+  const title = edit ? 'Editar Agendamento' : 'Novo Agendamento';
+
+  container.innerHTML = `
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div>
+          <div class="card-title">${title}</div>
+          <div class="card-sub">Preencha os dados do passeio</div>
+        </div>
+        <button onclick="openRouteEditor()" style="width:44px;height:44px;border-radius:50%;border:none;background:var(--o);color:#fff;font-size:32px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font);transition:.15s;box-shadow:0 2px 8px rgba(0,0,0,.12);line-height:1;padding:0 0 2px 0" title="Gerenciar roteiros">+</button>
+      </div>
+
+      <div class="form-group">
+        <label>Roteiro</label>
+        <div class="route-grid" id="routeGrid">
+          ${ROUTES.map(r=>`
+            <div class="route-card${formState.routeId===r.id?' selected':''}" data-route="${r.id}">
+              <div class="route-name">${r.name}</div>
+              <div class="route-stops">${r.stops.map(s=>`<span>${s}</span>`).join(' ')}</div>
+              <div class="route-duration-options">
+                ${r.durations.map(d=>`
+                  <button type="button" class="duration-btn${formState.routeId===r.id&&formState.durationLabel===d.label?' selected':''}"
+                    data-route="${r.id}" data-duration="${d.label}">
+                    ${d.label} — ${fmtCurr(d.price)}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div id="valueDisplay" class="${formState.routeId&&formState.durationLabel?'':'hidden'}">
+        ${formState.routeId&&formState.durationLabel?`<div class="value-display">${fmtCurr(calcValue())}<span class="value-label">Valor Total${formState.customValue>0?' (rota + personalização)':''}${formState.quantity>1?' · '+formState.quantity+' buggy\'s':''}${formState.discount>0?' · desconto: -'+fmtCurr(formState.discount):''}</span></div>`:''}
+      </div>
+
+      <div class="form-group">
+        <label>Quantidade de Buggy's <span style="font-weight:400;color:#aab">(privativos)</span></label>
+        <input class="form-input" type="number" min="1" step="1" value="${formState.quantity}" onchange="formState.quantity=Math.max(1,parseInt(this.value)||1);this.value=formState.quantity;updateTotalDisplay()" placeholder="1" style="width:100%;max-width:120px;text-align:center;font-weight:700;font-size:16px">
+      </div>
+
+      <div class="form-group">
+        <label>Personalizar Roteiro <span style="font-weight:400;color:#aab">(opcional)</span></label>
+        <textarea class="form-input" id="fCustomStops" placeholder="Paradas adicionais ou alterações no roteiro para este agendamento" style="margin-bottom:6px">${edit?escHtml(edit.customStops||''):''}</textarea>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:13px;color:var(--text2);white-space:nowrap">Valor adicional:</span>
+          <input class="form-input" id="fCustomValue" type="number" min="0" step="any" placeholder="0,00" value="${edit?edit.customValue||0:0}" style="width:120px" oninput="updateCustomValue(this)">
+          <span style="font-size:12px;color:var(--text2)">(soma ao total)</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Nome do Cliente</label>
+        <input class="form-input" id="fClient" placeholder="Ex: Maria Silva" value="${edit?escHtml(edit.client):''}" autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <label>WhatsApp</label>
+        <input class="form-input" id="fContact" placeholder="(82) 9XXXX-XXXX" value="${edit?escHtml(edit.contact):''}" autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <label>Acompanhantes <span style="font-weight:400;color:#aab">(nomes)</span></label>
+        <input class="form-input" id="fCompanions" type="text" placeholder="Ex: João, Maria" value="${edit?escHtml(edit.companions):''}" autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <label>Data</label>
+        <input class="form-input" id="fDate" type="date" value="${edit?edit.date:todayStr()}">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="form-group">
+          <label>Início</label>
+          <input class="form-input" id="fStart" type="time" value="${edit?edit.startTime:'08:00'}">
+        </div>
+        <div class="form-group">
+          <label>Término <span style="font-weight:400;color:#aab">(automático)</span></label>
+          <input class="form-input" id="fEnd" type="time" readonly style="background:var(--bg)" value="${edit?edit.endTime:''}">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Sinal (valor já pago)</label>
+        <div class="signal-group" id="signalGroup">
+          <button type="button" class="signal-btn${formState.signal===0?' selected':''}" data-signal="0">R$ 0</button>
+          <button type="button" class="signal-btn${formState.signal===50?' selected':''}" data-signal="50">R$ 50</button>
+          <button type="button" class="signal-btn${formState.signal===100?' selected':''}" data-signal="100">R$ 100</button>
+          <button type="button" class="signal-btn custom${![0,50,100].includes(formState.signal)?' selected':''}">Outro</button>
+        </div>
+        <input class="form-input hidden" id="fSignalCustom" type="number" min="0" step="any" placeholder="Valor personalizado" style="margin-top:6px">
+      </div>
+
+      <div class="form-group">
+        <label>Desconto <span style="font-weight:400;color:#aab">(opcional)</span></label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input class="form-input" id="fDiscount" type="number" min="0" step="any" placeholder="0,00" value="${formState.discount}" style="width:120px" oninput="updateDiscount(this)">
+          <span style="font-size:12px;color:var(--text2)">R$ (abater do total)</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Local de Embarque</label>
+        <select class="form-input" id="fPickup">
+          <option value="hotel">Hotel / Pousada</option>
+          <option value="ponto_encontro"${edit&&edit.pickup==='ponto_encontro'?' selected':''}>Ponto de Encontro (Posto Ipiranga)</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="pickupDetailGroup">
+        <label>Qual hotel/pousada?</label>
+        <input class="form-input" id="fPickupDetail" placeholder="Ex: Hotel Salinas Maragogi" value="${edit&&edit.pickup==='hotel'?escHtml(edit.pickupDetail||''):''}" autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <label>Status</label>
+        <div class="status-selector" id="statusSelector">
+          ${['confirmado','concluido','cancelado'].map(s=>`
+            <button type="button" class="status-option${formState.status===s?' selected-'+s:''}" data-status="${s}">
+              ${s==='confirmado'?'✅ ':s==='concluido'?'✅ ':'❌ '}${statusLabel(s)}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Observações</label>
+        <textarea class="form-input" id="fNotes" placeholder="Opcional">${edit?escHtml(edit.notes||''):''}</textarea>
+      </div>
+
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-block" id="btnSaveBooking">${edit?'Salvar Alterações':'Cadastrar Agendamento'}</button>
+        ${edit?`<button class="btn btn-outline" id="btnCancelEdit">Cancelar</button>`:''}
+      </div>
+    </div>
+  `;
+
+  // ─── Attach events (delegation — survives re-render) ───
+
+  // Route card selection
+  document.getElementById('routeGrid').addEventListener('click', function(e){
+    const card = e.target.closest('.route-card');
+    if(card && !e.target.closest('.duration-btn')){
+      selectRoute(card.dataset.route);
+    }
+  });
+
+  // Duration button selection
+  document.getElementById('routeGrid').addEventListener('click', function(e){
+    const btn = e.target.closest('.duration-btn');
+    if(btn) selectDuration(btn.dataset.route, btn.dataset.duration);
+  });
+
+  // Signal buttons
+  document.getElementById('signalGroup').addEventListener('click', function(e){
+    const btn = e.target.closest('.signal-btn');
+    if(!btn) return;
+    const val = btn.dataset.signal;
+    if(val !== undefined){
+      selectSignal(parseInt(val));
+    }else{
+      customSignal();
+    }
+  });
+
+  // Custom signal input
+  document.getElementById('fSignalCustom').addEventListener('input', function(){
+    formState.signal = parseFloat(this.value) || 0;
+  });
+
+  // Status selector
+  document.getElementById('statusSelector').addEventListener('click', function(e){
+    const btn = e.target.closest('.status-option');
+    if(btn) selectStatus(btn.dataset.status);
+  });
+
+  // Save button
+  document.getElementById('btnSaveBooking').addEventListener('click', saveBooking);
+
+  // Cancel edit button
+  const cancelBtn = document.getElementById('btnCancelEdit');
+  if(cancelBtn) cancelBtn.addEventListener('click', cancelEdit);
+
+  // Start time change → update end time
+  document.getElementById('fStart').addEventListener('change', updateEndTime);
+
+  // Pickup toggle
+  document.getElementById('fPickup').addEventListener('change', function(){
+    const g = document.getElementById('pickupDetailGroup');
+    g.style.display = this.value === 'hotel' ? 'block' : 'none';
+  });
+  document.getElementById('fPickup').dispatchEvent(new Event('change'));
+
+  // Show custom signal input if already set
+  if(![0,50,100].includes(formState.signal)){
+    const inp = document.getElementById('fSignalCustom');
+    inp.classList.remove('hidden');
+    inp.value = formState.signal;
+  }
+}
+
+function selectRoute(id){
+  formState.routeId = id;
+  formState.durationLabel = null;
+  document.querySelectorAll('.route-card').forEach(c=>c.classList.toggle('selected',c.dataset.route===id));
+  document.querySelectorAll('.duration-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('valueDisplay').classList.add('hidden');
+  document.getElementById('fEnd').value = '';
+}
+
+function selectDuration(routeId,label){
+  if(routeId!==formState.routeId){ selectRoute(routeId); }
+  formState.durationLabel = label;
+  document.querySelectorAll('.duration-btn').forEach(b=>{
+    b.classList.toggle('selected', b.dataset.route===routeId && b.dataset.duration===label);
+  });
+  updateTotalDisplay();
+  updateEndTime();
+}
+function selectSignal(val){
+  formState.signal = val;
+  const sel = document.querySelector('.signal-btn.selected');
+  if(sel) sel.classList.remove('selected');
+  document.querySelector(`.signal-btn[data-signal="${val}"]`)?.classList.add('selected');
+  const custom = document.querySelector('.signal-btn.custom');
+  custom.classList.toggle('selected',![0,50,100].includes(val));
+  const inp = document.getElementById('fSignalCustom');
+  if([0,50,100].includes(val)){
+    inp.classList.add('hidden');
+    inp.value = '';
+  }else{
+    inp.classList.remove('hidden');
+  }
+}
+function customSignal(){
+  selectSignal(-1);
+  document.getElementById('fSignalCustom').classList.remove('hidden');
+  document.getElementById('fSignalCustom').focus();
+}
+function onCustomSignalInput(el){
+  const v = parseFloat(el.value);
+  formState.signal = isNaN(v)?0:v;
+}
+
+function selectStatus(s){
+  formState.status = s;
+  document.querySelectorAll('.status-option').forEach(el=>{
+    el.className = 'status-option'+(el.dataset.status===s?' selected-'+s:'');
+  });
+}
+
+function calcValue(){
+  const routeId = formState.routeId;
+  const durLabel = formState.durationLabel;
+  if(!routeId||!durLabel) return 0;
+  const dur = getDuration(routeId,durLabel);
+  if(!dur) return 0;
+  return (dur.price * formState.quantity) + formState.customValue - formState.discount;
+}
+function updateCustomValue(el){
+  formState.customValue = parseFloat(el.value) || 0;
+  updateTotalDisplay();
+}
+function selectQty(n){
+  formState.quantity = n;
+  document.querySelectorAll('.qty-btn').forEach(b=>b.classList.toggle('selected',parseInt(b.dataset.qty)===n));
+  updateTotalDisplay();
+}
+function updateDiscount(el){
+  formState.discount = parseFloat(el.value) || 0;
+  updateTotalDisplay();
+}
+function updateTotalDisplay(){
+  const routeId = formState.routeId;
+  const durLabel = formState.durationLabel;
+  if(!routeId||!durLabel) return;
+  const total = calcValue();
+  const vd = document.getElementById('valueDisplay');
+  vd.classList.remove('hidden');
+  const parts = [`<span class="value-label">Valor Total`];
+  if(formState.quantity>1) parts.push(` · ${formState.quantity} buggy's`);
+  if(formState.customValue>0) parts.push(` · rota + personalização`);
+  if(formState.discount>0) parts.push(` · desconto: -${fmtCurr(formState.discount)}`);
+  parts.push(`</span>`);
+  vd.innerHTML = `<div class="value-display">${fmtCurr(total)}${parts.join('')}</div>`;
+}
+
+function updateEndTime(){
+  const start = document.getElementById('fStart').value;
+  const dur = formState.durationLabel;
+  if(start&&dur){
+    document.getElementById('fEnd').value = calcEndTime(start,formState.routeId,dur);
+  }
+}
+
+function saveBooking(){
+  // Step 1: validate selections
+  const routeId = formState.routeId;
+  const durationLabel = formState.durationLabel;
+  if(!routeId||!durationLabel){
+    alert('Selecione um roteiro e uma duração.');
+    return;
+  }
+  const dur = getDuration(routeId,durationLabel);
+  if(!dur){ alert('Duração inválida. Selecione novamente.'); return; }
+
+  // Step 2: read form fields
+  const client = document.getElementById('fClient').value.trim();
+  const contact = document.getElementById('fContact').value.trim();
+  const companions = document.getElementById('fCompanions').value.trim();
+  const date = document.getElementById('fDate').value;
+  const startTime = document.getElementById('fStart').value;
+  const endTime = document.getElementById('fEnd').value||calcEndTime(startTime,routeId,durationLabel);
+  const pickup = document.getElementById('fPickup').value;
+  const pickupDetail = pickup==='hotel'?document.getElementById('fPickupDetail').value.trim():'Ponto de Encontro (Posto Ipiranga)';
+  const customStops = document.getElementById('fCustomStops').value.trim();
+  const customValue = formState.customValue;
+  const quantity = formState.quantity;
+  const discount = formState.discount;
+  const totalValue = calcValue();
+  const status = formState.status;
+  const signal = formState.signal;
+  const notes = document.getElementById('fNotes').value.trim();
+
+  if(!client){ alert('Informe o nome do cliente.'); return; }
+  if(!contact){ alert('Informe o contato do cliente.'); return; }
+  if(!date){ alert('Selecione a data.'); return; }
+  if(!startTime){ alert('Selecione o horário de início.'); return; }
+
+  // Step 3: build booking object
+  const booking = {
+    id: editingId || Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    routeId, durationLabel, value: totalValue, customValue, quantity, discount,
+    client, contact, companions,
+    date, startTime, endTime,
+    signal, pickup, pickupDetail,
+    status, notes, customStops,
+    createdAt: editingId ? (bookings.find(b=>b.id===editingId)?.createdAt||new Date().toISOString()) : new Date().toISOString()
+  };
+
+  // Step 4: save
+  if(editingId){
+    const idx = bookings.findIndex(b=>b.id===editingId);
+    if(idx>=0) bookings[idx]=booking;
+  }else{
+    bookings.push(booking);
+  }
+  saveBookings();
+
+  alert('Salvo! Total: '+bookings.length);
+
+  editingId = null;
+  showView('agenda');
+}
+
+function cancelEdit(){
+  editingId = null;
+  showView('agenda');
+}
+
+// ─── Detail Modal ───
+function openDetail(id){
+  const b = bookings.find(b=>b.id===id);
+  if(!b) return;
+  const route = getRoute(b.routeId);
+  const dur = getDuration(b.routeId,b.durationLabel);
+  const body = document.getElementById('detailBody');
+  const actions = document.getElementById('detailActions');
+
+  document.getElementById('detailTitle').textContent = b.client;
+
+  body.innerHTML = `
+    <div class="detail-row"><span class="label">Roteiro</span><span class="value">${route?route.name:''} (${b.durationLabel})</span></div>
+    <div class="detail-row"><span class="label">Data</span><span class="value">${fmtDate(b.date)} — ${getDayName(b.date)}</span></div>
+    <div class="detail-row"><span class="label">Horário</span><span class="value">${b.startTime} - ${b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel)}</span></div>
+    <div class="detail-row"><span class="label">Contato</span><span class="value"><a href="https://wa.me/55${b.contact.replace(/\D/g,'')}" target="_blank" style="color:var(--t);text-decoration:none">${escHtml(b.contact)}</a></span></div>
+    <div class="detail-row"><span class="label">Acompanhantes</span><span class="value">${b.companions||'—'}</span></div>
+    <div class="detail-row"><span class="label">Embarque</span><span class="value">${escHtml(b.pickupDetail)}</span></div>
+    <div class="detail-row"><span class="label">🛞 Buggy's</span><span class="value">${b.quantity||1} privativo${(b.quantity||1)>1?'s':''}</span></div>
+    ${b.customValue>0?`<div class="detail-row"><span class="label">Personalização (+)</span><span class="value">${fmtCurr(b.customValue)}</span></div>`:''}
+    ${b.discount>0?`<div class="detail-row"><span class="label">Desconto (-)</span><span class="value" style="color:#e74c3c">${fmtCurr(b.discount)}</span></div>`:''}
+    <div class="detail-row"><span class="label">Valor Total</span><span class="value">${fmtCurr(b.value)}</span></div>
+    <div class="detail-row"><span class="label">Valor Pago</span><span class="value" style="color:#27ae60">${fmtCurr(b.signal)}</span></div>
+    <div class="detail-row"><span class="label">Restante</span><span class="value" style="color:${b.value-b.signal>0?'#e74c3c':'#27ae60'}">${fmtCurr(b.value-b.signal)}</span></div>
+    <div class="detail-row"><span class="label">Status</span><span class="value"><span class="pill pill-${b.status}">${statusLabel(b.status)}</span></span></div>
+    ${b.customStops?`<div class="detail-row"><span class="label">Personalização</span><span class="value">${escHtml(b.customStops)}</span></div>`:''}
+    ${b.notes?`<div class="detail-row"><span class="label">Obs</span><span class="value">${escHtml(b.notes)}</span></div>`:''}
+  `;
+
+  actions.innerHTML = `
+    <button class="btn btn-primary btn-sm" onclick="editBooking('${b.id}')">✏️ Editar</button>
+    <button class="btn btn-secondary btn-sm" onclick="generateReceipt('${b.id}')">📄 Comprovante</button>
+    <button class="btn btn-danger btn-sm" onclick="deleteBooking('${b.id}')">🗑️ Excluir</button>
+    <button class="btn btn-outline btn-sm" onclick="closeDetail()">Fechar</button>
+  `;
+
+  document.getElementById('detailModal').classList.add('active');
+}
+
+function closeDetail(){
+  document.getElementById('detailModal').classList.remove('active');
+  if(window._afterDetailClose){ const f=window._afterDetailClose; window._afterDetailClose=null; setTimeout(f,100); }
+}
+
+function editBooking(id){
+  window._afterDetailClose = null;
+  closeDetail();
+  openForm(id);
+}
+
+function deleteBooking(id){
+  if(!confirm('Tem certeza que deseja excluir este agendamento?')) return;
+  bookings = bookings.filter(b=>b.id!==id);
+  saveBookings();
+  closeDetail();
+  renderAgenda();
+}
+
+// Close modal on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(el=>{
+  el.addEventListener('click',(e)=>{
+    if(e.target===el){
+      el.classList.remove('active');
+      if(el.id==='detailModal' && window._afterDetailClose){ const f=window._afterDetailClose; window._afterDetailClose=null; setTimeout(f,100); }
+      if(el.id==='receiptModal'){
+        document.getElementById('shareButton').style.display = 'none';
+        window._receiptCanvas = null;
+      }
+    }
+  });
+});
+
+// ─── Receipt ───
+// SVG icons for receipt
+const RICONS = {
+  calendar:'<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="#00606C" stroke-width="1.5" style="vertical-align:-3px;margin-right:5px"><rect x="2" y="3" width="16" height="15" rx="2"/><line x1="2" y1="7" x2="18" y2="7"/><line x1="7" y1="1" x2="7" y2="5"/><line x1="13" y1="1" x2="13" y2="5"/></svg>',
+  clock:'<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="#00606C" stroke-width="1.5" style="vertical-align:-3px;margin-right:5px"><circle cx="10" cy="10" r="8"/><polyline points="10,5 10,10 14,10"/></svg>',
+  user:'<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="#00606C" stroke-width="1.5" style="vertical-align:-3px;margin-right:5px"><circle cx="10" cy="7" r="3"/><path d="M3,18 c0,-4 3,-7 7,-7 s7,3 7,7"/></svg>',
+  phone:'<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="#00606C" stroke-width="1.5" style="vertical-align:-3px;margin-right:5px"><path d="M4,3 l3,0 l1,3 l-2,1 c1,2 2,3 4,4 l1,-2 l3,1 l0,3 c0,1 -1,2 -2,2 -4,0 -7,-3 -8,-8 0,-1 0,-2 1,-2"/></svg>',
+  group:'<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="#00606C" stroke-width="1.5" style="vertical-align:-3px;margin-right:5px"><circle cx="7" cy="6" r="2.5"/><circle cx="14" cy="6" r="2.5"/><path d="M2,17 c0,-3 2.5,-5 5,-5 s5,2 5,5"/><path d="M10,17 c0,-2.5 2,-4 4,-4 s4,1.5 4,4"/></svg>',
+  pin:'<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="#00606C" stroke-width="1.5" style="vertical-align:-3px;margin-right:5px"><path d="M10,2 c-3,0 -6,2.5 -6,6 0,4.5 6,10 6,10 0,0 6,-5.5 6,-10 0,-3.5 -3,-6 -6,-6z"/><circle cx="10" cy="8" r="2"/></svg>',
+  buggy:'<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="#00606C" stroke-width="1.5" style="vertical-align:-3px;margin-right:5px"><circle cx="6" cy="15" r="2.5"/><circle cx="15" cy="15" r="2.5"/><path d="M3,13 l1,-5 c0.5,-2 2,-3 4,-3 l4,0 c3,0 5,2 5,4 l0,4"/><line x1="8" y1="5" x2="8" y2="13"/><line x1="3" y1="13" x2="17" y2="13"/><line x1="13" y1="4" x2="15" y2="7"/></svg>',
+  food:'<svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="#019391" stroke-width="1.5" style="vertical-align:-2px;margin-right:4px"><path d="M5,2 l0,8 c0,2 2,3 4,3"/><path d="M9,13 l0,5"/><path d="M11,2 l0,8 c0,2 -2,3 -4,3"/><path d="M14,2 c1,0 2,1 2,2 l0,12 c0,1 -1,2 -2,2"/></svg>',
+  loc:'<svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="#5A8A8A" stroke-width="1.5" style="vertical-align:-2px;margin-right:4px"><path d="M10,3 c-2.5,0 -5,2 -5,4.5 0,3 5,8.5 5,8.5 0,0 5,-5.5 5,-8.5 0,-2.5 -2.5,-4.5 -5,-4.5z"/><circle cx="10" cy="7.5" r="1.5"/></svg>',
+  alert:'<svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="#00DFC3" stroke-width="1.7" style="vertical-align:-2px;margin-right:4px"><circle cx="10" cy="10" r="8"/><line x1="10" y1="5" x2="10" y2="11"/><circle cx="10" cy="14" r="1.2" fill="#00DFC3"/></svg>'
+};
+function ric(n){ return RICONS[n]||''; }
+
+function generateReceipt(id){
+  const b = bookings.find(b=>b.id===id);
+  if(!b) return;
+  const route = getRoute(b.routeId);
+  const dur = getDuration(b.routeId,b.durationLabel);
+  const endTime = b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel);
+  const remaining = b.value-b.signal;
+
+  window._receiptCanvas = null;
+  window._receiptBooking = b;
+  window._receiptRoute = route;
+  window._receiptEndTime = endTime;
+
+  const content = document.getElementById('receiptContent');
+  content.innerHTML = `
+    <div class="receipt" id="receiptEl">
+      <div class="receipt-pattern">
+        <svg viewBox="0 0 400 960" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#00606C" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke-width="8" opacity="0.10" d="M-30,160C80,60 180,220 300,120S420,200 430,160"/>
+            <path stroke-width="10" opacity="0.08" d="M-30,200C60,140 160,260 280,180S400,240 430,200"/>
+            <path stroke-width="6" opacity="0.07" d="M360,70C340,130 380,190 350,250 330,285 310,260 340,215 360,185 350,145 370,100"/>
+            <path stroke-width="7" opacity="0.06" d="M360,70C390,120 410,180 420,230"/>
+            <path stroke-width="10" opacity="0.08" d="M40,100C20,160 50,220 30,280 15,310 5,285 18,250 28,220 18,175 40,130"/>
+            <path stroke-width="8" opacity="0.10" d="M20,340C100,280 180,380 280,320S380,370 400,350"/>
+            <path stroke-width="10" opacity="0.08" d="M-10,420C80,370 160,450 260,400 340,360 390,410 420,390"/>
+            <path stroke-width="6" opacity="0.07" d="M40,480C100,450 160,500 220,470 280,440 340,490 390,465"/>
+            <path stroke-width="10" opacity="0.08" d="M-20,440C60,410 140,470 220,440 280,415 340,450 420,425"/>
+            <path stroke-width="8" opacity="0.10" d="M260,550C280,538 300,544 310,555 320,566 300,572 280,565 268,558 264,553 260,550M310,555L322,546L320,562Z"/>
+            <path stroke-width="6" opacity="0.07" d="M220,575C235,565 250,570 258,578 266,586 252,592 238,587 228,582 224,578 220,575M258,578L268,570L266,585Z"/>
+            <path stroke-width="10" opacity="0.08" d="M240,605C258,594 275,600 284,610 293,620 276,626 260,620 248,615 244,610 240,605M284,610L296,601L293,618Z"/>
+            <path stroke-width="8" opacity="0.10" d="M100,620C70,605 55,635 80,650 105,665 135,630 110,615 88,603 72,620 85,632"/>
+            <path stroke-width="6" opacity="0.07" d="M160,670L166,656L172,670L186,668L177,680L182,694L168,686L154,694L159,680L148,668Z"/>
+            <circle stroke-width="10" opacity="0.08" cx="200" cy="560" r="8"/>
+            <circle stroke-width="7" opacity="0.06" cx="218" cy="540" r="5"/>
+            <circle stroke-width="6" opacity="0.07" cx="185" cy="580" r="6"/>
+            <circle stroke-width="8" opacity="0.10" cx="230" cy="590" r="4"/>
+            <circle stroke-width="9" opacity="0.07" cx="120" cy="490" r="7"/>
+            <circle stroke-width="8" opacity="0.08" cx="290" cy="510" r="6"/>
+            <path stroke-width="8" opacity="0.10" d="M70,780C85,770 110,770 125,780L132,788L128,798L62,798L58,788Z"/>
+            <path stroke-width="8" opacity="0.10" d="M62,798C58,808 68,812 76,812 84,812 94,808 92,798"/>
+            <path stroke-width="8" opacity="0.10" d="M98,798C96,808 104,812 112,812 120,812 128,808 126,798"/>
+            <path stroke-width="10" opacity="0.08" d="M75,780L120,780L125,785L70,785Z"/>
+            <path stroke-width="10" opacity="0.08" d="M-20,860C80,840 160,870 260,850 320,838 380,860 430,845"/>
+            <path stroke-width="8" opacity="0.10" d="M-30,890C70,870 160,900 260,880 340,865 390,890 430,875"/>
+            <path stroke-width="10" opacity="0.08" d="M-20,820C70,800 150,830 250,810 320,792 380,820 430,805"/>
+            <path stroke-width="7" opacity="0.06" d="M280,130C292,118 304,125 315,112"/>
+            <path stroke-width="6" opacity="0.07" d="M330,150C340,140 350,146 360,135"/>
+            <path stroke-width="8" opacity="0.10" d="M180,260C220,240 260,280 300,250 330,225 360,255 380,240"/>
+            <path stroke-width="10" opacity="0.08" d="M150,290C190,270 230,310 270,280 300,258 330,285 350,270"/>
+            <path stroke-width="8" opacity="0.10" d="M-30,950C60,930 140,960 220,940 300,920 360,950 430,935"/>
+            <path stroke-width="7" opacity="0.06" d="M10,50C50,40 100,60 140,45 180,30 220,55 260,40 300,25 340,50 390,35"/>
+            <path stroke-width="9" opacity="0.07" d="M30,700C70,680 120,710 170,690 210,672 250,700 300,680 340,662 380,690 410,675"/>
+            <path stroke-width="6" opacity="0.06" d="M300,740C320,730 340,740 360,732 380,724 390,735 410,728"/>
+            <path stroke-width="8" opacity="0.08" d="M80,740C100,730 130,745 160,735 190,725 220,745 250,735 270,728 290,742 310,730"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="logo-round" style="width:90px;height:90px;margin:0 auto 10px" id="receiptLogoWrap">
+        <img class="receipt-logo js-logo" src="${appSettings.logoDataUrl||'Logo%20Destinos%20Maragogi.png'}" alt="Logo" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='icon.svg'}else{this.style.display='none'}" style="transform:scale(${appSettings.logoZoom||1})">
+      </div>
+      <h2 class="js-company">${escHtml(appSettings.companyName)}</h2>
+      <p class="receipt-sub js-tagline">${escHtml(appSettings.tagline)}</p>
+
+      <hr class="receipt-divider">
+
+      <div class="r-row"><span class="r-label">${ric('calendar')}Data</span><span class="r-value">${fmtDate(b.date)} — ${getDayName(b.date)}</span></div>
+      <div class="r-row"><span class="r-label">${ric('clock')}Horário</span><span class="r-value">${b.startTime} — ${endTime}</span></div>
+      <div class="r-row"><span class="r-label">${ric('user')}Cliente</span><span class="r-value" style="font-weight:700">${escHtml(b.client)}</span></div>
+      <div class="r-row"><span class="r-label">${ric('phone')}Contato</span><span class="r-value">${escHtml(b.contact)}</span></div>
+      <div class="r-row"><span class="r-label">${ric('group')}Acompanhantes</span><span class="r-value">${b.companions||'—'}</span></div>
+      <div class="r-row"><span class="r-label">${ric('pin')}Embarque</span><span class="r-value">${escHtml(b.pickupDetail)}</span></div>
+      <div class="r-row"><span class="r-label">${ric('buggy')}Quantidade</span><span class="r-value">${b.quantity||1} buggy${(b.quantity||1)>1?'\'s':''} privativo${(b.quantity||1)>1?'s':''}</span></div>
+
+      <hr class="receipt-divider">
+
+      <div style="font-weight:700;font-size:13px;margin-bottom:4px;letter-spacing:.2px;color:var(--t)">${route?route.name:''} <span style="font-weight:400;color:#4A6A6A">(${b.durationLabel})</span></div>
+      <ul class="r-stops">${route?route.stops.map(s=>{
+        if(s.startsWith('Rota ')) return `<li class="r-section">${s}</li>`;
+        const icon = s.toLowerCase().startsWith('parada p/ almo')?ric('food'):ric('loc');
+        return `<li>${icon} ${s}</li>`;
+      }).join(''):''}</ul>
+      ${b.customStops?`<div style="font-size:12px;color:#4A6A6A;margin:6px 0 0;padding:6px 0 0;border-top:1px dashed var(--border);display:flex;align-items:center"><span style="font-weight:700;display:flex;align-items:center">${ric('alert')} Personalização:</span>&nbsp;${escHtml(b.customStops)}</div>`:''}
+
+      <hr class="receipt-divider">
+
+      <div class="r-highlight">
+        ${(()=>{ const base = (b.value-(b.customValue||0)+(b.discount||0))/Math.max(b.quantity||1,1); return `<div class="r-row"><span class="r-label">Roteiro base${b.quantity>1?` (${b.quantity}× ${fmtCurr(base)})`:''}</span><span class="r-value" style="font-weight:700">${fmtCurr(base*Math.max(b.quantity||1,1))}</span></div>`; })()}
+        ${b.customValue>0?`<div class="r-row"><span class="r-label">Personalização</span><span class="r-value" style="font-weight:700">+ ${fmtCurr(b.customValue)}</span></div>`:''}
+        ${b.discount>0?`<div class="r-row"><span class="r-label">Desconto</span><span class="r-value" style="font-weight:700;color:#D14C4C">- ${fmtCurr(b.discount)}</span></div>`:''}
+        <div class="r-row"><span class="r-label">Valor Total</span><span class="r-value" style="font-weight:800">${fmtCurr(b.value)}</span></div>
+        <div class="r-row"><span class="r-label">Valor Pago</span><span class="r-value" style="color:#019391;font-weight:700">${fmtCurr(b.signal)}</span></div>
+        <div class="r-row"><span class="r-label" style="font-weight:700">${remaining>0?'Saldo Restante':'Valor Pago'}</span><span class="r-value" style="font-weight:800;font-size:16px;color:${remaining>0?'#D14C4C':'#019391'}">${fmtCurr(remaining)}</span></div>
+      </div>
+
+      <div style="text-align:center;margin:8px 0">
+        <span class="pill pill-${b.status}">${statusLabel(b.status)}</span>
+      </div>
+
+      <hr class="receipt-divider">
+
+      <div class="r-footer"><svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px;margin-right:4px" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ig" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f58529"/><stop offset=".25" stop-color="#dd2a7b"/><stop offset=".5" stop-color="#8134af"/><stop offset=".75" stop-color="#515bd4"/><stop offset="1" stop-color="#00d2ff"/></linearGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#ig)"/><circle cx="12" cy="12" r="5.5" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="18" cy="6" r="1.2" fill="#fff"/></svg>@destinosmaragogi · Maragogi-AL</div>
+      <div style="text-align:center;font-size:12px;color:#4A6A6A;margin-top:8px;font-weight:600;letter-spacing:.3px">Contato Rodrigo: (82) 99141-4023</div>
+    </div>
+  `;
+
+  document.getElementById('receiptModal').classList.add('active');
+  document.getElementById('shareButton').style.display = 'flex';
+  window._receiptCanvas = null;
+}
+
+function receiptJPEG(callback){
+  const el = document.getElementById('receiptEl');
+  if(!el){ alert('Erro: comprovante não encontrado.'); return; }
+  if(window._receiptCanvas){ callback(window._receiptCanvas); return; }
+  if(typeof html2canvas === 'undefined'){
+    if(window._html2canvasLoading){ alert('Carregando… aguarde e tente novamente.'); return; }
+    window._html2canvasLoading = true;
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+    s.onload = ()=>{ window._html2canvasLoading = false; setTimeout(()=>receiptJPEG(callback), 100); };
+    s.onerror = ()=>{ window._html2canvasLoading = false; alert('Não foi possível carregar a biblioteca de imagem. Verifique sua conexão.'); };
+    document.head.appendChild(s);
+    return;
+  }
+  const prog = document.getElementById('receiptProgress');
+  if(prog) prog.style.display = 'block';
+  try {
+    html2canvas(el,{scale:2,backgroundColor:'#fff',useCORS:true,allowTaint:false,logging:false}).then(canvas=>{
+      window._receiptCanvas = canvas;
+      if(prog) prog.style.display = 'none';
+      callback(canvas);
+    }).catch(e=>{
+      if(prog) prog.style.display = 'none';
+      alert('Erro ao gerar imagem: '+(e.message||'tente novamente'));
+    });
+  } catch(e) {
+    if(prog) prog.style.display = 'none';
+    alert('Erro inesperado: '+(e.message||'tente novamente'));
+  }
+}
+function shareReceipt(){
+  const btn = document.getElementById('shareButton');
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  receiptJPEG(canvas=>{
+    const b = window._receiptBooking;
+    canvas.toBlob(blob=>{
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      if(!blob){ alert('Erro ao gerar o arquivo.'); return; }
+      const file = new File([blob],`comprovante_${b.client.replace(/\s/g,'_')}.jpg`,{type:'image/jpeg'});
+      if(navigator.share && (typeof navigator.canShare !== 'function' || navigator.canShare({files:[file]}))){
+        navigator.share({title:'Comprovante - '+appSettings.companyName,files:[file]}).catch(()=>{});
+      }else{
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    },'image/jpeg',0.95);
+  });
+}
+
+// ─── Stats ───
+function renderStats(){
+  const container = document.getElementById('statsContainer');
+
+  const total = bookings.length;
+  const confirmados = bookings.filter(b=>b.status==='confirmado').length;
+  const concluidos = bookings.filter(b=>b.status==='concluido').length;
+  const cancelados = bookings.filter(b=>b.status==='cancelado').length;
+
+  const receitaTotal = bookings.reduce((s,b)=>s+b.value,0);
+  const recebido = bookings.reduce((s,b)=>s+b.signal,0);
+  const aReceber = receitaTotal-recebido;
+
+  // Route breakdown
+  const routeStats = ROUTES.map(r=>{
+    const bs = bookings.filter(b=>b.routeId===r.id);
+    return {name:r.name, total:bs.length, receita:bs.reduce((s,b)=>s+b.value,0)};
+  });
+
+  container.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total</div></div>
+      <div class="stat-card stat-green"><div class="stat-num">${confirmados}</div><div class="stat-label">Confirmados</div></div>
+      <div class="stat-card stat-blue"><div class="stat-num">${concluidos}</div><div class="stat-label">Concluídos</div></div>
+      <div class="stat-card stat-red"><div class="stat-num">${cancelados}</div><div class="stat-label">Cancelados</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💰 Financeiro</div>
+      <div class="stat-row"><span>Receita Total</span><span style="font-weight:700">${fmtCurr(receitaTotal)}</span></div>
+      <div class="stat-row"><span style="color:#27ae60">Recebido</span><span style="font-weight:700;color:#27ae60">${fmtCurr(recebido)}</span></div>
+      <div class="stat-row"><span style="color:#e74c3c">A Receber</span><span style="font-weight:700;color:#e74c3c">${fmtCurr(aReceber)}</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Por Roteiro</div>
+      ${routeStats.map(rs=>`
+        <div class="stat-row">
+          <span>${rs.name}</span>
+          <span style="font-weight:600">${rs.total} agend. · ${fmtCurr(rs.receita)}</span>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="card">
+      <div class="card-title">📅 Últimos Agendamentos</div>
+      ${bookings.slice(-5).reverse().map(b=>{
+        const route = getRoute(b.routeId);
+        return `<div class="stat-row" style="cursor:pointer" onclick="openDetail('${b.id}')">
+          <span>${fmtDate(b.date)} — ${escHtml(b.client)}</span>
+          <span><span class="pill pill-${b.status}">${statusLabel(b.status)}</span></span>
+        </div>`;
+      }).join('')||'<div style="padding:8px;color:var(--text2);font-size:13px">Nenhum agendamento ainda.</div>'}
+    </div>
+  `;
+}
+</script>
+</body>
+</html>

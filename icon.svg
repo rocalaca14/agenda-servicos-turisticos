@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#00BAB9" rx="64"/>
+  <g transform="translate(256,240)">
+    <path d="M-120,40 Q-80,-60 0,-80 Q80,-60 120,40 L100,50 Q70,-10 0,-20 Q-70,-10 -100,50 Z" fill="#fff"/>
+    <circle cx="-60" cy="-30" r="28" fill="#fff"/><circle cx="-60" cy="-30" r="12" fill="#00BAB9"/>
+    <circle cx="60" cy="-30" r="28" fill="#fff"/><circle cx="60" cy="-30" r="12" fill="#00BAB9"/>
+    <rect x="-30" y="-50" width="60" height="30" rx="8" fill="#FFA600"/>
+    <rect x="-10" y="-40" width="20" height="10" rx="3" fill="#fff" opacity="0.5"/>
+    <circle cx="0" cy="55" r="18" fill="#fff"/><circle cx="0" cy="55" r="8" fill="#333"/>
+    <path d="M-100,45 L-85,15 L-70,45" fill="#FFA600" opacity="0.8"/>
+    <path d="M70,45 L85,15 L100,45" fill="#FFA600" opacity="0.8"/>
+    <rect x="-25" y="-60" width="50" height="8" rx="4" fill="#fff" opacity="0.7"/>
+    <path d="M-40,-68 L0,-90 L40,-68" fill="#fff" opacity="0.6"/>
+  </g>
+  <text x="256" y="420" font-family="Arial,sans-serif" font-weight="bold" font-size="48" fill="#fff" text-anchor="middle" letter-spacing="2">DM</text>
+</svg>

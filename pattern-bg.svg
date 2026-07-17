@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 960" width="400" height="960">
+  <defs>
+    <style>
+      .a { fill:none; stroke:#00BAB9; stroke-width:8; stroke-linecap:round; stroke-linejoin:round; opacity:0.05 }
+      .b { fill:none; stroke:#00BAB9; stroke-width:6; stroke-linecap:round; stroke-linejoin:round; opacity:0.035 }
+      .c { fill:none; stroke:#00BAB9; stroke-width:10; stroke-linecap:round; stroke-linejoin:round; opacity:0.04 }
+      .d { fill:none; stroke:#00BAB9; stroke-width:7; stroke-linecap:round; stroke-linejoin:round; opacity:0.03 }
+      .e { fill:none; stroke:#00BAB9; stroke-width:9; stroke-linecap:round; stroke-linejoin:round; opacity:0.025 }
+    </style>
+  </defs>
+
+  <!-- Large wave sweep – top -->
+  <path class="a" d="M-30,160 C80,60 180,220 300,120 S420,200 430,160"/>
+  <path class="c" d="M-30,200 C60,140 160,260 280,180 S400,240 430,200"/>
+
+  <!-- Palm frond – upper right -->
+  <path class="b" d="M360,70 C340,130 380,190 350,250 C330,285 310,260 340,215 C360,185 350,145 370,100"/>
+  <path class="d" d="M360,70 C390,120 410,180 420,230"/>
+  <path class="e" d="M360,70 C375,115 375,170 365,220"/>
+
+  <!-- Palm frond – upper left -->
+  <path class="c" d="M40,100 C20,160 50,220 30,280 C15,310 5,285 18,250 C28,220 18,175 40,130"/>
+  <path class="b" d="M40,100 C10,140 -5,200 0,260"/>
+
+  <!-- Central wave composition -->
+  <path class="a" d="M20,340 C100,280 180,380 280,320 S380,370 400,350"/>
+  <path class="d" d="M60,380 C120,340 200,400 280,360 C340,330 380,370 400,380"/>
+  <path class="c" d="M-10,420 C80,370 160,450 260,400 C340,360 390,410 420,390"/>
+
+  <!-- Flowing dune curves -->
+  <path class="b" d="M40,480 C100,450 160,500 220,470 C280,440 340,490 390,465"/>
+  <path class="e" d="M80,510 C130,485 180,530 240,505 C300,480 340,520 380,500"/>
+
+  <!-- Stylized fish school -->
+  <path class="b" d="M260,550 C280,538 300,544 310,555 C320,566 300,572 280,565 C268,558 264,553 260,550"/>
+  <path class="b" d="M310,555 L322,546 L320,562 Z"/>
+
+  <path class="d" d="M220,575 C235,565 250,570 258,578 C266,586 252,592 238,587 C228,582 224,578 220,575"/>
+  <path class="d" d="M258,578 L268,570 L266,585 Z"/>
+
+  <path class="e" d="M290,590 C302,580 315,585 322,593 C329,601 318,606 305,601 C295,597 292,593 290,590"/>
+  <path class="e" d="M322,593 L332,585 L330,600 Z"/>
+
+  <path class="c" d="M240,605 C258,594 275,600 284,610 C293,620 276,626 260,620 C248,615 244,610 240,605"/>
+  <path class="c" d="M284,610 L296,601 L293,618 Z"/>
+
+  <!-- Seashell spiral -->
+  <path class="a" d="M100,620 C70,605 55,635 80,650 C105,665 135,630 110,615 C88,603 72,620 85,632"/>
+  <path class="d" d="M85,630 C90,626 96,630 93,635 C90,638 85,635 87,631"/>
+
+  <!-- Starfish -->
+  <path class="b" d="M160,670 L166,656 L172,670 L186,668 L177,680 L182,694 L168,686 L154,694 L159,680 L148,668 Z"/>
+  <path class="d" d="M166,665 L168,670 L172,668"/>
+
+  <!-- Bubbles -->
+  <circle class="c" cx="200" cy="560" r="8"/>
+  <circle class="d" cx="218" cy="540" r="5"/>
+  <circle class="e" cx="185" cy="580" r="6"/>
+  <circle class="b" cx="230" cy="590" r="4"/>
+  <circle class="d" cx="170" cy="545" r="3"/>
+  <circle class="c" cx="240" cy="555" r="5.5"/>
+
+  <!-- Stylized buggy – lower area -->
+  <path class="a" d="M70,780 C85,770 110,770 125,780 L132,788 L128,798 L62,798 L58,788 Z"/>
+  <path class="a" d="M62,798 C58,808 68,812 76,812 C84,812 94,808 92,798"/>
+  <path class="a" d="M98,798 C96,808 104,812 112,812 C120,812 128,808 126,798"/>
+  <path class="c" d="M75,780 L120,780 L125,785 L70,785 Z"/>
+  <path class="b" d="M90,770 L105,770 L108,780 L87,780 Z"/>
+  <path class="d" d="M55,790 L140,790"/>
+
+  <!-- Small shells -->
+  <path class="e" d="M320,700 C325,693 330,696 332,700 C334,704 330,706 326,704 C322,702 321,700 320,700"/>
+  <path class="b" d="M340,720 C344,714 348,716 350,720 C352,724 348,726 345,724 C342,722 341,720 340,720"/>
+  <path class="d" d="M310,730 C313,725 316,727 317,730 C318,733 315,735 312,733 C310,731 310,730 310,730"/>
+
+  <!-- Guanabara / horizon line -->
+  <path class="c" d="M-20,860 C80,840 160,870 260,850 C320,838 380,860 430,845"/>
+  <path class="a" d="M-30,890 C70,870 160,900 260,880 C340,865 390,890 430,875"/>
+  <path class="b" d="M10,920 C90,900 180,930 270,910 C340,895 380,920 420,908"/>
+
+  <!-- Seagulls -->
+  <path class="d" d="M280,130 C292,118 304,125 315,112"/>
+  <path class="e" d="M330,150 C340,140 350,146 360,135"/>
+  <path class="b" d="M260,160 C268,150 278,155 288,145"/>
+  <path class="c" d="M350,110 C358,100 366,105 374,95"/>
+
+  <!-- Coral / organic shapes -->
+  <path class="b" d="M130,750 C140,730 150,745 160,725 C165,715 170,725 175,715"/>
+  <path class="d" d="M120,760 C125,745 135,755 140,740"/>
+  <path class="e" d="M140,755 C148,740 155,750 160,738"/>
+
+  <!-- Extra organic flowing curves -->
+  <path class="a" d="M180,260 C220,240 260,280 300,250 C330,225 360,255 380,240"/>
+  <path class="c" d="M150,290 C190,270 230,310 270,280 C300,258 330,285 350,270"/>
+  <path class="b" d="M200,640 C240,620 280,660 320,635 C350,615 370,640 390,625"/>
+
+  <!-- Bottom wave -->
+  <path class="a" d="M-30,950 C60,930 140,960 220,940 C300,920 360,950 430,935"/>
+</svg>
