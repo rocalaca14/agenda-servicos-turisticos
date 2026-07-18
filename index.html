@@ -19,7 +19,7 @@
 #loading .sp{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--t);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-[style*="display:grid"]{overflow:hidden}
+[style*="display:grid"]>*{min-width:0}
 :root{--t:#00606C;--t2:#019391;--o:#00DFC3;--o2:#00BFA8;--bg:#F4FAFA;--white:#FFFFFF;--border:#B7E5E2;--text:#102A30;--text2:#527178;--shadow:0 4px 20px rgba(0,0,0,.12);--radius:14px;--radius-sm:10px;--font:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif}
 html,body{height:100%;width:100%;overflow-x:hidden;font-family:var(--font);background:var(--bg);color:var(--text);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 svg{shape-rendering:geometricPrecision}
@@ -1524,7 +1524,7 @@ function renderForm(){
         ${formState.routeId&&formState.durationLabel?`<div class="value-display">${fmtCurr(calcValue())}<span class="value-label">Valor Total${formState.customValue>0?' (rota + personalização)':''}${formState.quantity>1?' · '+formState.quantity+' buggy\'s':''}${formState.discount>0?' · desconto: -'+fmtCurr(formState.discount):''}</span></div>`:''}
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+      <div id="signalGroup" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
         <label style="font-size:12px;font-weight:600;color:var(--text2);text-align:center">Qtd. Buggy Privativo</label>
         <label style="font-size:12px;font-weight:600;color:var(--text2);text-align:center">Valor Adicional</label>
         <label style="font-size:12px;font-weight:600;color:var(--text2);text-align:center">Desconto <span style="font-weight:400;color:#aab">(opcional)</span></label>
@@ -1534,12 +1534,10 @@ function renderForm(){
         <input class="form-input" id="fDiscount" type="number" min="0" step="any" placeholder="0,00" value="${formState.discount}" style="width:100%;height:44px;text-align:center;box-sizing:border-box;margin:0" oninput="updateDiscount(this)">
         <input class="form-input" id="fDate" type="date" value="${edit?edit.date:todayStr()}" style="width:100%;height:44px;box-sizing:border-box;margin:0">
         <label style="font-size:13px;font-weight:600;color:var(--text2);grid-column:1/-1;margin-bottom:-4px">Sinal (valor já pago)</label>
-        <div id="signalGroup" style="display:contents">
-          <button type="button" class="signal-btn${formState.signal===0?' selected':''}" data-signal="0" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">R$ 0</button>
-          <button type="button" class="signal-btn${formState.signal===50?' selected':''}" data-signal="50" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">R$ 50</button>
-          <button type="button" class="signal-btn${formState.signal===100?' selected':''}" data-signal="100" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">R$ 100</button>
-          <button type="button" class="signal-btn custom${![0,50,100].includes(formState.signal)?' selected':''}" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">Outro</button>
-        </div>
+        <button type="button" class="signal-btn${formState.signal===0?' selected':''}" data-signal="0" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">R$ 0</button>
+        <button type="button" class="signal-btn${formState.signal===50?' selected':''}" data-signal="50" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">R$ 50</button>
+        <button type="button" class="signal-btn${formState.signal===100?' selected':''}" data-signal="100" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">R$ 100</button>
+        <button type="button" class="signal-btn custom${![0,50,100].includes(formState.signal)?' selected':''}" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">Outro</button>
       </div>
       <input class="form-input hidden" id="fSignalCustom" type="number" min="0" step="any" placeholder="Valor personalizado" style="margin-top:6px">
 
