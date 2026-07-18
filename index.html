@@ -1526,16 +1526,20 @@ function renderForm(){
         ${formState.routeId&&formState.durationLabel?`<div class="value-display">${fmtCurr(calcValue())}<span class="value-label">Valor Total${formState.customValue>0?' (rota + personalização)':''}${formState.quantity>1?' · '+formState.quantity+' buggy\'s':''}${formState.discount>0?' · desconto: -'+fmtCurr(formState.discount):''}</span></div>`:''}
       </div>
 
-      <div id="signalGroup" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:8px">
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px">
         <label style="font-size:12px;font-weight:600;color:var(--text2);text-align:center">Qtd. Buggy Privativo</label>
         <label style="font-size:12px;font-weight:600;color:var(--text2);text-align:center">Valor Adicional</label>
-        <label style="font-size:12px;font-weight:600;color:var(--text2);text-align:center">Desconto <span style="font-weight:400;color:#aab">(opcional)</span></label>
-        <label style="font-size:12px;font-weight:600;color:var(--text2);text-align:center">Data</label>
         <input class="form-input" type="number" min="1" step="1" value="${formState.quantity}" onchange="formState.quantity=Math.max(1,parseInt(this.value)||1);this.value=formState.quantity;updateTotalDisplay()" placeholder="1" style="width:100%;height:44px;text-align:center;font-weight:700;font-size:15px;box-sizing:border-box;margin:0">
         <input class="form-input" id="fCustomValue" type="number" min="0" step="any" placeholder="0,00" value="${edit?edit.customValue||0:0}" style="width:100%;height:44px;text-align:center;box-sizing:border-box;margin:0" oninput="updateCustomValue(this)">
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:8px">
+        <label style="font-size:12px;font-weight:600;color:var(--text2);text-align:center">Desconto <span style="font-weight:400;color:#aab">(opcional)</span></label>
+        <label style="font-size:12px;font-weight:600;color:var(--text2);text-align:center">Data</label>
         <input class="form-input" id="fDiscount" type="number" min="0" step="any" placeholder="0,00" value="${formState.discount}" style="width:100%;height:44px;text-align:center;box-sizing:border-box;margin:0" oninput="updateDiscount(this)">
-        <input class="form-input" id="fDate" type="date" value="${edit?edit.date:todayStr()}" style="width:100%;height:44px;box-sizing:border-box;margin:0">
-        <label style="font-size:13px;font-weight:600;color:var(--text2);grid-column:1/-1;margin-bottom:-4px">Sinal (valor já pago)</label>
+        <input class="form-input" id="fDate" type="date" value="${edit?edit.date:todayStr()}" style="width:100%!important;min-width:0!important;max-width:100%;height:44px;box-sizing:border-box;margin:0">
+      </div>
+      <label style="font-size:13px;font-weight:600;color:var(--text2);margin:8px 0 4px;display:block">Sinal (valor já pago)</label>
+      <div id="signalGroup" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:8px">
         <button type="button" class="signal-btn${formState.signal===0?' selected':''}" data-signal="0" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">R$ 0</button>
         <button type="button" class="signal-btn${formState.signal===50?' selected':''}" data-signal="50" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">R$ 50</button>
         <button type="button" class="signal-btn${formState.signal===100?' selected':''}" data-signal="100" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">R$ 100</button>
@@ -1623,18 +1627,18 @@ function renderForm(){
       </div>
       <input class="form-input hidden" id="fSignalCustom" type="number" min="0" step="any" placeholder="Valor personalizado" style="margin-top:6px">
 
-      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:8px">
-        <div class="form-group" style="margin:0">
-          <label style="text-align:center;font-size:12px;margin-bottom:2px">Data</label>
-          <input class="form-input" id="fDate" type="date" value="${edit?edit.date:todayStr()}" style="width:100%;height:44px;box-sizing:border-box">
-        </div>
+      <div class="form-group" style="margin:0">
+        <label style="text-align:center;font-size:12px;margin-bottom:2px">Data</label>
+        <input class="form-input" id="fDate" type="date" value="${edit?edit.date:todayStr()}" style="width:100%!important;min-width:0!important;max-width:100%;height:44px;box-sizing:border-box">
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px">
         <div class="form-group" style="margin:0">
           <label style="text-align:center;font-size:12px;margin-bottom:2px">Horário de Embarque</label>
-          <input class="form-input" id="fStart" type="time" value="${edit?edit.startTime:'08:00'}" style="width:100%;height:44px;box-sizing:border-box">
+          <input class="form-input" id="fStart" type="time" value="${edit?edit.startTime:'08:00'}" style="width:100%!important;min-width:0!important;max-width:100%;height:44px;box-sizing:border-box">
         </div>
         <div class="form-group" style="margin:0">
           <label style="text-align:center;font-size:12px;margin-bottom:2px">Término</label>
-          <input class="form-input" id="fEnd" type="time" value="${edit?edit.endTime:''}" style="width:100%;height:44px;box-sizing:border-box">
+          <input class="form-input" id="fEnd" type="time" value="${edit?edit.endTime:''}" style="width:100%!important;min-width:0!important;max-width:100%;height:44px;box-sizing:border-box">
         </div>
       </div>
 
@@ -1669,23 +1673,25 @@ function renderForm(){
         <div class="value-display" id="transferTotalDisplay">${fmtCurr(Math.max(0, formState.transferValue - formState.discount))}<span class="value-label">Valor Total${formState.discount>0?' · desconto: -'+fmtCurr(formState.discount):''}</span></div>
       </div>
 
-      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:8px">
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px">
         <div class="form-group" style="margin:0">
           <label style="text-align:center;font-size:12px;margin-bottom:2px">Horário de Embarque</label>
-          <input class="form-input" id="fTransferPickupTime" type="time" value="${formState.transferPickupTime||'08:00'}" style="width:100%;height:44px;box-sizing:border-box">
+          <input class="form-input" id="fTransferPickupTime" type="time" value="${formState.transferPickupTime||'08:00'}" style="width:100%!important;min-width:0!important;max-width:100%;height:44px;box-sizing:border-box">
         </div>
         <div class="form-group" style="margin:0">
           <label style="text-align:center;font-size:12px;margin-bottom:2px">Local de Embarque</label>
-          <select class="form-input" id="fTransferPickupType" style="width:100%;height:44px;box-sizing:border-box">
+          <select class="form-input" id="fTransferPickupType" style="width:100%!important;min-width:0!important;max-width:100%;height:44px;box-sizing:border-box">
             <option value="recife" ${formState.transferPickupType==='recife'?'selected':''}>Aeroporto Recife</option>
             <option value="maceio" ${formState.transferPickupType==='maceio'?'selected':''}>Aeroporto Maceió</option>
             <option value="outro" ${formState.transferPickupType==='outro'?'selected':''}>Outro</option>
           </select>
           <input class="form-input" id="fTransferPickupCustom" placeholder="Digite o local..." style="margin-top:6px;height:44px;box-sizing:border-box;${formState.transferPickupType==='outro'?'':'display:none'}" value="${edit?escHtml(edit.transferPickupCustom||''):''}">
         </div>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:8px">
         <div class="form-group" style="margin:0">
           <label style="text-align:center;font-size:12px;margin-bottom:2px">Local de Desembarque</label>
-          <select class="form-input" id="fTransferDropoffType" style="width:100%;height:44px;box-sizing:border-box">
+          <select class="form-input" id="fTransferDropoffType" style="width:100%!important;min-width:0!important;max-width:100%;height:44px;box-sizing:border-box">
             <option value="recife" ${formState.transferDropoffType==='recife'?'selected':''}>Aeroporto Recife</option>
             <option value="maceio" ${formState.transferDropoffType==='maceio'?'selected':''}>Aeroporto Maceió</option>
             <option value="outro" ${formState.transferDropoffType==='outro'?'selected':''}>Outro</option>
@@ -1694,7 +1700,7 @@ function renderForm(){
         </div>
         <div class="form-group" style="margin:0">
           <label style="text-align:center;font-size:12px;margin-bottom:2px">Data</label>
-          <input class="form-input" id="fDate" type="date" value="${edit?edit.date:todayStr()}" style="width:100%;height:44px;box-sizing:border-box">
+          <input class="form-input" id="fDate" type="date" value="${edit?edit.date:todayStr()}" style="width:100%!important;min-width:0!important;max-width:100%;height:44px;box-sizing:border-box">
         </div>
       </div>
       <span style="font-size:11px;color:var(--text2);margin-top:4px;display:block">Cliente deve estar pronto no horário de embarque</span>
@@ -1732,7 +1738,7 @@ function renderForm(){
       ${t!=='buggy' && t!=='piscinas' && t!=='transfer' ? `
       <div class="form-group">
         <label>Data</label>
-        <input class="form-input" id="fDate" type="date" value="${edit?edit.date:todayStr()}">
+        <input class="form-input" id="fDate" type="date" value="${edit?edit.date:todayStr()}" style="width:100%!important;min-width:0!important;max-width:100%;height:44px;box-sizing:border-box">
       </div>
       `:''}
 
@@ -1740,11 +1746,11 @@ function renderForm(){
       <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px">
         <div class="form-group">
           <label>Horário de Embarque</label>
-          <input class="form-input" id="fStart" type="time" value="${edit?edit.startTime:'08:00'}">
+          <input class="form-input" id="fStart" type="time" value="${edit?edit.startTime:'08:00'}" style="width:100%!important;min-width:0!important;max-width:100%;height:44px;box-sizing:border-box">
         </div>
         <div class="form-group">
           <label>Término</label>
-          <input class="form-input" id="fEnd" type="time" value="${edit?edit.endTime:''}">
+          <input class="form-input" id="fEnd" type="time" value="${edit?edit.endTime:''}" style="width:100%!important;min-width:0!important;max-width:100%;height:44px;box-sizing:border-box">
         </div>
       </div>
       `:''}
