@@ -95,8 +95,6 @@ textarea.form-input{resize:vertical;min-height:70px}
 .route-card:hover{border-color:var(--t)}
 .route-card.selected{border-color:var(--t);background:#e6f7f7}
 .route-card .route-name{font-size:14px;font-weight:700;color:var(--text)}
-.route-card .route-stops{font-size:12px;color:var(--text2);margin:4px 0 8px}
-.route-card .route-stops span{display:inline-block;background:var(--bg);padding:1px 8px;border-radius:10px;margin:2px;font-size:11px}
 .route-duration-options{display:flex;gap:6px;flex-wrap:wrap}
 .duration-btn{padding:5px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;background:var(--white);transition:.2s;font-family:var(--font)}
 .duration-btn.selected{border-color:var(--o);background:#fff3e0;color:var(--o2)}
@@ -269,6 +267,11 @@ textarea.form-input{resize:vertical;min-height:70px}
 .empty-state svg{width:64px;height:64px;fill:var(--border);margin-bottom:12px}
 .empty-state p{font-size:14px}
 
+/* Client suggestion dropdown */
+.suggest-item{padding:10px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--bg);transition:.1s}
+.suggest-item:last-child{border-bottom:none}
+.suggest-item:hover{background:var(--bg)}
+
 /* Duration badge on booking card */
 .route-badge{display:inline-block;background:var(--bg);padding:2px 10px;border-radius:10px;font-size:11px;color:var(--text2)}
 
@@ -311,6 +314,9 @@ textarea.form-input{resize:vertical;min-height:70px}
 
 <!-- ===== VIEW: AGENDA ===== -->
 <div class="view" id="viewAgenda">
+  <div style="padding:0 0 8px">
+    <input class="form-input" id="searchInput" placeholder="🔍 Buscar por nome do cliente..." style="font-size:14px;padding:8px 12px" oninput="searchQuery=this.value.trim().toLowerCase();renderAgenda()">
+  </div>
   <div class="filter-bar" id="filterBar"></div>
   <div id="agendaList"></div>
 </div>
@@ -386,6 +392,13 @@ textarea.form-input{resize:vertical;min-height:70px}
         </div>
         <button class="btn btn-sm" onclick="removeLogo()" style="margin-top:6px;background:var(--bg);color:var(--text2);border:none;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px">Remover logo</button>
       </div>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
+    <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px">💾 Backup de Dados</div>
+    <button class="btn btn-sm btn-outline" onclick="exportBackup()" style="width:100%;margin-bottom:6px">📤 Exportar (fazer download .json)</button>
+    <div style="position:relative">
+      <button class="btn btn-sm btn-outline" style="width:100%" onclick="document.getElementById('importBackupInput').click()">📥 Importar (carregar .json)</button>
+      <input type="file" id="importBackupInput" accept=".json" style="display:none" onchange="importBackup(event)">
     </div>
     <div style="display:flex;gap:8px;margin-top:20px">
       <button class="btn btn-primary" onclick="saveSettings()" style="flex:1">Salvar</button>
@@ -523,6 +536,22 @@ let ROUTES = [
     durations:[{label:'7-8h',hours:8,price:650}] }
 ];
 
+function resolveTransferLoc(type, custom){
+  if(type==='recife') return 'Aeroporto Recife';
+  if(type==='maceio') return 'Aeroporto Maceió';
+  return custom||'';
+}
+
+function iconBuggy(){
+  return `<svg viewBox="0 0 20 16" width="16" height="16" style="vertical-align:middle"><rect x="2" y="4" width="16" height="7" rx="2" fill="#4CAF50"/><rect x="6" y="2" width="8" height="4" rx="1" fill="#388E3C"/><circle cx="5" cy="12" r="3" fill="#333"/><circle cx="15" cy="12" r="3" fill="#333"/></svg>`;
+}
+function iconPiscinas(){
+  return `<svg viewBox="0 0 20 20" width="16" height="16" style="vertical-align:middle"><rect x="9" y="8" width="2" height="10" rx="1" fill="#8D6E63"/><ellipse cx="10" cy="8" rx="7" ry="4" fill="#4CAF50"/><ellipse cx="6" cy="9" rx="4" ry="3" fill="#388E3C"/><ellipse cx="14" cy="9" rx="4" ry="3" fill="#388E3C"/></svg>`;
+}
+function iconTransfer(){
+  return `<svg viewBox="0 0 20 16" width="16" height="16" style="vertical-align:middle"><rect x="1" y="4" width="18" height="7" rx="2" fill="#333"/><rect x="6" y="2" width="8" height="4" rx="1.5" fill="#444"/><rect x="7" y="3" width="6" height="2" rx="1" fill="#90CAF9"/><circle cx="5" cy="12" r="3" fill="#222"/><circle cx="15" cy="12" r="3" fill="#222"/></svg>`;
+}
+
 const ROUTES_KEY = 'destinos_maragogi_routes';
 const ROUTES_DEFAULTS = JSON.parse(JSON.stringify(ROUTES));
 function loadRoutes(){
@@ -543,7 +572,7 @@ let filterStatus = 'todos';
 let editingId = null;
 
 // ─── Form state ───
-const formState = { tipo:'buggy', routeId:null, durationLabel:null, signal:0, customValue:0, quantity:1, discount:0, status:'confirmado', poolAdults:1, poolChildren:0, poolIndividualPrice:0, poolName:'' };
+const formState = { tipo:'buggy', routeId:null, durationLabel:null, signal:0, customValue:0, quantity:1, discount:0, status:'confirmado', poolAdults:1, poolChildren:0, poolIndividualPrice:0, poolName:'', transferPassengers:1, transferPickupTime:'', transferPickup:'', transferDropoff:'', transferValue:0, transferPickupType:'recife', transferPickupCustom:'', transferDropoffType:'recife', transferDropoffCustom:'' };
 
 // ─── Settings ───
 let appSettings = { companyName:'Agenda Serviços Turísticos', tagline:'Serviços Turísticos - Maragogi-AL', location:'Maragogi-AL', logoDataUrl:'', logoZoom:1 };
@@ -636,8 +665,52 @@ function removeLogo(){
   applyLogoZoom();
 }
 
+// ─── Backup ───
+function exportBackup(){
+  const data = {
+    version: APP_VERSION,
+    exportedAt: new Date().toISOString(),
+    bookings: JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'),
+    routes: JSON.parse(localStorage.getItem(ROUTES_KEY)||'null'),
+    settings: JSON.parse(localStorage.getItem(SETTINGS_KEY)||'null')
+  };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `backup_agenda_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function importBackup(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const data = JSON.parse(e.target.result);
+      if(!data.bookings || !Array.isArray(data.bookings)){
+        alert('Arquivo inválido: bookings não encontrados.');
+        return;
+      }
+      if(!confirm(`Importar ${data.bookings.length} agendamentos? Os dados atuais serão substituídos.`)) return;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data.bookings));
+      if(data.routes) localStorage.setItem(ROUTES_KEY, JSON.stringify(data.routes));
+      if(data.settings) localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings));
+      alert(`Importado com sucesso! ${data.bookings.length} agendamentos.`);
+      event.target.value = '';
+      window.location.reload();
+    } catch(err) {
+      alert('Erro ao importar: '+(err.message||'arquivo inválido'));
+    }
+  };
+  reader.readAsText(file);
+}
+
 // ─── Version & Service Worker ───
-const APP_VERSION = '4';
+const APP_VERSION = '5';
 
 // Force-kill old service workers and caches on version mismatch
 (async ()=>{
@@ -680,14 +753,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(hd) hd.style.display='';
     loadSettings();
     loadRoutes();
+
     loadBookings();
-    // Recalculate endTime for all bookings
-    bookings.forEach(b => {
-      if(b.startTime && b.routeId && b.durationLabel){
-        try { b.endTime = calcEndTime(b.startTime, b.routeId, b.durationLabel); } catch(e) {}
-      }
-    });
-    saveBookings();
     setupNav();
     renderCalendar();
     applySettings();
@@ -704,11 +771,75 @@ function loadBookings(){
     const d = localStorage.getItem(STORAGE_KEY);
     let raw = d ? JSON.parse(d) : [];
     // Sanitize: remove entries without required fields
-    bookings = raw.filter(b => b && b.client && b.date && typeof b.value === 'number').map(b => { b.tipo = b.tipo||'buggy'; b.companions = b.companions||''; b.customStops = b.customStops||''; b.quantity = b.quantity||1; b.discount = b.discount||0; b.poolAdults = b.poolAdults||1; b.poolChildren = b.poolChildren||0; b.poolIndividualPrice = b.poolIndividualPrice||0; b.poolName = b.poolName||''; b.boardingPoint = b.boardingPoint||''; return b; });
+    bookings = raw.filter(b => b && b.client && b.date && typeof b.value === 'number').map(b => {
+      b.tipo = b.tipo||'buggy';
+      b.companions = b.companions||'';
+      b.quantity = b.quantity||1;
+      b.discount = b.discount||0;
+      b.poolAdults = b.poolAdults||1;
+      b.poolChildren = b.poolChildren||0;
+      b.poolIndividualPrice = b.poolIndividualPrice||0;
+      b.poolName = b.poolName||'';
+      // Migration: unificar boardingPoint em pickupDetail
+      b.pickup = b.pickup||(b.pickupDetail?'outro':'ponto_encontro');
+      if(!b.pickupDetail && b.boardingPoint) b.pickupDetail = b.boardingPoint;
+      if(!b.pickupDetail) b.pickupDetail = '';
+      delete b.boardingPoint;
+      // Migration: mover customStops para notes em piscinas
+      if(b.tipo==='piscinas' && b.customStops){
+        b.notes = (b.notes||'') + (b.notes?' | ':'') + 'Paradas extras: ' + b.customStops;
+      }
+      if(!b.customStops) b.customStops = '';
+      if(b.tipo==='transfer'){
+        b.transferPickupTime = b.transferPickupTime||'';
+        b.transferPassengers = b.transferPassengers||1;
+        b.transferValue = b.transferValue||0;
+        b.transferPickupType = b.transferPickupType||'recife';
+        b.transferPickupCustom = b.transferPickupCustom||'';
+        b.transferDropoffType = b.transferDropoffType||'recife';
+        b.transferDropoffCustom = b.transferDropoffCustom||'';
+        b.transferPickup = b.transferPickup||'';
+        b.transferDropoff = b.transferDropoff||'';
+      }
+      return b;
+    });
   }catch(e){ bookings=[]; }
   if(!localStorage.getItem(STORAGE_KEY) || bookings.length===0){
     localStorage.setItem(STORAGE_KEY,'[]');
   }
+}
+
+// ─── Cliente Recorrente ───
+function suggestClient(input){
+  const val = input.value.trim().toLowerCase();
+  const list = document.getElementById('clientSuggestions');
+  if(!list) return;
+  if(val.length < 2){ list.innerHTML=''; list.style.display='none'; return; }
+  const seen = {};
+  const matches = [];
+  bookings.forEach(b=>{
+    if(!b.client || seen[b.client]) return;
+    seen[b.client] = true;
+    if(b.client.toLowerCase().includes(val)){
+      matches.push({name:b.client, contact:b.contact||'', companions:b.companions||''});
+    }
+  });
+  if(matches.length===0){ list.innerHTML=''; list.style.display='none'; return; }
+  list.innerHTML = matches.slice(0,6).map((m,i)=>
+    `<div class="suggest-item" data-idx="${i}" onclick="fillClient(this.dataset.idx)">${escHtml(m.name)}  <span style="font-size:11px;color:var(--text2)">${m.contact||''}</span></div>`
+  ).join('');
+  list.style.display = 'block';
+  list._data = matches;
+}
+function fillClient(idx){
+  const list = document.getElementById('clientSuggestions');
+  const m = list._data[parseInt(idx)];
+  if(!m) return;
+  document.getElementById('fClient').value = m.name;
+  document.getElementById('fContact').value = m.contact;
+  document.getElementById('fCompanions').value = m.companions;
+  document.getElementById('clientSuggestions').innerHTML='';
+  document.getElementById('clientSuggestions').style.display='none';
 }
 function saveBookings(){
   localStorage.setItem(STORAGE_KEY,JSON.stringify(bookings));
@@ -797,6 +928,7 @@ function renderAgenda(){
   // Skip invalid entries
   filtered = filtered.filter(b => b && b.client && b.date && b.value !== undefined);
   if(filterStatus!=='todos') filtered = filtered.filter(b=>b.status===filterStatus);
+  if(searchQuery) filtered = filtered.filter(b=>b.client.toLowerCase().includes(searchQuery));
 
   // Group by date
   const groups = {};
@@ -822,21 +954,23 @@ function renderAgenda(){
       </div>
       ${items.map(b=>{
         const isPiscinas = b.tipo==='piscinas';
-        const route = isPiscinas ? null : getRoute(b.routeId);
-        const timeStr = `${b.startTime} - ${b.endTime||calcEndTime(b.startTime,b.routeId||'piscinas',b.durationLabel)}`;
+        const isTransfer = b.tipo==='transfer';
+        const route = isPiscinas||isTransfer ? null : getRoute(b.routeId);
+        const timeStr = isTransfer ? (b.transferPickupTime||'') : `${b.startTime} - ${b.endTime||calcEndTime(b.startTime,b.routeId||'piscinas',b.durationLabel)}`;
         return `<div class="booking-card bc-${b.status}" onclick="openDetail('${b.id}')">
           <div class="bc-top">
             <div>
               <div class="bc-time">${timeStr}</div>
               <div class="bc-client">${escHtml(b.client)}</div>
-              <div class="bc-route">${isPiscinas?'🏝️ Piscinas Naturais':(route?route.name:'')} ${b.durationLabel?`<span class="route-badge">${b.durationLabel}</span>`:''}</div>
+              <div class="bc-route">${isTransfer?iconTransfer()+' Transfer':isPiscinas?iconPiscinas()+' Piscinas Naturais':(route?route.name:'')} ${b.durationLabel?`<span class="route-badge">${b.durationLabel}</span>`:''}</div>
             </div>
             <span class="pill pill-${b.status}">${statusLabel(b.status)}</span>
           </div>
           <div class="bc-bottom">
             <span class="bc-value">${fmtCurr(b.value)}</span>
-            ${!isPiscinas && b.quantity>1?`<span style="font-size:11px;color:var(--text2)">${b.quantity} buggy's</span>`:''}
+            ${!isPiscinas && !isTransfer && b.quantity>1?`<span style="font-size:11px;color:var(--text2)">${b.quantity} buggy's</span>`:''}
             ${isPiscinas && b.poolAdults?(()=>{ const s=b.poolChildren>1?'s':''; const vi=b.vesselType?((b.vesselType==='lancha'?'🚤':b.vesselType==='jangada'?'⛵':'🛥️')+' '+b.vesselType+(b.vesselMode?' '+b.vesselMode:'')):''; return `<span style="font-size:11px;color:var(--text2)">${vi?vi+' · ':''}${b.poolAdults} adulto${b.poolAdults>1?'s':''}${b.poolChildren>0?', '+b.poolChildren+' criança'+s:''}</span>`; })():''}
+            ${isTransfer?`<span style="font-size:11px;color:var(--text2)">${b.transferPassengers} passageiro${b.transferPassengers>1?'s':''}${b.transferPickup?' · '+escHtml(b.transferPickup):''}</span>`:''}
             ${b.signal>0?`<span style="font-size:12px;color:#27ae60">Pago: ${fmtCurr(b.signal)}</span>`:''}
           </div>
         </div>`;
@@ -855,6 +989,7 @@ let calYear = new Date().getFullYear();
 
 let currentDayStr = ''; // YYYY-MM-DD currently shown in day detail
 let sidebarFilter = 'todos';
+let searchQuery = '';
 
 // ─── Calendar ───
 function renderCalendar(){
@@ -980,9 +1115,10 @@ function showDayPopup(dateStr){
     <div class="popup-day">${dayName}, ${d.getDate()}/${d.getMonth()+1}</div>
     ${bks.map(b=>{
       const isPiscinas = b.tipo==='piscinas';
-      const title = isPiscinas ? '🏝️ Piscinas Naturais' : (getRoute(b.routeId)?.name||'');
-      const endTime = b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel);
-      const subtitle = isPiscinas ? `${b.vesselType?b.vesselType==='lancha'?'🚤':b.vesselType==='jangada'?'⛵':'🛥️':''} ${b.vesselType||''} ${b.vesselMode||''} · ${b.poolAdults||0} adulto${b.poolAdults>1?'s':''}` : '';
+      const isTransfer = b.tipo==='transfer';
+      const title = isTransfer ? iconTransfer()+' Transfer' : (isPiscinas ? iconPiscinas()+' Piscinas Naturais' : (getRoute(b.routeId)?.name||''));
+      const endTime = isTransfer ? b.transferPickupTime||'' : (b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel));
+      const subtitle = isTransfer ? `${b.transferPassengers||1} passageiro${b.transferPassengers>1?'s':''}${b.transferPickup?' · '+escHtml(b.transferPickup):''}` : (isPiscinas ? `${b.vesselType?b.vesselType==='lancha'?'🚤':b.vesselType==='jangada'?'⛵':'🛥️':''} ${b.vesselType||''} ${b.vesselMode||''} · ${b.poolAdults||0} adulto${b.poolAdults>1?'s':''}` : '');
       return `<div class="day-popup-item" onclick="removeDayPopup();showDayDetail('${dateStr}')">
         <div class="ppi-left">
           <span class="ppi-title">${title}</span>
@@ -1003,6 +1139,10 @@ function removeDayPopup(){
   if(p) p.remove();
   const o = document.getElementById('dayPopupOverlay');
   if(o) o.remove();
+}
+function openTimeline(dateStr){
+  closeDetail();
+  showDayDetail(dateStr);
 }
 
 function monthStep(delta){
@@ -1087,23 +1227,26 @@ function showDayDetail(dateStr){
   // Render booking blocks
   bks.forEach(b=>{
     const isPiscinas = b.tipo==='piscinas';
-    const route = isPiscinas ? null : getRoute(b.routeId);
-    const dur = isPiscinas ? null : getDuration(b.routeId,b.durationLabel);
-    const startMin = timeToMinutes(b.startTime);
-    const hours = dur ? dur.hours : 3;
+    const isTransfer = b.tipo==='transfer';
+    const route = isPiscinas||isTransfer ? null : getRoute(b.routeId);
+    const dur = isPiscinas||isTransfer ? null : getDuration(b.routeId,b.durationLabel);
+    const startTime = isTransfer ? (b.transferPickupTime||'07:00') : b.startTime;
+    const startMin = timeToMinutes(startTime);
+    const hours = dur ? dur.hours : (isTransfer ? 1 : 3);
     const topPx = Math.max(0, startMin - 420);
     const heightPx = hours * 60;
-    const endTime = b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel);
+    const endTime = isTransfer ? '' : (b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel));
     let people = escHtml(b.client);
     if(b.companions) people += ', '+escHtml(b.companions);
-    const title = isPiscinas ? '🏝️ Piscinas Naturais' : (route?route.name:'');
-    const embarque = isPiscinas ? (b.boardingPoint||b.pickupDetail||'') : (b.pickupDetail||'');
+    const title = isTransfer ? iconTransfer()+' Transfer' : (isPiscinas ? iconPiscinas()+' Piscinas Naturais' : (route?route.name:''));
+    const embarque = isTransfer ? (b.transferPickup||'') : (b.pickupDetail||'');
     const vesselInfo = isPiscinas && b.vesselType ? `${b.vesselType==='lancha'?'🚤':b.vesselType==='jangada'?'⛵':'🛥️'} ${b.vesselType==='lancha'?'Lancha':b.vesselType==='jangada'?'Jangada':'Catamarã'} ${b.vesselMode==='privada'?'🔒 Privada':'👥 Comp.'}` : '';
+    const transferExtra = isTransfer ? `${escHtml(b.transferPickup||'')}${b.transferDropoff?' → '+escHtml(b.transferDropoff):''}` : '';
     html += `<div class="tl-block status-${b.status}" style="top:${topPx}px;height:${Math.max(heightPx,40)}px" onclick="openDetailFromCalendar('${b.id}')">
       <div class="tlb-title">${title}</div>
       <div class="tlb-client">${people}</div>
-      <div class="tlb-time">Início: ${b.startTime} · Término: ${endTime}</div>
-      <div class="tlb-pickup">${vesselInfo?`${vesselInfo} | `:''}Embarque: ${escHtml(embarque)}</div>
+      <div class="tlb-time">${isTransfer?`Embarque: ${startTime}`:`Início: ${b.startTime} · Término: ${endTime}`}</div>
+      <div class="tlb-pickup">${transferExtra||(vesselInfo?`${vesselInfo} | `:'')+'Embarque: '+escHtml(embarque)}</div>
     </div>`;
   });
 
@@ -1294,6 +1437,15 @@ function openForm(bookingId){
     formState.poolName = edit.poolName||'';
     formState.vesselType = edit.vesselType||'lancha';
     formState.vesselMode = edit.vesselMode||'compartilhada';
+    formState.transferPassengers = edit.transferPassengers||1;
+    formState.transferPickupTime = edit.transferPickupTime||'';
+    formState.transferPickup = edit.transferPickup||'';
+    formState.transferDropoff = edit.transferDropoff||'';
+    formState.transferValue = edit.transferValue||0;
+    formState.transferPickupType = edit.transferPickupType||(edit.transferPickup==='Aeroporto Recife'?'recife':edit.transferPickup==='Aeroporto Maceió'?'maceio':'outro');
+    formState.transferPickupCustom = edit.transferPickupCustom||(edit.transferPickupType?edit.transferPickup:formState.transferPickupType==='outro'?edit.transferPickup:'')||'';
+    formState.transferDropoffType = edit.transferDropoffType||(edit.transferDropoff==='Aeroporto Recife'?'recife':edit.transferDropoff==='Aeroporto Maceió'?'maceio':'outro');
+    formState.transferDropoffCustom = edit.transferDropoffCustom||(edit.transferDropoffType?edit.transferDropoff:formState.transferDropoffType==='outro'?edit.transferDropoff:'')||'';
   }else{
     formState.tipo = 'buggy';
     formState.routeId = null;
@@ -1309,6 +1461,15 @@ function openForm(bookingId){
     formState.poolName = '';
     formState.vesselType = 'lancha';
     formState.vesselMode = 'compartilhada';
+    formState.transferPassengers = 1;
+    formState.transferPickupTime = '';
+    formState.transferPickup = '';
+    formState.transferDropoff = '';
+    formState.transferValue = 0;
+    formState.transferPickupType = 'recife';
+    formState.transferPickupCustom = '';
+    formState.transferDropoffType = 'recife';
+    formState.transferDropoffCustom = '';
   }
   renderForm();
   if(formState.routeId&&formState.durationLabel) updateTotalDisplay();
@@ -1331,10 +1492,11 @@ function renderForm(){
 
       <div class="form-group">
         <label>Tipo de Passeio</label>
-        <div style="display:flex;gap:8px" id="tipoSelector">
-          <button type="button" class="btn ${t==='buggy'?'btn-primary':'btn-outline'}" data-tipo="buggy" style="flex:1;text-align:center">🚙 Buggy</button>
-          <button type="button" class="btn ${t==='piscinas'?'btn-primary':'btn-outline'}" data-tipo="piscinas" style="flex:1;text-align:center">🏝️ Piscinas Naturais</button>
-        </div>
+        <select class="form-input" id="tipoSelector">
+          <option value="buggy" ${t==='buggy'?'selected':''}>🚙 Buggy</option>
+          <option value="piscinas" ${t==='piscinas'?'selected':''}>🏝️ Piscinas Naturais</option>
+          <option value="transfer" ${t==='transfer'?'selected':''}>🚐 Transfer</option>
+        </select>
       </div>
 
       ${t==='buggy' ? `
@@ -1344,7 +1506,6 @@ function renderForm(){
           ${ROUTES.map(r=>`
             <div class="route-card${formState.routeId===r.id?' selected':''}" data-route="${r.id}">
               <div class="route-name">${r.name}</div>
-              <div class="route-stops">${r.stops.map(s=>`<span>${s}</span>`).join(' ')}</div>
               <div class="route-duration-options">
                 ${r.durations.map(d=>`
                   <button type="button" class="duration-btn${formState.routeId===r.id&&formState.durationLabel===d.label?' selected':''}"
@@ -1362,72 +1523,117 @@ function renderForm(){
         ${formState.routeId&&formState.durationLabel?`<div class="value-display">${fmtCurr(calcValue())}<span class="value-label">Valor Total${formState.customValue>0?' (rota + personalização)':''}${formState.quantity>1?' · '+formState.quantity+' buggy\'s':''}${formState.discount>0?' · desconto: -'+fmtCurr(formState.discount):''}</span></div>`:''}
       </div>
 
-      <div class="form-group">
-        <label>Quantidade de Buggy's <span style="font-weight:400;color:#aab">(privativos)</span></label>
-        <input class="form-input" type="number" min="1" step="1" value="${formState.quantity}" onchange="formState.quantity=Math.max(1,parseInt(this.value)||1);this.value=formState.quantity;updateTotalDisplay()" placeholder="1" style="width:100%;max-width:120px;text-align:center;font-weight:700;font-size:16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+        <label style="font-size:13px;font-weight:600;color:var(--text2);white-space:nowrap">Qtd. Buggy Privativo</label>
+        <label style="font-size:13px;font-weight:600;color:var(--text2);white-space:nowrap">Valor Adicional</label>
+        <label style="font-size:13px;font-weight:600;color:var(--text2);white-space:nowrap">Desconto <span style="font-weight:400;color:#aab">(opcional)</span></label>
+        <label style="font-size:13px;font-weight:600;color:var(--text2);white-space:nowrap">Data</label>
+        <input class="form-input" type="number" min="1" step="1" value="${formState.quantity}" onchange="formState.quantity=Math.max(1,parseInt(this.value)||1);this.value=formState.quantity;updateTotalDisplay()" placeholder="1" style="width:100%;height:44px;text-align:center;font-weight:700;font-size:15px;box-sizing:border-box;margin:0">
+        <input class="form-input" id="fCustomValue" type="number" min="0" step="any" placeholder="0,00" value="${edit?edit.customValue||0:0}" style="width:100%;height:44px;text-align:center;box-sizing:border-box;margin:0" oninput="updateCustomValue(this)">
+        <input class="form-input" id="fDiscount" type="number" min="0" step="any" placeholder="0,00" value="${formState.discount}" style="width:100%;height:44px;text-align:center;box-sizing:border-box;margin:0" oninput="updateDiscount(this)">
+        <input class="form-input" id="fDate" type="date" value="${edit?edit.date:todayStr()}" style="width:100%;height:44px;box-sizing:border-box;margin:0">
+        <label style="font-size:13px;font-weight:600;color:var(--text2);grid-column:1/-1;margin-bottom:-4px">Sinal (valor já pago)</label>
+        <div id="signalGroup" style="display:contents">
+          <button type="button" class="signal-btn${formState.signal===0?' selected':''}" data-signal="0" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">R$ 0</button>
+          <button type="button" class="signal-btn${formState.signal===50?' selected':''}" data-signal="50" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">R$ 50</button>
+          <button type="button" class="signal-btn${formState.signal===100?' selected':''}" data-signal="100" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">R$ 100</button>
+          <button type="button" class="signal-btn custom${![0,50,100].includes(formState.signal)?' selected':''}" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">Outro</button>
+        </div>
       </div>
+      <input class="form-input hidden" id="fSignalCustom" type="number" min="0" step="any" placeholder="Valor personalizado" style="margin-top:6px">
 
       <div class="form-group">
         <label>Personalizar Roteiro <span style="font-weight:400;color:#aab">(opcional)</span></label>
-        <textarea class="form-input" id="fCustomStops" placeholder="Paradas adicionais ou alterações no roteiro para este agendamento" style="margin-bottom:6px">${edit?escHtml(edit.customStops||''):''}</textarea>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:13px;color:var(--text2);white-space:nowrap">Valor adicional:</span>
-          <input class="form-input" id="fCustomValue" type="number" min="0" step="any" placeholder="0,00" value="${edit?edit.customValue||0:0}" style="width:120px" oninput="updateCustomValue(this)">
-          <span style="font-size:12px;color:var(--text2)">(soma ao total)</span>
-        </div>
+        <textarea class="form-input" id="fCustomStops" placeholder="Paradas adicionais ou alterações no roteiro para este agendamento">${edit?escHtml(edit.customStops||''):''}</textarea>
       </div>
 
       <div class="form-group">
         <label>Local de Embarque</label>
         <select class="form-input" id="fPickup">
-          <option value="hotel">Hotel / Pousada</option>
           <option value="ponto_encontro"${edit&&edit.pickup==='ponto_encontro'?' selected':''}>Ponto de Encontro (Posto Ipiranga)</option>
+          <option value="outro"${edit&&edit.pickup==='outro'?' selected':''}>Outro</option>
         </select>
       </div>
 
-      <div class="form-group" id="pickupDetailGroup">
-        <label>Qual hotel/pousada?</label>
-        <input class="form-input" id="fPickupDetail" placeholder="Ex: Hotel Salinas Maragogi" value="${edit&&edit.pickup==='hotel'?escHtml(edit.pickupDetail||''):''}" autocomplete="off">
+      <div class="form-group" id="pickupDetailGroup" style="${edit&&edit.pickup==='outro'?'':'display:none'}">
+        <label>Informe o local de embarque</label>
+        <input class="form-input" id="fPickupDetail" placeholder="Ex: Hotel, Aeroporto..." value="${edit&&edit.pickup==='outro'?escHtml(edit.pickupDetail||''):''}" autocomplete="off">
       </div>
-      ` : `
+      ` : t==='piscinas' ? `
       <div class="form-group">
         <label>Nome da Piscina Natural</label>
         <input class="form-input" id="fPoolName" placeholder="Ex: Piscina do Gostoso, Piscina do Davi..." value="${edit?escHtml(edit.poolName||''):''}">
       </div>
 
-      <div class="form-group">
-        <label>Tipo de Embarcação</label>
-        <div class="btn-group" id="vesselTypeSelector" style="display:flex;gap:4px">
-          <button type="button" class="btn ${formState.vesselType==='lancha'?'btn-primary':'btn-outline'}" data-vessel="lancha" style="flex:1;text-align:center">🚤 Lancha</button>
-          <button type="button" class="btn ${formState.vesselType==='jangada'?'btn-primary':'btn-outline'}" data-vessel="jangada" style="flex:1;text-align:center">⛵ Jangada</button>
-          <button type="button" class="btn ${formState.vesselType==='catamara'?'btn-primary':'btn-outline'}" data-vessel="catamara" style="flex:1;text-align:center">🛥️ Catamarã</button>
-        </div>
-      </div>
-
-      <div class="form-group" id="vesselModeGroup" style="display:${formState.vesselType==='catamara'?'none':'block'}">
-        <label>Modalidade</label>
-        <div class="btn-group" id="vesselModeSelector" style="display:flex;gap:4px">
-          <button type="button" class="btn ${formState.vesselMode==='privada'?'btn-primary':'btn-outline'}" data-vesselmode="privada" style="flex:1;text-align:center">🔒 Privada</button>
-          <button type="button" class="btn ${formState.vesselMode==='compartilhada'?'btn-primary':'btn-outline'}" data-vesselmode="compartilhada" style="flex:1;text-align:center">👥 Compartilhada</button>
-        </div>
-      </div>
-
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div class="form-group">
-          <label>Quantidade de Adultos</label>
-          <input class="form-input" id="fPoolAdults" type="number" min="0" step="1" value="${formState.poolAdults}" onchange="formState.poolAdults=Math.max(0,parseInt(this.value)||0);updatePoolTotal()" style="text-align:center;font-weight:700">
+        <div class="form-group" style="margin:0">
+          <label>Tipo de Embarcação</label>
+          <select class="form-input" id="vesselTypeSelector">
+            <option value="lancha" ${formState.vesselType==='lancha'?'selected':''}>🚤 Lancha</option>
+            <option value="jangada" ${formState.vesselType==='jangada'?'selected':''}>⛵ Jangada</option>
+            <option value="catamara" ${formState.vesselType==='catamara'?'selected':''}>🛥️ Catamarã</option>
+          </select>
         </div>
-        <div class="form-group">
-          <label>Crianças (meia)</label>
-          <input class="form-input" id="fPoolChildren" type="number" min="0" step="1" value="${formState.poolChildren}" onchange="formState.poolChildren=Math.max(0,parseInt(this.value)||0);updatePoolTotal()" style="text-align:center;font-weight:700">
+        <div class="form-group" style="margin:0${formState.vesselType==='catamara'?';display:none':''}" id="vesselModeGroup">
+          <label>Modalidade</label>
+          <select class="form-input" id="vesselModeSelector">
+            <option value="privada" ${formState.vesselMode==='privada'?'selected':''}>🔒 Privada</option>
+            <option value="compartilhada" ${formState.vesselMode==='compartilhada'?'selected':''}>👥 Compartilhada</option>
+          </select>
         </div>
       </div>
 
-      <div class="form-group">
-        <label>Valor Individual (por pessoa)</label>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:16px;font-weight:700;color:var(--t)">R$</span>
-          <input class="form-input" id="fPoolPrice" type="number" min="0" step="any" placeholder="130,00" value="${formState.poolIndividualPrice}" oninput="formState.poolIndividualPrice=parseFloat(this.value)||0;updatePoolTotal()" style="width:140px;text-align:center;font-weight:700;font-size:16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+        <div class="form-group" style="margin:0">
+          <label style="text-align:center;font-size:12px;margin-bottom:2px">Quantidade de Adultos</label>
+          <input class="form-input" id="fPoolAdults" type="number" min="0" step="1" value="${formState.poolAdults}" onchange="formState.poolAdults=Math.max(0,parseInt(this.value)||0);updatePoolTotal()" style="width:100%;text-align:center;font-weight:700;height:44px;box-sizing:border-box">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label style="text-align:center;font-size:12px;margin-bottom:2px">Crianças (meia)</label>
+          <input class="form-input" id="fPoolChildren" type="number" min="0" step="1" value="${formState.poolChildren}" onchange="formState.poolChildren=Math.max(0,parseInt(this.value)||0);updatePoolTotal()" style="width:100%;text-align:center;font-weight:700;height:44px;box-sizing:border-box">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label style="text-align:center;font-size:12px;margin-bottom:2px">Valor por pessoa</label>
+          <div style="position:relative">
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:700;color:var(--t);pointer-events:none;z-index:1">R$</span>
+            <input class="form-input" id="fPoolPrice" type="number" min="0" step="any" placeholder="130,00" value="${formState.poolIndividualPrice}" oninput="formState.poolIndividualPrice=parseFloat(this.value)||0;updatePoolTotal()" style="width:100%;text-align:center;font-weight:700;font-size:15px;height:44px;box-sizing:border-box;padding-left:32px">
+          </div>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label style="text-align:center;font-size:12px;margin-bottom:2px">Desconto <span style="font-weight:400;color:#aab">(opcional)</span></label>
+          <input class="form-input" id="fDiscount" type="number" min="0" step="any" placeholder="0,00" value="${formState.discount}" style="width:100%;text-align:center;height:44px;box-sizing:border-box" oninput="updateDiscount(this)">
+        </div>
+      </div>
+
+      <div id="signalGroup" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <label style="font-size:13px;font-weight:600;color:var(--text2)">Sinal (valor já pago)</label>
+          <button type="button" class="signal-btn${formState.signal===0?' selected':''}" data-signal="0" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">R$ 0</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;justify-content:flex-end">
+          <button type="button" class="signal-btn${formState.signal===50?' selected':''}" data-signal="50" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">R$ 50</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;justify-content:flex-end">
+          <button type="button" class="signal-btn${formState.signal===100?' selected':''}" data-signal="100" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">R$ 100</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;justify-content:flex-end">
+          <button type="button" class="signal-btn custom${![0,50,100].includes(formState.signal)?' selected':''}" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box;margin:0">Outro</button>
+        </div>
+      </div>
+      <input class="form-input hidden" id="fSignalCustom" type="number" min="0" step="any" placeholder="Valor personalizado" style="margin-top:6px">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div class="form-group" style="margin:0">
+          <label style="text-align:center;font-size:12px;margin-bottom:2px">Data</label>
+          <input class="form-input" id="fDate" type="date" value="${edit?edit.date:todayStr()}" style="width:100%;height:44px;box-sizing:border-box">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label style="text-align:center;font-size:12px;margin-bottom:2px">Horário de Embarque</label>
+          <input class="form-input" id="fStart" type="time" value="${edit?edit.startTime:'08:00'}" style="width:100%;height:44px;box-sizing:border-box">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label style="text-align:center;font-size:12px;margin-bottom:2px">Término</label>
+          <input class="form-input" id="fEnd" type="time" value="${edit?edit.endTime:''}" style="width:100%;height:44px;box-sizing:border-box">
         </div>
       </div>
 
@@ -1437,18 +1643,77 @@ function renderForm(){
 
       <div class="form-group">
         <label>Ponto de Embarque / Referência</label>
-        <input class="form-input" id="fBoardingPoint" placeholder="Ex: Hotel Salinas, Posto Ipiranga..." value="${edit?escHtml(edit.boardingPoint||''):''}">
+        <input class="form-input" id="fPickupDetail" placeholder="Ex: Hotel Salinas, Posto Ipiranga..." value="${edit?escHtml(edit.pickupDetail||edit.boardingPoint||''):''}">
+      </div>
+      ` : `
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div class="form-group" style="margin:0">
+          <label style="text-align:center;font-size:12px;margin-bottom:2px">Qtd. Passageiros</label>
+          <input class="form-input" id="fTransferPassengers" type="number" min="1" step="1" value="${formState.transferPassengers}" onchange="formState.transferPassengers=Math.max(1,parseInt(this.value)||1);this.value=formState.transferPassengers" style="width:100%;text-align:center;font-weight:700;font-size:16px;height:44px;box-sizing:border-box">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label style="text-align:center;font-size:12px;margin-bottom:2px">Valor do Transfer</label>
+          <div style="position:relative">
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:700;color:var(--t);pointer-events:none;z-index:1">R$</span>
+            <input class="form-input" id="fTransferValue" type="number" min="0" step="any" placeholder="200,00" value="${formState.transferValue}" oninput="formState.transferValue=parseFloat(this.value)||0;updateTransferTotal()" style="width:100%;text-align:center;font-weight:700;font-size:16px;height:44px;box-sizing:border-box;padding-left:32px">
+          </div>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label style="text-align:center;font-size:12px;margin-bottom:2px">Desconto <span style="font-weight:400;color:#aab">(opcional)</span></label>
+          <input class="form-input" id="fDiscount" type="number" min="0" step="any" placeholder="0,00" value="${formState.discount}" style="width:100%;text-align:center;height:44px;box-sizing:border-box" oninput="updateDiscount(this)">
+        </div>
       </div>
 
+      <div id="transferValueDisplay" class="${formState.transferValue>0?'':'hidden'}">
+        <div class="value-display" id="transferTotalDisplay">${fmtCurr(Math.max(0, formState.transferValue - formState.discount))}<span class="value-label">Valor Total${formState.discount>0?' · desconto: -'+fmtCurr(formState.discount):''}</span></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+        <div class="form-group" style="margin:0">
+          <label style="text-align:center;font-size:12px;margin-bottom:2px">Horário de Embarque</label>
+          <input class="form-input" id="fTransferPickupTime" type="time" value="${formState.transferPickupTime||'08:00'}" style="width:100%;height:44px;box-sizing:border-box">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label style="text-align:center;font-size:12px;margin-bottom:2px">Local de Embarque</label>
+          <select class="form-input" id="fTransferPickupType" style="width:100%;height:44px;box-sizing:border-box">
+            <option value="recife" ${formState.transferPickupType==='recife'?'selected':''}>Aeroporto Recife</option>
+            <option value="maceio" ${formState.transferPickupType==='maceio'?'selected':''}>Aeroporto Maceió</option>
+            <option value="outro" ${formState.transferPickupType==='outro'?'selected':''}>Outro</option>
+          </select>
+          <input class="form-input" id="fTransferPickupCustom" placeholder="Digite o local..." style="margin-top:6px;height:44px;box-sizing:border-box;${formState.transferPickupType==='outro'?'':'display:none'}" value="${edit?escHtml(edit.transferPickupCustom||''):''}">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label style="text-align:center;font-size:12px;margin-bottom:2px">Local de Desembarque</label>
+          <select class="form-input" id="fTransferDropoffType" style="width:100%;height:44px;box-sizing:border-box">
+            <option value="recife" ${formState.transferDropoffType==='recife'?'selected':''}>Aeroporto Recife</option>
+            <option value="maceio" ${formState.transferDropoffType==='maceio'?'selected':''}>Aeroporto Maceió</option>
+            <option value="outro" ${formState.transferDropoffType==='outro'?'selected':''}>Outro</option>
+          </select>
+          <input class="form-input" id="fTransferDropoffCustom" placeholder="Digite o local..." style="margin-top:6px;height:44px;box-sizing:border-box;${formState.transferDropoffType==='outro'?'':'display:none'}" value="${edit?escHtml(edit.transferDropoffCustom||''):''}">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label style="text-align:center;font-size:12px;margin-bottom:2px">Data</label>
+          <input class="form-input" id="fDate" type="date" value="${edit?edit.date:todayStr()}" style="width:100%;height:44px;box-sizing:border-box">
+        </div>
+      </div>
+      <span style="font-size:11px;color:var(--text2);margin-top:4px;display:block">Cliente deve estar pronto no horário de embarque</span>
+
       <div class="form-group">
-        <label>Observações do Passeio <span style="font-weight:400;color:#aab">(opcional)</span></label>
-        <textarea class="form-input" id="fCustomStops" placeholder="Informações adicionais sobre o passeio">${edit?escHtml(edit.customStops||''):''}</textarea>
+        <label>Sinal (valor já pago)</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px" id="signalGroup">
+          <button type="button" class="signal-btn${formState.signal===0?' selected':''}" data-signal="0" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box">R$ 0</button>
+          <button type="button" class="signal-btn${formState.signal===50?' selected':''}" data-signal="50" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box">R$ 50</button>
+          <button type="button" class="signal-btn${formState.signal===100?' selected':''}" data-signal="100" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box">R$ 100</button>
+          <button type="button" class="signal-btn custom${![0,50,100].includes(formState.signal)?' selected':''}" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box">Outro</button>
+        </div>
+        <input class="form-input hidden" id="fSignalCustom" type="number" min="0" step="any" placeholder="Valor personalizado" style="margin-top:6px">
       </div>
       `}
 
-      <div class="form-group">
+      <div class="form-group" style="position:relative">
         <label>Nome do Cliente</label>
-        <input class="form-input" id="fClient" placeholder="Ex: Maria Silva" value="${edit?escHtml(edit.client):''}" autocomplete="off">
+        <input class="form-input" id="fClient" placeholder="Ex: Maria Silva" value="${edit?escHtml(edit.client):''}" autocomplete="off" oninput="suggestClient(this)">
+        <div id="clientSuggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:8px;z-index:10;max-height:200px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.1)"></div>
       </div>
 
       <div class="form-group">
@@ -1456,38 +1721,47 @@ function renderForm(){
         <input class="form-input" id="fContact" placeholder="(82) 9XXXX-XXXX" value="${edit?escHtml(edit.contact):''}" autocomplete="off">
       </div>
 
+      ${t!=='transfer' ? `
       <div class="form-group">
         <label>Acompanhantes <span style="font-weight:400;color:#aab">(nomes)</span></label>
         <input class="form-input" id="fCompanions" type="text" placeholder="Ex: João, Maria" value="${edit?escHtml(edit.companions):''}" autocomplete="off">
       </div>
+      `:''}
 
+      ${t!=='buggy' && t!=='piscinas' && t!=='transfer' ? `
       <div class="form-group">
         <label>Data</label>
         <input class="form-input" id="fDate" type="date" value="${edit?edit.date:todayStr()}">
       </div>
+      `:''}
 
+      ${t!=='transfer' && t!=='piscinas' ? `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="form-group">
           <label>Horário de Embarque</label>
           <input class="form-input" id="fStart" type="time" value="${edit?edit.startTime:'08:00'}">
         </div>
         <div class="form-group">
-          <label>Término <span style="font-weight:400;color:#aab">(automático)</span></label>
-          <input class="form-input" id="fEnd" type="time" readonly style="background:var(--bg)" value="${edit?edit.endTime:''}">
+          <label>Término</label>
+          <input class="form-input" id="fEnd" type="time" value="${edit?edit.endTime:''}">
         </div>
       </div>
+      `:''}
 
+      ${t!=='buggy' && t!=='piscinas' && t!=='transfer' ? `
       <div class="form-group">
         <label>Sinal (valor já pago)</label>
-        <div class="signal-group" id="signalGroup">
-          <button type="button" class="signal-btn${formState.signal===0?' selected':''}" data-signal="0">R$ 0</button>
-          <button type="button" class="signal-btn${formState.signal===50?' selected':''}" data-signal="50">R$ 50</button>
-          <button type="button" class="signal-btn${formState.signal===100?' selected':''}" data-signal="100">R$ 100</button>
-          <button type="button" class="signal-btn custom${![0,50,100].includes(formState.signal)?' selected':''}">Outro</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px" id="signalGroup">
+          <button type="button" class="signal-btn${formState.signal===0?' selected':''}" data-signal="0" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box">R$ 0</button>
+          <button type="button" class="signal-btn${formState.signal===50?' selected':''}" data-signal="50" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box">R$ 50</button>
+          <button type="button" class="signal-btn${formState.signal===100?' selected':''}" data-signal="100" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box">R$ 100</button>
+          <button type="button" class="signal-btn custom${![0,50,100].includes(formState.signal)?' selected':''}" style="width:100%;height:44px;padding:10px 14px;box-sizing:border-box">Outro</button>
         </div>
         <input class="form-input hidden" id="fSignalCustom" type="number" min="0" step="any" placeholder="Valor personalizado" style="margin-top:6px">
       </div>
+      `:''}
 
+      ${t!=='buggy' && t!=='transfer' && t!=='piscinas' ? `
       <div class="form-group">
         <label>Desconto <span style="font-weight:400;color:#aab">(opcional)</span></label>
         <div style="display:flex;align-items:center;gap:8px">
@@ -1495,21 +1769,22 @@ function renderForm(){
           <span style="font-size:12px;color:var(--text2)">R$ (abater do total)</span>
         </div>
       </div>
+      `:''}
+
+      <div class="form-group">
+        <label>Observações</label>
+        <textarea class="form-input" id="fNotes" placeholder="Opcional">${edit?escHtml(edit.notes||''):''}</textarea>
+      </div>
 
       <div class="form-group">
         <label>Status</label>
         <div class="status-selector" id="statusSelector">
           ${['confirmado','concluido','cancelado'].map(s=>`
-            <button type="button" class="status-option${formState.status===s?' selected-'+s:''}" data-status="${s}">
+            <button type="button" class="status-option${formState.status===s?' selected-'+s:''}" data-status="${s}" style="flex:1;text-align:center">
               ${s==='confirmado'?'✅ ':s==='concluido'?'✅ ':'❌ '}${statusLabel(s)}
             </button>
           `).join('')}
         </div>
-      </div>
-
-      <div class="form-group">
-        <label>Observações</label>
-        <textarea class="form-input" id="fNotes" placeholder="Opcional">${edit?escHtml(edit.notes||''):''}</textarea>
       </div>
 
       <div style="display:flex;gap:8px">
@@ -1522,12 +1797,9 @@ function renderForm(){
   // ─── Attach events (delegation — survives re-render) ───
 
   // Tipo selector
-  document.getElementById('tipoSelector').addEventListener('click', function(e){
-    const btn = e.target.closest('[data-tipo]');
-    if(btn){
-      formState.tipo = btn.dataset.tipo;
-      renderForm();
-    }
+  document.getElementById('tipoSelector').addEventListener('change', function(){
+    formState.tipo = this.value;
+    renderForm();
   });
 
   // Buggy-specific events
@@ -1546,7 +1818,7 @@ function renderForm(){
     document.getElementById('fStart').addEventListener('change', updateEndTime);
     document.getElementById('fPickup').addEventListener('change', function(){
       const g = document.getElementById('pickupDetailGroup');
-      g.style.display = this.value === 'hotel' ? 'block' : 'none';
+      g.style.display = this.value === 'outro' ? 'block' : 'none';
     });
     document.getElementById('fPickup').dispatchEvent(new Event('change'));
   }
@@ -1578,23 +1850,52 @@ function renderForm(){
     updatePoolTotal();
     const vesselSel = document.getElementById('vesselTypeSelector');
     if(vesselSel){
-      vesselSel.onclick = function(e){
-        const btn = e.target.closest('[data-vessel]');
-        if(btn){
-          formState.vesselType = btn.dataset.vessel;
-          formState.vesselMode = formState.vesselType==='catamara' ? 'compartilhada' : formState.vesselMode;
-          renderForm();
-        }
+      vesselSel.onchange = function(){
+        formState.vesselType = this.value;
+        formState.vesselMode = formState.vesselType==='catamara' ? 'compartilhada' : formState.vesselMode;
+        renderForm();
       };
     }
     const modeSel = document.getElementById('vesselModeSelector');
     if(modeSel){
-      modeSel.onclick = function(e){
-        const btn = e.target.closest('[data-vesselmode]');
-        if(btn){
-          formState.vesselMode = btn.dataset.vesselmode;
-          renderForm();
-        }
+      modeSel.onchange = function(){
+        formState.vesselMode = this.value;
+        renderForm();
+      };
+    }
+  }
+  // Transfer-specific events
+  if(t==='transfer'){
+    updateTransferTotal();
+    const tPickupType = document.getElementById('fTransferPickupType');
+    if(tPickupType){
+      tPickupType.onchange = function(){
+        formState.transferPickupType = this.value;
+        const ci = document.getElementById('fTransferPickupCustom');
+        if(ci) ci.style.display = this.value==='outro'?'':'none';
+      };
+    }
+    const tPickupCustom = document.getElementById('fTransferPickupCustom');
+    if(tPickupCustom){
+      tPickupCustom.oninput = function(){ formState.transferPickupCustom = this.value; };
+    }
+    const tDropoffType = document.getElementById('fTransferDropoffType');
+    if(tDropoffType){
+      tDropoffType.onchange = function(){
+        formState.transferDropoffType = this.value;
+        const ci = document.getElementById('fTransferDropoffCustom');
+        if(ci) ci.style.display = this.value==='outro'?'':'none';
+      };
+    }
+    const tDropoffCustom = document.getElementById('fTransferDropoffCustom');
+    if(tDropoffCustom){
+      tDropoffCustom.oninput = function(){ formState.transferDropoffCustom = this.value; };
+    }
+    const transferPassInp = document.getElementById('fTransferPassengers');
+    if(transferPassInp){
+      transferPassInp.onchange = function(){
+        formState.transferPassengers = Math.max(1, parseInt(this.value)||1);
+        this.value = formState.transferPassengers;
       };
     }
   }
@@ -1679,6 +1980,15 @@ function updatePoolTotal(){
     vd.innerHTML = `<div class="value-display">${fmtCurr(total)}<span class="value-label">Valor Total${formState.discount>0?' · desconto: -'+fmtCurr(formState.discount):''}</span></div>`;
   }
 }
+function updateTransferTotal(){
+  const total = (formState.transferValue||0) - (formState.discount||0);
+  const vd = document.getElementById('transferTotalDisplay');
+  if(vd){
+    vd.innerHTML = `${fmtCurr(total)}<span class="value-label">Valor Total${formState.discount>0?' · desconto: -'+fmtCurr(formState.discount):''}</span>`;
+  }
+  const dd = document.getElementById('transferValueDisplay');
+  if(dd) dd.classList.toggle('hidden', formState.transferValue<=0);
+}
 function updateCustomValue(el){
   formState.customValue = parseFloat(el.value) || 0;
   updateTotalDisplay();
@@ -1691,6 +2001,7 @@ function selectQty(n){
 function updateDiscount(el){
   formState.discount = parseFloat(el.value) || 0;
   updateTotalDisplay();
+  updateTransferTotal();
 }
 function updateTotalDisplay(){
   const routeId = formState.routeId;
@@ -1707,13 +2018,7 @@ function updateTotalDisplay(){
   vd.innerHTML = `<div class="value-display">${fmtCurr(total)}${parts.join('')}</div>`;
 }
 
-function updateEndTime(){
-  const start = document.getElementById('fStart').value;
-  const dur = formState.durationLabel;
-  if(start&&dur){
-    document.getElementById('fEnd').value = calcEndTime(start,formState.routeId,dur);
-  }
-}
+function updateEndTime(){} // mantido para compatibilidade
 
 function saveBooking(){
   const tipo = formState.tipo||'buggy';
@@ -1742,16 +2047,16 @@ function saveBooking(){
   if(!client){ alert('Informe o nome do cliente.'); return; }
   if(!contact){ alert('Informe o contato do cliente.'); return; }
   if(!date){ alert('Selecione a data.'); return; }
-  if(!startTime){ alert('Selecione o horário de início.'); return; }
+  if(tipo!=='transfer' && !startTime){ alert('Selecione o horário de início.'); return; }
 
   let booking;
   if(tipo==='buggy'){
     const routeId = formState.routeId;
     const durationLabel = formState.durationLabel;
     const dur = getDuration(routeId,durationLabel);
-    const endTime = document.getElementById('fEnd').value||calcEndTime(startTime,routeId,durationLabel);
+    const endTime = document.getElementById('fEnd').value;
     const pickup = document.getElementById('fPickup').value;
-    const pickupDetail = pickup==='hotel'?document.getElementById('fPickupDetail').value.trim():'Ponto de Encontro (Posto Ipiranga)';
+    const pickupDetail = pickup==='outro'?document.getElementById('fPickupDetail').value.trim():'Ponto de Encontro (Posto Ipiranga)';
     const customStops = document.getElementById('fCustomStops').value.trim();
     const customValue = formState.customValue;
     const quantity = formState.quantity;
@@ -1763,14 +2068,12 @@ function saveBooking(){
       signal, pickup, pickupDetail, status, notes, customStops,
       createdAt: editingId ? (bookings.find(b=>b.id===editingId)?.createdAt||new Date().toISOString()) : new Date().toISOString()
     };
-  }else{
-    const endTime = document.getElementById('fEnd').value||calcEndTime(startTime,'piscinas','3h');
+  }else if(tipo==='piscinas'){
     const poolName = document.getElementById('fPoolName').value.trim();
     const poolAdults = formState.poolAdults||0;
     const poolChildren = formState.poolChildren||0;
     const poolIndividualPrice = formState.poolIndividualPrice||0;
-    const boardingPoint = document.getElementById('fBoardingPoint')?.value.trim()||'';
-    const customStops = document.getElementById('fCustomStops')?.value.trim()||'';
+    const pickupDetail = document.getElementById('fPickupDetail')?.value.trim()||'';
     const vesselType = formState.vesselType||'lancha';
     const vesselMode = formState.vesselType==='catamara' ? 'compartilhada' : (formState.vesselMode||'compartilhada');
     const totalValue = poolCalcTotal();
@@ -1780,7 +2083,28 @@ function saveBooking(){
       id: editingId || Date.now().toString(36)+Math.random().toString(36).slice(2,6),
       tipo:'piscinas', poolName, poolAdults, poolChildren, poolIndividualPrice, vesselType, vesselMode, value: totalValue, discount,
       client, contact, companions, date, startTime, endTime,
-      signal, pickupDetail:boardingPoint, status, notes, customStops, boardingPoint,
+      signal, status, notes, pickupDetail,
+      createdAt: editingId ? (bookings.find(b=>b.id===editingId)?.createdAt||new Date().toISOString()) : new Date().toISOString()
+    };
+  }else{
+    const transferPickupType = document.getElementById('fTransferPickupType').value;
+    const transferPickupCustom = (document.getElementById('fTransferPickupCustom')?.value||'').trim();
+    const transferDropoffType = document.getElementById('fTransferDropoffType').value;
+    const transferDropoffCustom = (document.getElementById('fTransferDropoffCustom')?.value||'').trim();
+    const transferPickupTime = document.getElementById('fTransferPickupTime').value;
+    const transferPassengers = formState.transferPassengers;
+    const transferPickup = resolveTransferLoc(transferPickupType, transferPickupCustom);
+    const transferDropoff = resolveTransferLoc(transferDropoffType, transferDropoffCustom);
+    const transferValue = formState.transferValue;
+    if(!transferPickupTime){ alert('Informe o horário de embarque.'); return; }
+    if(transferValue<=0){ alert('Informe o valor do transfer.'); return; }
+    const totalValue = Math.max(0, transferValue - discount);
+    booking = {
+      id: editingId || Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+      tipo:'transfer', transferPickupTime, transferPassengers, transferPickup, transferDropoff, transferValue, value: totalValue, discount,
+      transferPickupType, transferPickupCustom, transferDropoffType, transferDropoffCustom,
+      client, contact, companions, date, startTime:'',
+      endTime:'', signal, status, notes,
       createdAt: editingId ? (bookings.find(b=>b.id===editingId)?.createdAt||new Date().toISOString()) : new Date().toISOString()
     };
   }
@@ -1792,11 +2116,26 @@ function saveBooking(){
     bookings.push(booking);
   }
   saveBookings();
-
-  alert('Salvo! Total: '+bookings.length);
-
+  feedbackSave();
   editingId = null;
   showView('agenda');
+}
+
+function feedbackSave(){
+  if(navigator.vibrate) navigator.vibrate(30);
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.15);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime+0.15);
+  }catch(e){}
 }
 
 function cancelEdit(){
@@ -1809,6 +2148,7 @@ function openDetail(id){
   const b = bookings.find(b=>b.id===id);
   if(!b) return;
   const isPiscinas = b.tipo==='piscinas';
+  const isTransfer = b.tipo==='transfer';
   const body = document.getElementById('detailBody');
   const actions = document.getElementById('detailActions');
 
@@ -1816,7 +2156,7 @@ function openDetail(id){
 
   if(isPiscinas){
     body.innerHTML = `
-      <div class="detail-row"><span class="label">Passeio</span><span class="value">🏝️ Piscinas Naturais</span></div>
+      <div class="detail-row"><span class="label">Passeio</span><span class="value">${iconPiscinas()} Piscinas Naturais</span></div>
       <div class="detail-row"><span class="label">Piscina</span><span class="value">${escHtml(b.poolName||'—')}</span></div>
       ${b.vesselType?`<div class="detail-row"><span class="label">Embarcação</span><span class="value">${b.vesselType==='lancha'?'🚤 Lancha':b.vesselType==='jangada'?'⛵ Jangada':'🛥️ Catamarã'} ${b.vesselMode==='privada'?'🔒 Privada':'👥 Compartilhada'}</span></div>`:''}
       <div class="detail-row"><span class="label">Data</span><span class="value">${fmtDate(b.date)} — ${getDayName(b.date)}</span></div>
@@ -1830,9 +2170,26 @@ function openDetail(id){
       <div class="detail-row"><span class="label">Restante</span><span class="value" style="color:${b.value-b.signal>0?'#D14C4C':'#019391'}">${fmtCurr(b.value-b.signal)}</span></div>
       <div class="detail-row"><span class="label">Contato</span><span class="value"><a href="https://wa.me/55${b.contact.replace(/\D/g,'')}" target="_blank" style="color:var(--t);text-decoration:none">${escHtml(b.contact)}</a></span></div>
       <div class="detail-row"><span class="label">Acompanhantes</span><span class="value">${b.companions||'—'}</span></div>
-      <div class="detail-row"><span class="label">Embarque</span><span class="value">${escHtml(b.boardingPoint||b.pickupDetail||'—')}</span></div>
+      <div class="detail-row"><span class="label">Embarque</span><span class="value">${escHtml(b.pickupDetail||'—')}</span></div>
       <div class="detail-row"><span class="label">Status</span><span class="value"><span class="pill pill-${b.status}">${statusLabel(b.status)}</span></span></div>
-      ${b.customStops?`<div class="detail-row"><span class="label">Obs</span><span class="value">${escHtml(b.customStops)}</span></div>`:''}
+      ${b.notes?`<div class="detail-row"><span class="label">Obs</span><span class="value">${escHtml(b.notes)}</span></div>`:''}
+    `;
+  }else if(b.tipo==='transfer'){
+    body.innerHTML = `
+      <div class="detail-row"><span class="label">Passeio</span><span class="value">${iconTransfer()} Transfer</span></div>
+      <div class="detail-row"><span class="label">Data</span><span class="value">${fmtDate(b.date)} — ${getDayName(b.date)}</span></div>
+      <div class="detail-row"><span class="label">Embarque</span><span class="value">${b.transferPickupTime||'—'}</span></div>
+      <div class="detail-row"><span class="label">Local Embarque</span><span class="value">${escHtml(b.transferPickup||'—')}</span></div>
+      <div class="detail-row"><span class="label">Local Desembarque</span><span class="value">${escHtml(b.transferDropoff||'—')}</span></div>
+      <div class="detail-row"><span class="label">Passageiros</span><span class="value">${b.transferPassengers||1}</span></div>
+      ${b.discount>0?`<div class="detail-row"><span class="label">Desconto (-)</span><span class="value" style="color:#e74c3c">${fmtCurr(b.discount)}</span></div>`:''}
+      <div class="detail-row"><span class="label">Valor Total</span><span class="value">${fmtCurr(b.value)}</span></div>
+      <div class="detail-row"><span class="label">Valor Pago</span><span class="value" style="color:#019391">${fmtCurr(b.signal)}</span></div>
+      <div class="detail-row"><span class="label">Restante</span><span class="value" style="color:${b.value-b.signal>0?'#D14C4C':'#019391'}">${fmtCurr(b.value-b.signal)}</span></div>
+      <div class="detail-row"><span class="label">Contato</span><span class="value"><a href="https://wa.me/55${b.contact.replace(/\D/g,'')}" target="_blank" style="color:var(--t);text-decoration:none">${escHtml(b.contact)}</a></span></div>
+      <div class="detail-row"><span class="label">Acompanhantes</span><span class="value">${b.companions||'—'}</span></div>
+      <div class="detail-row"><span class="label">Status</span><span class="value"><span class="pill pill-${b.status}">${statusLabel(b.status)}</span></span></div>
+      ${b.notes?`<div class="detail-row"><span class="label">Obs</span><span class="value">${escHtml(b.notes)}</span></div>`:''}
     `;
   }else{
     const route = getRoute(b.routeId);
@@ -1858,6 +2215,7 @@ function openDetail(id){
   actions.innerHTML = `
     <button class="btn btn-primary btn-sm" onclick="editBooking('${b.id}')">✏️ Editar</button>
     <button class="btn btn-secondary btn-sm" onclick="generateReceipt('${b.id}')">📄 Comprovante</button>
+    <button class="btn btn-outline btn-sm" onclick="openTimeline('${b.date}')">📅 Ver Dia Completo</button>
     <button class="btn btn-danger btn-sm" onclick="deleteBooking('${b.id}')">🗑️ Excluir</button>
     <button class="btn btn-outline btn-sm" onclick="closeDetail()">Fechar</button>
   `;
@@ -1874,6 +2232,21 @@ function editBooking(id){
   window._afterDetailClose = null;
   closeDetail();
   openForm(id);
+}
+
+function sendConfirmation(id){
+  const b = bookings.find(x=>x.id===id);
+  if(!b) return;
+  const isPiscinas = b.tipo==='piscinas';
+  const route = isPiscinas ? null : getRoute(b.routeId);
+  const roteiro = isPiscinas ? '🏝️ Piscinas Naturais' : (route?route.name:'');
+  const msg = `Olá ${b.client}! 🙌\n\nSeu passeio está confirmado!\n📅 ${fmtDate(b.date)}\n⏰ ${b.startTime} - ${b.endTime||'12:00'}\n📍 ${roteiro}\n🚐 Embarque: ${b.pickupDetail||'Ponto de Encontro (Posto Ipiranga)'}\n💰 Valor: ${fmtCurr(b.value)}\n💵 Pago: ${fmtCurr(b.signal)}\n\nQualquer dúvida é só chamar! 😊`;
+  const phone = b.contact.replace(/\D/g,'');
+  if(phone){
+    window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+  }else{
+    alert('Cliente sem número de WhatsApp cadastrado.');
+  }
 }
 
 function deleteBooking(id){
@@ -1918,8 +2291,9 @@ function generateReceipt(id){
   const b = bookings.find(b=>b.id===id);
   if(!b) return;
   const isPiscinas = b.tipo==='piscinas';
-  const route = isPiscinas ? null : getRoute(b.routeId);
-  const endTime = b.endTime||(isPiscinas ? calcEndTime(b.startTime,'piscinas','3h') : calcEndTime(b.startTime,b.routeId,b.durationLabel));
+  const isTransfer = b.tipo==='transfer';
+  const route = isPiscinas||isTransfer ? null : getRoute(b.routeId);
+  const endTime = b.endTime||(isPiscinas ? calcEndTime(b.startTime,'piscinas','3h') : (isTransfer ? '' : calcEndTime(b.startTime,b.routeId,b.durationLabel)));
   const remaining = b.value-b.signal;
 
   window._receiptCanvas = null;
@@ -1986,22 +2360,34 @@ function generateReceipt(id){
       <div class="r-row"><span class="r-label">${ric('user')}Cliente</span><span class="r-value" style="font-weight:700">${escHtml(b.client)}</span></div>
       <div class="r-row"><span class="r-label">${ric('phone')}Contato</span><span class="r-value">${escHtml(b.contact)}</span></div>
       <div class="r-row"><span class="r-label">${ric('group')}Acompanhantes</span><span class="r-value">${b.companions||'—'}</span></div>
-      <div class="r-row"><span class="r-label">${ric('pin')}Embarque</span><span class="r-value">${escHtml(b.pickupDetail||b.boardingPoint||'—')}</span></div>
+      ${isTransfer ? `
+      <div class="r-row"><span class="r-label">${ric('pin')}Embarque</span><span class="r-value">${escHtml(b.transferPickup||'—')}</span></div>
+      <div class="r-row"><span class="r-label">${ric('pin')}Desembarque</span><span class="r-value">${escHtml(b.transferDropoff||'—')}</span></div>
+      ` : `
+      <div class="r-row"><span class="r-label">${ric('pin')}Embarque</span><span class="r-value">${escHtml(b.pickupDetail||'—')}</span></div>
+      `}
 
       ${isPiscinas ? `
       <div class="r-row"><span class="r-label">${ric('loc')}Piscina</span><span class="r-value">${escHtml(b.poolName||'—')}</span></div>
       ${b.vesselType?`<div class="r-row"><span class="r-label">${ric('pin')}Embarcação</span><span class="r-value">${b.vesselType==='lancha'?'🚤 Lancha':b.vesselType==='jangada'?'⛵ Jangada':'🛥️ Catamarã'} ${b.vesselMode==='privada'?'🔒 Privada':'👥 Compartilhada'}</span></div>`:''}
       <div class="r-row"><span class="r-label">${ric('group')}Adultos</span><span class="r-value">${b.poolAdults||0} × ${fmtCurr(b.poolIndividualPrice||0)}</span></div>
       ${b.poolChildren>0?`<div class="r-row"><span class="r-label">${ric('group')}Crianças</span><span class="r-value">${b.poolChildren} × ${fmtCurr((b.poolIndividualPrice||0)*0.5)} (meia)</span></div>`:''}
+      ` : (isTransfer ? `
+      <div class="r-row"><span class="r-label">${ric('group')}Passageiros</span><span class="r-value">${b.transferPassengers||1}</span></div>
+      <div class="r-row"><span class="r-label">${ric('pin')}Embarque</span><span class="r-value">${escHtml(b.transferPickup||'—')}</span></div>
+      <div class="r-row"><span class="r-label">${ric('pin')}Desembarque</span><span class="r-value">${escHtml(b.transferDropoff||'—')}</span></div>
       ` : `
       <div class="r-row"><span class="r-label">${ric('buggy')}Quantidade</span><span class="r-value">${b.quantity||1} buggy${(b.quantity||1)>1?'\'s':''} privativo${(b.quantity||1)>1?'s':''}</span></div>
-      `}
+      `)}
 
       <hr class="receipt-divider">
 
-      ${isPiscinas ? `
-      <div style="font-weight:700;font-size:14px;margin-bottom:4px;letter-spacing:.2px;color:var(--t)">🏝️ Piscinas Naturais</div>
-      ${b.customStops?`<div style="font-size:12px;color:#4A6A6A;margin:6px 0 0;padding:6px 0 0;border-top:1px dashed var(--border);display:flex;align-items:center"><span style="font-weight:700;display:flex;align-items:center">${ric('alert')} Obs:</span>&nbsp;${escHtml(b.customStops)}</div>`:''}
+      ${isTransfer ? `
+      <div style="font-weight:700;font-size:14px;margin-bottom:4px;letter-spacing:.2px;color:var(--t)">${iconTransfer()} Transfer</div>
+      ${b.notes?`<div style="font-size:12px;color:#4A6A6A;margin:6px 0 0;padding:6px 0 0;border-top:1px dashed var(--border);display:flex;align-items:center"><span style="font-weight:700;display:flex;align-items:center">${ric('alert')} Obs:</span>&nbsp;${escHtml(b.notes)}</div>`:''}
+      ` : isPiscinas ? `
+      <div style="font-weight:700;font-size:14px;margin-bottom:4px;letter-spacing:.2px;color:var(--t)">${iconPiscinas()} Piscinas Naturais</div>
+      ${b.notes?`<div style="font-size:12px;color:#4A6A6A;margin:6px 0 0;padding:6px 0 0;border-top:1px dashed var(--border);display:flex;align-items:center"><span style="font-weight:700;display:flex;align-items:center">${ric('alert')} Obs:</span>&nbsp;${escHtml(b.notes)}</div>`:''}
       ` : `
       <div style="font-weight:700;font-size:13px;margin-bottom:4px;letter-spacing:.2px;color:var(--t)">${route?route.name:''} <span style="font-weight:400;color:#4A6A6A">(${b.durationLabel})</span></div>
       <ul class="r-stops">${route?route.stops.map(s=>{
@@ -2010,17 +2396,19 @@ function generateReceipt(id){
         return `<li>${icon} ${s}</li>`;
       }).join(''):''}</ul>
       ${b.customStops?`<div style="font-size:12px;color:#4A6A6A;margin:6px 0 0;padding:6px 0 0;border-top:1px dashed var(--border);display:flex;align-items:center"><span style="font-weight:700;display:flex;align-items:center">${ric('alert')} Personalização:</span>&nbsp;${escHtml(b.customStops)}</div>`:''}
+      ${b.notes?`<div style="font-size:12px;color:#4A6A6A;margin:6px 0 0;padding:6px 0 0;border-top:1px dashed var(--border);display:flex;align-items:center"><span style="font-weight:700;display:flex;align-items:center">${ric('alert')} Obs:</span>&nbsp;${escHtml(b.notes)}</div>`:''}
       `}
-
       <hr class="receipt-divider">
 
       <div class="r-highlight">
-        ${isPiscinas ? `
+        ${isTransfer ? `
+        <div class="r-row"><span class="r-label">Valor do Transfer</span><span class="r-value" style="font-weight:700">${fmtCurr(b.transferValue||0)}</span></div>
+        ` : isPiscinas ? `
         <div class="r-row"><span class="r-label">Valor Total</span><span class="r-value" style="font-weight:800">${fmtCurr(b.value)}</span></div>
         ` : `
         ${(()=>{ const base = (b.value-(b.customValue||0)+(b.discount||0))/Math.max(b.quantity||1,1); return `<div class="r-row"><span class="r-label">Roteiro base${b.quantity>1?` (${b.quantity}× ${fmtCurr(base)})`:''}</span><span class="r-value" style="font-weight:700">${fmtCurr(base*Math.max(b.quantity||1,1))}</span></div>`; })()}
         ${b.customValue>0?`<div class="r-row"><span class="r-label">Personalização</span><span class="r-value" style="font-weight:700">+ ${fmtCurr(b.customValue)}</span></div>`:''}
-        `}
+      `}
         ${b.discount>0?`<div class="r-row"><span class="r-label">Desconto</span><span class="r-value" style="font-weight:700;color:#D14C4C">- ${fmtCurr(b.discount)}</span></div>`:''}
         <div class="r-row"><span class="r-label">Valor Total</span><span class="r-value" style="font-weight:800">${fmtCurr(b.value)}</span></div>
         <div class="r-row"><span class="r-label">Valor Pago</span><span class="r-value" style="color:#019391;font-weight:700">${fmtCurr(b.signal)}</span></div>
@@ -2104,26 +2492,63 @@ function shareReceipt(){
 function renderStats(){
   const container = document.getElementById('statsContainer');
 
-  const total = bookings.length;
-  const confirmados = bookings.filter(b=>b.status==='confirmado').length;
-  const concluidos = bookings.filter(b=>b.status==='concluido').length;
-  const cancelados = bookings.filter(b=>b.status==='cancelado').length;
+  // Build month options from bookings
+  const months = new Map();
+  const today = new Date();
+  for(let i=-6;i<=0;i++){
+    const d = new Date(today.getFullYear(), today.getMonth()+i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const name = `${d.toLocaleString('pt-BR',{month:'long'})} ${d.getFullYear()}`;
+    months.set(key, name);
+  }
+  // Add any month with bookings that's not in the range
+  bookings.forEach(b=>{
+    if(b.date){
+      const key = b.date.slice(0,7);
+      if(!months.has(key)){
+        const d = new Date(key+'-01');
+        months.set(key, `${d.toLocaleString('pt-BR',{month:'long'})} ${d.getFullYear()}`);
+      }
+    }
+  });
+  const monthOptions = Array.from(months.entries()).sort().reverse();
+  const selectedMonth = window._statsMonth || 'all';
 
-  const receitaTotal = bookings.reduce((s,b)=>s+b.value,0);
-  const recebido = bookings.reduce((s,b)=>s+b.signal,0);
+  let filtered = [...bookings];
+  if(selectedMonth !== 'all'){
+    filtered = filtered.filter(b => b.date && b.date.startsWith(selectedMonth));
+  }
+
+  const total = filtered.length;
+  const confirmados = filtered.filter(b=>b.status==='confirmado').length;
+  const concluidos = filtered.filter(b=>b.status==='concluido').length;
+  const cancelados = filtered.filter(b=>b.status==='cancelado').length;
+
+  const receitaTotal = filtered.reduce((s,b)=>s+b.value,0);
+  const recebido = filtered.reduce((s,b)=>s+b.signal,0);
   const aReceber = receitaTotal-recebido;
 
-  // Route breakdown
   const routeStats = ROUTES.map(r=>{
-    const bs = bookings.filter(b=>b.routeId===r.id);
+    const bs = filtered.filter(b=>b.routeId===r.id);
     return {name:r.name, total:bs.length, receita:bs.reduce((s,b)=>s+b.value,0)};
   });
-  const piscinasBS = bookings.filter(b=>b.tipo==='piscinas');
+  const piscinasBS = filtered.filter(b=>b.tipo==='piscinas');
   if(piscinasBS.length>0){
-    routeStats.push({name:'🏝️ Piscinas Naturais', total:piscinasBS.length, receita:piscinasBS.reduce((s,b)=>s+b.value,0)});
+    routeStats.push({name:iconPiscinas()+' Piscinas Naturais', total:piscinasBS.length, receita:piscinasBS.reduce((s,b)=>s+b.value,0)});
+  }
+  const transferBS = filtered.filter(b=>b.tipo==='transfer');
+  if(transferBS.length>0){
+    routeStats.push({name:iconTransfer()+' Transfer', total:transferBS.length, receita:transferBS.reduce((s,b)=>s+b.value,0)});
   }
 
   container.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <select class="form-input" id="statsMonthFilter" style="flex:1;font-size:13px;padding:6px 10px" onchange="window._statsMonth=this.value;renderStats()">
+        <option value="all">📆 Todos os meses</option>
+        ${monthOptions.map(([key,name])=>`<option value="${key}"${selectedMonth===key?' selected':''}>${name}</option>`).join('')}
+      </select>
+      ${selectedMonth!=='all'?`<button class="btn btn-sm" onclick="window._statsMonth='all';renderStats()" style="background:var(--bg);color:var(--text2);padding:6px 12px">Limpar</button>`:''}
+    </div>
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total</div></div>
       <div class="stat-card stat-green"><div class="stat-num">${confirmados}</div><div class="stat-label">Confirmados</div></div>
@@ -2135,7 +2560,7 @@ function renderStats(){
       <div class="card-title">💰 Financeiro</div>
       <div class="stat-row"><span>Receita Total</span><span style="font-weight:700">${fmtCurr(receitaTotal)}</span></div>
       <div class="stat-row"><span style="color:#27ae60">Recebido</span><span style="font-weight:700;color:#27ae60">${fmtCurr(recebido)}</span></div>
-      <div class="stat-row"><span style="color:#e74c3c">A Receber</span><span style="font-weight:700;color:#e74c3c">${fmtCurr(aReceber)}</span></div>
+      <div class="stat-row"><span style="color:#D14C4C">A Receber</span><span style="font-weight:700;color:#D14C4C">${fmtCurr(aReceber)}</span></div>
     </div>
 
     <div class="card">
@@ -2150,10 +2575,11 @@ function renderStats(){
 
     <div class="card">
       <div class="card-title">📅 Últimos Agendamentos</div>
-      ${bookings.slice(-5).reverse().map(b=>{
+      ${filtered.slice(-5).reverse().map(b=>{
         const isPiscinas = b.tipo==='piscinas';
-        const route = isPiscinas ? null : getRoute(b.routeId);
-        const label = isPiscinas ? '🏝️ Piscinas' : (route?route.name:'');
+        const isTransfer = b.tipo==='transfer';
+        const route = isPiscinas||isTransfer ? null : getRoute(b.routeId);
+        const label = isTransfer ? iconTransfer()+' Transfer' : (isPiscinas ? iconPiscinas()+' Piscinas' : (route?route.name:''));
         return `<div class="stat-row" style="cursor:pointer" onclick="openDetail('${b.id}')">
           <span>${fmtDate(b.date)} — ${escHtml(b.client)} <span style="font-size:11px;color:var(--text2)">${label}</span></span>
           <span><span class="pill pill-${b.status}">${statusLabel(b.status)}</span></span>
