@@ -19,8 +19,9 @@
 #loading .sp{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--t);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[style*="display:grid"]{overflow:hidden}
 :root{--t:#00606C;--t2:#019391;--o:#00DFC3;--o2:#00BFA8;--bg:#F4FAFA;--white:#FFFFFF;--border:#B7E5E2;--text:#102A30;--text2:#527178;--shadow:0 4px 20px rgba(0,0,0,.12);--radius:14px;--radius-sm:10px;--font:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif}
-html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+html,body{height:100%;width:100%;overflow-x:hidden;font-family:var(--font);background:var(--bg);color:var(--text);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 svg{shape-rendering:geometricPrecision}
 body{padding-bottom:80px;overflow-x:hidden}
 
