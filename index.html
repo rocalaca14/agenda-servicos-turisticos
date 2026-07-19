@@ -1536,7 +1536,7 @@ function renderForm(){
         <label style="font-size:12px;font-weight:600;color:var(--text2);text-align:center">Desconto <span style="font-weight:400;color:#aab">(opcional)</span></label>
         <label style="font-size:12px;font-weight:600;color:var(--text2);text-align:center">Data</label>
         <input class="form-input" id="fDiscount" type="number" min="0" step="any" placeholder="0,00" value="${formState.discount}" style="width:100%;height:44px;text-align:center;box-sizing:border-box;margin:0" oninput="updateDiscount(this)">
-        <input class="form-input" id="fDate" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" value="${edit?edit.date.split('-').reverse().join('/'):todayStr().split('-').reverse().join('/')}" style="width:100%!important;min-width:0!important;max-width:100%;height:44px;box-sizing:border-box;margin:0">
+        <div style="overflow:hidden;width:100%"><input class="form-input" id="fDate" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" value="${edit?edit.date.split('-').reverse().join('/'):todayStr().split('-').reverse().join('/')}" style="width:100%!important;min-width:0!important;max-width:100%;height:44px;box-sizing:border-box;margin:0"></div>
       </div>
       <label style="font-size:13px;font-weight:600;color:var(--text2);margin:8px 0 4px;display:block">Sinal (valor já pago)</label>
       <div id="signalGroup" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:8px">
@@ -1854,7 +1854,7 @@ function renderForm(){
 
   // Force date/time inputs to fit their parent width (iOS native min-width override)
   setTimeout(function(){
-    document.querySelectorAll('#formContainer input[type="date"], #formContainer input[type="time"]').forEach(function(el){
+    document.querySelectorAll('#formContainer input[type="date"], #formContainer input[type="time"], #formContainer input[type="text"][placeholder="dd/mm/aaaa"]').forEach(function(el){
       var p = el.parentElement;
       if(p){
         var pw = p.clientWidth;
