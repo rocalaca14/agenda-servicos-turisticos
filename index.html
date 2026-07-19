@@ -379,6 +379,20 @@ textarea.form-input{resize:vertical;min-height:70px}
         <input class="form-input" id="settLocation" placeholder="Ex: Maragogi-AL" maxlength="40">
       </div>
       <div class="form-group">
+        <label>Instagram</label>
+        <input class="form-input" id="settInstagram" placeholder="Ex: @destinosmaragogi" maxlength="40">
+      </div>
+      <div class="form-group" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px">
+        <div>
+          <label>Nome de Contato</label>
+          <input class="form-input" id="settContactName" placeholder="Ex: Rodrigo" maxlength="40">
+        </div>
+        <div>
+          <label>Telefone</label>
+          <input class="form-input" id="settContactPhone" placeholder="Ex: (82) 99141-4023" maxlength="25">
+        </div>
+      </div>
+      <div class="form-group">
         <label>Logo (PNG/JPG, recomendado 200×200px, máx 500KB)</label>
         <input type="file" id="settLogoInput" accept="image/png,image/jpeg" style="font-size:13px;color:var(--text2)">
         <div id="settLogoPreview" style="display:none;margin-top:8px">
@@ -578,7 +592,7 @@ let editingId = null;
 const formState = { tipo:'buggy', routeId:null, durationLabel:null, signal:0, customValue:0, quantity:1, discount:0, status:'confirmado', poolAdults:1, poolChildren:0, poolIndividualPrice:0, poolName:'', transferPassengers:1, transferPickupTime:'', transferPickup:'', transferDropoff:'', transferValue:0, transferPickupType:'recife', transferPickupCustom:'', transferDropoffType:'recife', transferDropoffCustom:'' };
 
 // ─── Settings ───
-let appSettings = { companyName:'Agenda Serviços Turísticos', tagline:'Serviços Turísticos - Maragogi-AL', location:'Maragogi-AL', logoDataUrl:'', logoZoom:1 };
+let appSettings = { companyName:'Agenda Serviços Turísticos', tagline:'Serviços Turísticos - Maragogi-AL', location:'Maragogi-AL', logoDataUrl:'', logoZoom:1, instagram:'@destinosmaragogi', contactName:'Rodrigo', contactPhone:'(82) 99141-4023' };
 const SETTINGS_KEY = 'destinos_maragogi_settings';
 function loadSettings(){
   try{
@@ -590,6 +604,9 @@ function saveSettings(){
   appSettings.companyName = document.getElementById('settCompany').value.trim() || 'Destinos Maragogi';
   appSettings.tagline = document.getElementById('settTagline').value.trim() || 'Serviços Turísticos - Maragogi-AL';
   appSettings.location = document.getElementById('settLocation').value.trim() || 'Maragogi-AL';
+  appSettings.instagram = document.getElementById('settInstagram').value.trim() || '@destinosmaragogi';
+  appSettings.contactName = document.getElementById('settContactName').value.trim() || 'Rodrigo';
+  appSettings.contactPhone = document.getElementById('settContactPhone').value.trim() || '(82) 99141-4023';
   // If preview is hidden, logo was removed
   const preview = document.getElementById('settLogoPreview');
   if(preview.style.display==='none') appSettings.logoDataUrl = '';
@@ -620,6 +637,9 @@ function openSettings(){
   document.getElementById('settCompany').value = appSettings.companyName;
   document.getElementById('settTagline').value = appSettings.tagline;
   document.getElementById('settLocation').value = appSettings.location;
+  document.getElementById('settInstagram').value = appSettings.instagram;
+  document.getElementById('settContactName').value = appSettings.contactName;
+  document.getElementById('settContactPhone').value = appSettings.contactPhone;
   if(appSettings.logoDataUrl){
     document.getElementById('settLogoImg').src = appSettings.logoDataUrl;
     document.getElementById('settLogoPreview').style.display = '';
@@ -2441,8 +2461,8 @@ function generateReceipt(id){
 
       <hr class="receipt-divider">
 
-      <div class="r-footer"><svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px;margin-right:4px" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ig" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f58529"/><stop offset=".25" stop-color="#dd2a7b"/><stop offset=".5" stop-color="#8134af"/><stop offset=".75" stop-color="#515bd4"/><stop offset="1" stop-color="#00d2ff"/></linearGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#ig)"/><circle cx="12" cy="12" r="5.5" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="18" cy="6" r="1.2" fill="#fff"/></svg>@destinosmaragogi · Maragogi-AL</div>
-      <div style="text-align:center;font-size:12px;color:#4A6A6A;margin-top:8px;font-weight:600;letter-spacing:.3px">Contato Rodrigo: (82) 99141-4023</div>
+      <div class="r-footer"><svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px;margin-right:4px" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ig" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f58529"/><stop offset=".25" stop-color="#dd2a7b"/><stop offset=".5" stop-color="#8134af"/><stop offset=".75" stop-color="#515bd4"/><stop offset="1" stop-color="#00d2ff"/></linearGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#ig)"/><circle cx="12" cy="12" r="5.5" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="18" cy="6" r="1.2" fill="#fff"/></svg>${escHtml(appSettings.instagram)} · ${escHtml(appSettings.location)}</div>
+      <div style="text-align:center;font-size:12px;color:#4A6A6A;margin-top:8px;font-weight:600;letter-spacing:.3px">Contato ${escHtml(appSettings.contactName)}: ${escHtml(appSettings.contactPhone)}</div>
     </div>
   `;
 
