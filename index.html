@@ -898,9 +898,10 @@ function loadBookings(){
         b.transferPickup = b.transferPickup||'';
         b.transferDropoff = b.transferDropoff||'';
       }
-      // Migration: fix missing endTime
-      if(b.tipo!=='transfer' && !b.endTime && b.startTime){
-        b.endTime = calcEndTime(b.startTime, b.routeId||'piscinas', b.durationLabel||'3h');
+      // Migration: fix missing endTime (only if duration label still exists)
+      if(b.tipo!=='transfer' && !b.endTime && b.startTime && b.routeId){
+        var _dur = getDuration(b.routeId, b.durationLabel);
+        if(_dur) b.endTime = calcEndTime(b.startTime, b.routeId, b.durationLabel);
       }
       return b;
     });
@@ -913,7 +914,10 @@ function loadBookings(){
     if(val && Array.isArray(val) && val.length > 0){
       var raw = val;
       var fb = raw.filter(function(b){ return b && b.client && b.date && typeof b.value === 'number'; }).map(function(b){
-        if(b.tipo!=='transfer' && !b.endTime && b.startTime) b.endTime = calcEndTime(b.startTime, b.routeId||'piscinas', b.durationLabel||'3h');
+        if(b.tipo!=='transfer' && !b.endTime && b.startTime && b.routeId){
+          var _dur = getDuration(b.routeId, b.durationLabel);
+          if(_dur) b.endTime = calcEndTime(b.startTime, b.routeId, b.durationLabel);
+        }
         return b;
       });
       if(fb.length > 0){
@@ -926,7 +930,10 @@ function loadBookings(){
   dbListen('bookings', function(val){
     if(val && Array.isArray(val) && initDone){
       var fb = val.filter(function(b){ return b && b.client && b.date && typeof b.value === 'number'; }).map(function(b){
-        if(b.tipo!=='transfer' && !b.endTime && b.startTime) b.endTime = calcEndTime(b.startTime, b.routeId||'piscinas', b.durationLabel||'3h');
+        if(b.tipo!=='transfer' && !b.endTime && b.startTime && b.routeId){
+          var _dur = getDuration(b.routeId, b.durationLabel);
+          if(_dur) b.endTime = calcEndTime(b.startTime, b.routeId, b.durationLabel);
+        }
         return b;
       });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(fb));
@@ -1021,6 +1028,15 @@ function calcEndTime(start,routeId,durationLabel){
   const em = totalMin%60;
   return String(eh).padStart(2,'0')+':'+String(em).padStart(2,'0');
 }
+function safeEndTime(b){
+  if(b.endTime) return b.endTime;
+  if(b.tipo==='transfer') return b.transferPickupTime||'';
+  if(!b.startTime) return '';
+  const routeId = b.routeId||'piscinas';
+  const label = b.durationLabel||'3h';
+  if(routeId!=='piscinas' && !getDuration(routeId,label)) return b.startTime;
+  return calcEndTime(b.startTime,routeId,label);
+}
 function getRoute(id){ return ROUTES.find(r=>r.id===id); }
 function getDuration(routeId,label){
   const r=getRoute(routeId);
@@ -1100,7 +1116,7 @@ function renderAgenda(){
         const isPiscinas = b.tipo==='piscinas';
         const isTransfer = b.tipo==='transfer';
         const route = isPiscinas||isTransfer ? null : getRoute(b.routeId);
-        const timeStr = isTransfer ? (b.transferPickupTime||'') : `${b.startTime} - ${b.endTime||calcEndTime(b.startTime,b.routeId||'piscinas',b.durationLabel)}`;
+        const timeStr = isTransfer ? (b.transferPickupTime||'') : `${b.startTime} - ${safeEndTime(b)}`;
         return `<div class="booking-card bc-${b.status}" onclick="openDetail('${b.id}')">
           <div class="bc-top">
             <div>
@@ -1261,7 +1277,7 @@ function showDayPopup(dateStr){
       const isPiscinas = b.tipo==='piscinas';
       const isTransfer = b.tipo==='transfer';
       const title = isTransfer ? iconTransfer()+' Transfer' : (isPiscinas ? iconPiscinas()+' Piscinas Naturais' : (getRoute(b.routeId)?.name||''));
-      const endTime = isTransfer ? b.transferPickupTime||'' : (b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel));
+      const endTime = safeEndTime(b);
       const subtitle = isTransfer ? `${b.transferPassengers||1} passageiro${b.transferPassengers>1?'s':''}${b.transferPickup?' · '+escHtml(b.transferPickup):''}` : (isPiscinas ? `${b.vesselType?b.vesselType==='lancha'?'🚤':b.vesselType==='jangada'?'⛵':'🛥️':''} ${b.vesselType||''} ${b.vesselMode||''} · ${b.poolAdults||0} adulto${b.poolAdults>1?'s':''}` : '');
       return `<div class="day-popup-item" onclick="removeDayPopup();showDayDetail('${dateStr}')">
         <div class="ppi-left">
@@ -1379,7 +1395,7 @@ function showDayDetail(dateStr){
     const hours = dur ? dur.hours : (isTransfer ? 1 : 3);
     const topPx = Math.max(0, startMin - 420);
     const heightPx = hours * 60;
-    const endTime = isTransfer ? '' : (b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel));
+    const endTime = isTransfer ? '' : safeEndTime(b);
     let people = escHtml(b.client);
     if(b.companions) people += ', '+escHtml(b.companions);
     const title = isTransfer ? iconTransfer()+' Transfer' : (isPiscinas ? iconPiscinas()+' Piscinas Naturais' : (route?route.name:''));
@@ -2360,7 +2376,7 @@ function openDetail(id){
     body.innerHTML = `
       <div class="detail-row"><span class="label">Roteiro</span><span class="value">${route?route.name:''} (${b.durationLabel})</span></div>
       <div class="detail-row"><span class="label">Data</span><span class="value">${fmtDate(b.date)} — ${getDayName(b.date)}</span></div>
-      <div class="detail-row"><span class="label">Horário</span><span class="value">${b.startTime} - ${b.endTime||calcEndTime(b.startTime,b.routeId,b.durationLabel)}</span></div>
+      <div class="detail-row"><span class="label">Horário</span><span class="value">${b.startTime} - ${safeEndTime(b)}</span></div>
       <div class="detail-row"><span class="label">Contato</span><span class="value"><a href="https://wa.me/55${b.contact.replace(/\D/g,'')}" target="_blank" style="color:var(--t);text-decoration:none">${escHtml(b.contact)}</a></span></div>
       <div class="detail-row"><span class="label">Acompanhantes</span><span class="value">${b.companions||'—'}</span></div>
       <div class="detail-row"><span class="label">Embarque</span><span class="value">${escHtml(b.pickupDetail)}</span></div>
@@ -2457,7 +2473,7 @@ function generateReceipt(id){
   const isPiscinas = b.tipo==='piscinas';
   const isTransfer = b.tipo==='transfer';
   const route = isPiscinas||isTransfer ? null : getRoute(b.routeId);
-  const endTime = b.endTime||(isPiscinas ? calcEndTime(b.startTime,'piscinas','3h') : (isTransfer ? '' : calcEndTime(b.startTime,b.routeId,b.durationLabel)));
+  const endTime = safeEndTime(b);
   const remaining = b.value-b.signal;
 
   window._receiptCanvas = null;
