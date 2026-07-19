@@ -25,6 +25,7 @@
 [style*="display:grid"]{overflow:hidden}
 .form-input,.signal-btn,.status-option{min-width:0!important}
 :root{--t:#00606C;--t2:#019391;--o:#00DFC3;--o2:#00BFA8;--bg:#F4FAFA;--white:#FFFFFF;--border:#B7E5E2;--text:#102A30;--text2:#527178;--shadow:0 4px 20px rgba(0,0,0,.12);--radius:14px;--radius-sm:10px;--font:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif}
+[data-theme="dark"]{--t:#00BFA8;--t2:#019391;--o:#00DFC3;--o2:#00BFA8;--bg:#0D1B1E;--white:#1A2D32;--border:#2A4045;--text:#E0ECEE;--text2:#8AA4A8;--shadow:0 4px 20px rgba(0,0,0,.4)}
 html,body{height:100%;width:100%;overflow-x:hidden;font-family:var(--font);background:var(--bg);color:var(--text);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 svg{shape-rendering:geometricPrecision}
 body{padding-bottom:80px;overflow-x:hidden}
@@ -394,6 +395,17 @@ textarea.form-input{resize:vertical;min-height:70px}
           <input class="form-input" id="settContactPhone" placeholder="Ex: (82) 99141-4023" maxlength="25">
         </div>
       </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--border);margin-top:8px">
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--text)">🌙 Modo Escuro</div>
+          <div style="font-size:11px;color:var(--text2)">Alternar tema escuro</div>
+        </div>
+        <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">
+          <input type="checkbox" id="settDarkMode" onchange="document.querySelector('.dark-toggle-knob').style.transform=this.checked?'translateX(20px)':'translateX(0)'" style="opacity:0;width:0;height:0">
+          <span style="position:absolute;inset:0;background:var(--border);border-radius:12px;transition:.2s"></span>
+          <span class="dark-toggle-knob" style="position:absolute;left:2px;top:2px;width:20px;height:20px;background:var(--white);border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>
+        </label>
+      </div>
       <div class="form-group">
         <label>Logo (PNG/JPG, recomendado 200×200px, máx 500KB)</label>
         <input type="file" id="settLogoInput" accept="image/png,image/jpeg" style="font-size:13px;color:var(--text2)">
@@ -602,13 +614,14 @@ const DAY_NAMES = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quin
 let bookings = [];
 let currentView = 'calendar';
 let filterStatus = 'todos';
+let filterType = 'todos';
 let editingId = null;
 
 // ─── Form state ───
 const formState = { tipo:'buggy', routeId:null, durationLabel:null, signal:0, customValue:0, quantity:1, discount:0, status:'confirmado', poolAdults:1, poolChildren:0, poolIndividualPrice:0, poolName:'', transferPassengers:1, transferPickupTime:'', transferPickup:'', transferDropoff:'', transferValue:0, transferPickupType:'recife', transferPickupCustom:'', transferDropoffType:'recife', transferDropoffCustom:'' };
 
 // ─── Settings ───
-let appSettings = { companyName:'Agenda Serviços Turísticos', tagline:'Serviços Turísticos - Maragogi-AL', location:'Maragogi-AL', logoDataUrl:'', logoZoom:1, instagram:'@destinosmaragogi', contactName:'Rodrigo', contactPhone:'(82) 99141-4023' };
+let appSettings = { companyName:'Agenda Serviços Turísticos', tagline:'Serviços Turísticos - Maragogi-AL', location:'Maragogi-AL', logoDataUrl:'', logoZoom:1, instagram:'@destinosmaragogi', contactName:'Rodrigo', contactPhone:'(82) 99141-4023', darkMode:false };
 const SETTINGS_KEY = 'destinos_maragogi_settings';
 
 // ─── Firebase ───
@@ -673,6 +686,8 @@ function saveSettings(){
   appSettings.instagram = document.getElementById('settInstagram').value.trim() || '@destinosmaragogi';
   appSettings.contactName = document.getElementById('settContactName').value.trim() || 'Rodrigo';
   appSettings.contactPhone = document.getElementById('settContactPhone').value.trim() || '(82) 99141-4023';
+  const dm = document.getElementById('settDarkMode');
+  if(dm) appSettings.darkMode = dm.checked;
   // If preview is hidden, logo was removed
   const preview = document.getElementById('settLogoPreview');
   if(preview.style.display==='none') appSettings.logoDataUrl = '';
@@ -683,7 +698,15 @@ function saveSettings(){
   applySettings();
   closeModal('settingsModal');
 }
+function applyDarkMode(){
+  if(appSettings.darkMode){
+    document.documentElement.setAttribute('data-theme','dark');
+  }else{
+    document.documentElement.removeAttribute('data-theme');
+  }
+}
 function applySettings(){
+  applyDarkMode();
   document.querySelectorAll('.js-company').forEach(el => el.textContent = appSettings.companyName);
   document.querySelectorAll('.js-tagline').forEach(el => el.textContent = appSettings.tagline);
   document.querySelectorAll('.js-location').forEach(el => el.textContent = appSettings.location);
@@ -707,6 +730,8 @@ function openSettings(){
   document.getElementById('settInstagram').value = appSettings.instagram;
   document.getElementById('settContactName').value = appSettings.contactName;
   document.getElementById('settContactPhone').value = appSettings.contactPhone;
+  const dm = document.getElementById('settDarkMode');
+  if(dm){ dm.checked = appSettings.darkMode; dm.onchange(); }
   if(appSettings.logoDataUrl){
     document.getElementById('settLogoImg').src = appSettings.logoDataUrl;
     document.getElementById('settLogoPreview').style.display = '';
@@ -1023,17 +1048,31 @@ function renderAgenda(){
   const list = document.getElementById('agendaList');
   const filterBar = document.getElementById('filterBar');
 
-  // Filters
-  const filters = [
+  // Type filters
+  const typeFilters = [
+    {id:'todos',label:'Todos'},
+    {id:'buggy',label:'🚙 Buggy'},
+    {id:'piscinas',label:'🏝️ Piscinas'},
+    {id:'transfer',label:'🚐 Transfer'}
+  ];
+  filterBar.innerHTML = typeFilters.map(f=>
+    `<button class="filter-btn${filterType===f.id?' active':''}" data-ftype="${f.id}">${f.label}</button>`
+  ).join('') + '<span style="width:1px;height:24px;background:var(--border);margin:0 2px;flex-shrink:0"></span>';
+  filterBar.innerHTML += [
     {id:'todos',label:'Todos'},
     {id:'confirmado',label:'✅ Confirmado'},
     {id:'concluido',label:'✅ Concluído'},
     {id:'cancelado',label:'❌ Cancelado'}
-  ];
-  filterBar.innerHTML = filters.map(f=>
+  ].map(f=>
     `<button class="filter-btn${filterStatus===f.id?' active':''}" data-filter="${f.id}">${f.label}</button>`
   ).join('');
-  filterBar.querySelectorAll('.filter-btn').forEach(el=>{
+  filterBar.querySelectorAll('[data-ftype]').forEach(el=>{
+    el.addEventListener('click',()=>{
+      filterType = el.dataset.ftype;
+      renderAgenda();
+    });
+  });
+  filterBar.querySelectorAll('[data-filter]').forEach(el=>{
     el.addEventListener('click',()=>{
       filterStatus = el.dataset.filter;
       renderAgenda();
@@ -1043,6 +1082,7 @@ function renderAgenda(){
   let filtered = [...bookings];
   // Skip invalid entries
   filtered = filtered.filter(b => b && b.client && b.date && b.value !== undefined);
+  if(filterType!=='todos') filtered = filtered.filter(b=>b.tipo===filterType);
   if(filterStatus!=='todos') filtered = filtered.filter(b=>b.status===filterStatus);
   if(searchQuery) filtered = filtered.filter(b=>b.client.toLowerCase().includes(searchQuery));
 
