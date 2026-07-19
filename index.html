@@ -96,10 +96,12 @@ textarea.form-input{resize:vertical;min-height:70px}
 
 /* Route cards */
 .route-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:16px}
-.route-card{border:2px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:.2s;background:var(--surface)}
+.route-card{border:2px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:.2s;background:var(--surface);position:relative}
 .route-card:hover{border-color:var(--t)}
 .route-card.selected{border-color:var(--t);background:#e6f7f7}
 .route-card .route-name{font-size:14px;font-weight:700;color:var(--text)}
+.route-card .route-edit{position:absolute;bottom:6px;right:6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text2);font-size:10px;cursor:pointer;padding:2px 7px;display:flex;align-items:center;gap:3px;font-family:var(--font);opacity:.5;transition:.15s;line-height:1.4}
+.route-card .route-edit:active{opacity:1;border-color:var(--t);color:var(--t)}
 .route-duration-options{display:flex;gap:6px;flex-wrap:wrap}
 .duration-btn{padding:5px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);transition:.2s;font-family:var(--font)}
 .duration-btn.selected{border-color:var(--o);background:rgba(0,223,195,.12);color:var(--o)}
@@ -1635,7 +1637,7 @@ function renderForm(){
       <div class="form-group">
         <label>Roteiro</label>
         <div class="route-grid" id="routeGrid">
-          ${ROUTES.map(r=>`
+          ${ROUTES.map((r,i)=>`
             <div class="route-card${formState.routeId===r.id?' selected':''}" data-route="${r.id}">
               <div class="route-name">${r.name}</div>
               <div class="route-duration-options">
@@ -1646,9 +1648,11 @@ function renderForm(){
                   </button>
                 `).join('')}
               </div>
+              <button class="route-edit" onclick="event.stopPropagation();openRouteEditor(${i})">✎ Editar</button>
             </div>
           `).join('')}
         </div>
+        <button onclick="openRouteEditor()" style="width:100%;padding:12px;border:2px dashed var(--border);border-radius:var(--radius);background:none;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;font-family:var(--font);transition:.15s">+ Adicionar Novo Roteiro</button>
       </div>
 
       <div id="valueDisplay" class="${formState.routeId&&formState.durationLabel?'':'hidden'}">
