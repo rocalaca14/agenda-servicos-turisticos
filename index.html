@@ -1852,6 +1852,21 @@ function renderForm(){
   const cancelBtn = document.getElementById('btnCancelEdit');
   if(cancelBtn) cancelBtn.addEventListener('click', cancelEdit);
 
+  // Force date/time inputs to fit their parent width (iOS native min-width override)
+  setTimeout(function(){
+    document.querySelectorAll('#formContainer input[type="date"], #formContainer input[type="time"]').forEach(function(el){
+      var p = el.parentElement;
+      if(p){
+        var pw = p.clientWidth;
+        if(pw > 0){
+          el.style.setProperty('width', pw + 'px', 'important');
+          el.style.setProperty('min-width', '0', 'important');
+          el.style.setProperty('max-width', pw + 'px', 'important');
+        }
+      }
+    });
+  }, 0);
+
   // Piscinas-specific events
   if(t==='piscinas'){
     updatePoolTotal();
