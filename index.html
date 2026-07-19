@@ -898,6 +898,10 @@ function loadBookings(){
         b.transferPickup = b.transferPickup||'';
         b.transferDropoff = b.transferDropoff||'';
       }
+      // Migration: fix missing endTime
+      if(b.tipo!=='transfer' && !b.endTime && b.startTime){
+        b.endTime = calcEndTime(b.startTime, b.routeId||'piscinas', b.durationLabel||'3h');
+      }
       return b;
     });
   }catch(e){ bookings=[]; }
@@ -908,7 +912,10 @@ function loadBookings(){
   dbLoad('bookings', function(val){
     if(val && Array.isArray(val) && val.length > 0){
       var raw = val;
-      var fb = raw.filter(function(b){ return b && b.client && b.date && typeof b.value === 'number'; });
+      var fb = raw.filter(function(b){ return b && b.client && b.date && typeof b.value === 'number'; }).map(function(b){
+        if(b.tipo!=='transfer' && !b.endTime && b.startTime) b.endTime = calcEndTime(b.startTime, b.routeId||'piscinas', b.durationLabel||'3h');
+        return b;
+      });
       if(fb.length > 0){
         localStorage.setItem(STORAGE_KEY, JSON.stringify(fb));
         bookings = fb;
@@ -918,7 +925,10 @@ function loadBookings(){
   });
   dbListen('bookings', function(val){
     if(val && Array.isArray(val) && initDone){
-      var fb = val.filter(function(b){ return b && b.client && b.date && typeof b.value === 'number'; });
+      var fb = val.filter(function(b){ return b && b.client && b.date && typeof b.value === 'number'; }).map(function(b){
+        if(b.tipo!=='transfer' && !b.endTime && b.startTime) b.endTime = calcEndTime(b.startTime, b.routeId||'piscinas', b.durationLabel||'3h');
+        return b;
+      });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(fb));
       bookings = fb;
       renderCalendar();
@@ -2207,7 +2217,7 @@ function saveBooking(){
     const routeId = formState.routeId;
     const durationLabel = formState.durationLabel;
     const dur = getDuration(routeId,durationLabel);
-    const endTime = document.getElementById('fEnd').value;
+    const endTime = document.getElementById('fEnd').value || calcEndTime(startTime, routeId, durationLabel);
     const pickup = document.getElementById('fPickup').value;
     const pickupDetail = pickup==='outro'?document.getElementById('fPickupDetail').value.trim():'Ponto de Encontro (Posto Ipiranga)';
     const customStops = document.getElementById('fCustomStops').value.trim();
@@ -2230,6 +2240,7 @@ function saveBooking(){
     const vesselType = formState.vesselType||'lancha';
     const vesselMode = formState.vesselType==='catamara' ? 'compartilhada' : (formState.vesselMode||'compartilhada');
     const totalValue = poolCalcTotal();
+    const endTime = document.getElementById('fEnd').value || calcEndTime(startTime, 'piscinas', '3h');
     if(poolIndividualPrice<=0){ alert('Informe o valor individual do passeio.'); return; }
     if(poolAdults<=0){ alert('Informe a quantidade de adultos.'); return; }
     booking = {
