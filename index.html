@@ -14,6 +14,8 @@
 <link rel="apple-touch-startup-image" href="icon-512.png">
 <title>Agenda Serviços Turísticos</title>
 <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
 <style>
 #loading{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;font-family:var(--font);color:var(--text2);font-size:14px;background:var(--bg)}
 #loading .sp{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--t);border-radius:50%;animation:spin .8s linear infinite}
@@ -576,9 +578,23 @@ function loadRoutes(){
     const d = localStorage.getItem(ROUTES_KEY);
     if(d){ ROUTES.length = 0; ROUTES.push(...JSON.parse(d)); }
   }catch(e){}
+  dbLoad('routes', function(val){
+    if(val && Array.isArray(val) && val.length > 0){
+      localStorage.setItem(ROUTES_KEY, JSON.stringify(val));
+      ROUTES.length = 0; ROUTES.push.apply(ROUTES, val);
+      if(initDone && typeof renderForm==='function') renderForm();
+    }
+  });
+  dbListen('routes', function(val){
+    if(val && Array.isArray(val) && initDone){
+      localStorage.setItem(ROUTES_KEY, JSON.stringify(val));
+      ROUTES.length = 0; ROUTES.push.apply(ROUTES, val);
+    }
+  });
 }
 function saveRoutes(){
   localStorage.setItem(ROUTES_KEY, JSON.stringify(ROUTES));
+  dbSave('routes', ROUTES);
 }
 
 const DAY_NAMES = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
@@ -594,11 +610,55 @@ const formState = { tipo:'buggy', routeId:null, durationLabel:null, signal:0, cu
 // ─── Settings ───
 let appSettings = { companyName:'Agenda Serviços Turísticos', tagline:'Serviços Turísticos - Maragogi-AL', location:'Maragogi-AL', logoDataUrl:'', logoZoom:1, instagram:'@destinosmaragogi', contactName:'Rodrigo', contactPhone:'(82) 99141-4023' };
 const SETTINGS_KEY = 'destinos_maragogi_settings';
+
+// ─── Firebase ───
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAAEUtmOyUcVpfJkg4YCJP5AnPz4vySqcE",
+  authDomain: "agenda-maragogi.firebaseapp.com",
+  databaseURL: "https://agenda-maragogi-default-rtdb.firebaseio.com",
+  projectId: "agenda-maragogi",
+  storageBucket: "agenda-maragogi.firebasestorage.app",
+  messagingSenderId: "306406235772",
+  appId: "1:306406235772:web:39b6bc1d9484a0506d73f9"
+};
+let DB;
+try {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  DB = firebase.database();
+} catch(e) { DB = null; }
+
+function dbSave(path, data){
+  if(!DB) return Promise.resolve();
+  return DB.ref(path).set(data).catch(function(){});
+}
+function dbLoad(path, cb){
+  if(!DB){ cb(null); return; }
+  DB.ref(path).once('value').then(function(snap){ cb(snap.val()); }).catch(function(){ cb(null); });
+}
+function dbListen(path, cb){
+  if(!DB) return;
+  DB.ref(path).on('value', function(snap){ cb(snap.val()); });
+}
+
 function loadSettings(){
   try{
     const d = localStorage.getItem(SETTINGS_KEY);
     if(d) Object.assign(appSettings, JSON.parse(d));
   }catch(e){}
+  dbLoad('settings', function(val){
+    if(val){
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(val));
+      Object.assign(appSettings, val);
+      if(initDone) applySettings();
+    }
+  });
+  dbListen('settings', function(val){
+    if(val && initDone){
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(val));
+      Object.assign(appSettings, val);
+      applySettings();
+    }
+  });
 }
 function saveSettings(){
   appSettings.companyName = document.getElementById('settCompany').value.trim() || 'Destinos Maragogi';
@@ -613,6 +673,7 @@ function saveSettings(){
   delete appSettings.primaryColor;
   delete appSettings.accentColor;
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(appSettings));
+  dbSave('settings', appSettings);
   applySettings();
   closeModal('settingsModal');
 }
@@ -722,6 +783,9 @@ function importBackup(event){
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data.bookings));
       if(data.routes) localStorage.setItem(ROUTES_KEY, JSON.stringify(data.routes));
       if(data.settings) localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings));
+      dbSave('bookings', data.bookings);
+      if(data.routes) dbSave('routes', data.routes);
+      if(data.settings) dbSave('settings', data.settings);
       alert(`Importado com sucesso! ${data.bookings.length} agendamentos.`);
       event.target.value = '';
       window.location.reload();
@@ -830,6 +894,27 @@ function loadBookings(){
   if(!localStorage.getItem(STORAGE_KEY) || bookings.length===0){
     localStorage.setItem(STORAGE_KEY,'[]');
   }
+  // Firebase – load after localStorage for sync
+  dbLoad('bookings', function(val){
+    if(val && Array.isArray(val) && val.length > 0){
+      var raw = val;
+      var fb = raw.filter(function(b){ return b && b.client && b.date && typeof b.value === 'number'; });
+      if(fb.length > 0){
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(fb));
+        bookings = fb;
+        if(initDone){ renderCalendar(); renderAgenda(); }
+      }
+    }
+  });
+  dbListen('bookings', function(val){
+    if(val && Array.isArray(val) && initDone){
+      var fb = val.filter(function(b){ return b && b.client && b.date && typeof b.value === 'number'; });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(fb));
+      bookings = fb;
+      renderCalendar();
+      renderAgenda();
+    }
+  });
 }
 
 // ─── Cliente Recorrente ───
@@ -866,6 +951,7 @@ function fillClient(idx){
 }
 function saveBookings(){
   localStorage.setItem(STORAGE_KEY,JSON.stringify(bookings));
+  dbSave('bookings', bookings);
 }
 
 // ─── Navigation ───
