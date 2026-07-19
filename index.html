@@ -621,11 +621,17 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "306406235772",
   appId: "1:306406235772:web:39b6bc1d9484a0506d73f9"
 };
-let DB;
-try {
-  firebase.initializeApp(FIREBASE_CONFIG);
-  DB = firebase.database();
-} catch(e) { DB = null; }
+let DB = null;
+
+function initFirebase(){
+  if(DB) return;
+  try {
+    if(typeof firebase !== 'undefined' && firebase.initializeApp){
+      firebase.initializeApp(FIREBASE_CONFIG);
+      DB = firebase.database();
+    }
+  } catch(e) { DB = null; }
+}
 
 function dbSave(path, data){
   if(!DB) return Promise.resolve();
@@ -834,6 +840,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(initDone) return;
   initDone = true;
   try {
+    initFirebase();
     const ld = document.getElementById('loading');
     if(ld) ld.style.display='none';
     const hd = document.getElementById('appHeader');
