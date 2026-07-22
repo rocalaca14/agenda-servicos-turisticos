@@ -2533,6 +2533,10 @@ function generateReceipt(id){
       <h2 class="js-company">${escHtml(appSettings.companyName)}</h2>
       <p class="receipt-sub js-tagline">${escHtml(appSettings.tagline)}</p>
 
+      <div style="text-align:center;margin:10px 0 4px">
+        <span style="display:inline-block;background:linear-gradient(135deg,var(--t),#004d4d);color:#fff;font-size:12px;font-weight:700;letter-spacing:.5px;padding:5px 18px;border-radius:20px">${b.tipo==='buggy'?'🚙 Passeio de Buggy':b.tipo==='piscinas'?'🏝️ Piscinas Naturais':'🚐 Transfer'}</span>
+      </div>
+
       <hr class="receipt-divider">
 
       <div class="r-row"><span class="r-label">${ric('calendar')}Data</span><span class="r-value">${fmtDate(b.date)} — ${getDayName(b.date)}</span></div>
