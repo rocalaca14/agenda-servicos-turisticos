@@ -1176,7 +1176,7 @@ function fetchWeather(){
   if(cached){
     try { weatherCache = JSON.parse(cached); if(weatherCache.date===today) return Promise.resolve(weatherCache); } catch(e){}
   }
-  return fetch('https://api.open-meteo.com/v1/forecast?latitude=-9.005&longitude=-35.222&daily=temperature_2m_max,temperature_2m_min,weathercode&current_weather=true&timezone=America%2FRecife')
+  return fetch('https://api.open-meteo.com/v1/forecast?latitude=-9.005&longitude=-35.222&daily=temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset&current_weather=true&timezone=America%2FRecife')
     .then(r=>r.json())
     .then(data=>{
       const d = data.daily;
@@ -1185,7 +1185,9 @@ function fetchWeather(){
         max: d.temperature_2m_max[0],
         min: d.temperature_2m_min[0],
         code: d.weathercode[0],
-        current: data.current_weather?.temperature
+        current: data.current_weather?.temperature,
+        sunrise: d.sunrise ? d.sunrise[0].slice(11,16) : null,
+        sunset: d.sunset ? d.sunset[0].slice(11,16) : null
       };
       localStorage.setItem('weather_cache', JSON.stringify(weatherCache));
       return weatherCache;
@@ -1242,6 +1244,9 @@ function renderDashStats(){
   const weatherHTML = weather
     ? `<span>${weatherIcon(weather.code)} ${Math.round(weather.max)}° / ${Math.round(weather.min)}°</span>`
     : `<span>🌡️ --°</span>`;
+  const sunHTML = weather && weather.sunrise
+    ? `<div style="font-size:10px;opacity:.7;margin-top:2px">🌅 ${weather.sunrise} · 🌇 ${weather.sunset||'--:--'}</div>`
+    : '';
   el.innerHTML = `
     <div class="dash-stat">
       <div class="dash-icon">📅</div>
@@ -1255,6 +1260,7 @@ function renderDashStats(){
       <div class="dash-info">
         <div class="dash-num">${weather?Math.round(weather.max)+'°':'--'}</div>
         <div class="dash-label">${weather?weatherDesc(weather.code):'Carregando...'}</div>
+        ${sunHTML}
       </div>
     </div>`;
 }
