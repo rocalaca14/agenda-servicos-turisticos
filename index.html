@@ -47,7 +47,7 @@ body{padding-bottom:80px;overflow-x:hidden}
 .nav-item:active{opacity:.6}
 
 /* FAB */
-.fab{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);width:56px;height:56px;border-radius:50%;background:var(--o);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,223,195,.45);z-index:250;transition:.15s}
+.fab{position:fixed;bottom:68px;left:50%;transform:translateX(-50%);width:56px;height:56px;border-radius:50%;background:var(--t);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,189,185,.45);z-index:250;transition:.15s}
 .fab:active{transform:translateX(-50%) scale(.92)}
 
 /* Views */
@@ -199,6 +199,23 @@ textarea.form-input{resize:vertical;min-height:70px}
 .sb-dot.concluido{background:#007bff}
 .sb-dot.cancelado{background:#dc3545}
 .sidebar-placeholder{padding:20px;color:var(--border);font-size:12px;text-align:center;border-top:1px dashed var(--border);margin:16px 20px 0}
+
+/* Dashboard */
+.dash-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.dash-stat{background:linear-gradient(135deg,var(--t),#004D4D);border-radius:var(--radius);padding:14px;color:#fff;display:flex;align-items:center;gap:10px}
+.dash-stat .dash-icon{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.dash-stat .dash-info{min-width:0}
+.dash-stat .dash-num{font-size:20px;font-weight:800;line-height:1}
+.dash-stat .dash-label{font-size:11px;opacity:.8;margin-top:1px}
+.dash-upcoming-title{font-size:14px;font-weight:700;color:var(--text);margin:16px 0 8px;padding-left:2px}
+.dash-upcoming-card{background:var(--surface);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s;border-left:4px solid var(--t)}
+.dash-upcoming-card:active{transform:scale(.98)}
+.dash-upcoming-card .duc-time{font-size:13px;font-weight:700;color:var(--t);white-space:nowrap;min-width:42px}
+.dash-upcoming-card .duc-info{flex:1;min-width:0}
+.dash-upcoming-card .duc-client{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-upcoming-card .duc-route{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-upcoming-card .duc-value{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap}
+.dash-empty{text-align:center;padding:20px;color:var(--text2);font-size:13px}
 
 /* Calendar */
 .cal-nav{display:flex;align-items:center;justify-content:space-between;padding:0 0 16px}
@@ -449,11 +466,11 @@ textarea.form-input{resize:vertical;min-height:70px}
 <nav class="bottom-nav">
   <button class="nav-item active" data-view="calendar">
     <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
-    Calendário
+    Agenda
   </button>
-  <button class="nav-item" data-view="stats">
-    <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-    Estatísticas
+  <button class="nav-item" data-view="stats" onclick="openSettings()">
+    <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/></svg>
+    Config
   </button>
 </nav>
 
@@ -493,9 +510,12 @@ textarea.form-input{resize:vertical;min-height:70px}
   </div>
 </div>
 
-<!-- ===== VIEW: CALENDAR ===== -->
+<!-- ===== VIEW: CALENDAR / DASHBOARD ===== -->
 <div class="view active" id="viewCalendar">
   <div id="calendarContainer"></div>
+  <div id="dashStats" class="dash-stats"></div>
+  <div id="dashFilter" class="filter-bar" style="margin-bottom:8px"></div>
+  <div id="dashUpcoming"></div>
 </div>
 
 <!-- ===== VIEW: DAY DETAIL ===== -->
@@ -987,6 +1007,7 @@ function setupNav(){
     el.addEventListener('click',()=>{
       const v = el.dataset.view;
       if(v==='form'){ openForm(); return; }
+      if(el.onclick) return; // handle onclick directly
       showView(v);
     });
   });
@@ -1143,6 +1164,117 @@ function statusLabel(s){
   return s==='confirmado'?'Confirmado':s==='concluido'?'Concluído':'Cancelado';
 }
 
+// ─── Weather (Open-Meteo) ───
+let weatherCache = null;
+const WEATHER_ICONS = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌧️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'❄️',73:'❄️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
+const WEATHER_DESC = {0:'Ensolarado',1:'Parcialmente nublado',2:'Nublado',3:'Encoberto',45:'Nevoeiro',48:'Nevoeiro',51:'Chuva leve',53:'Chuva',55:'Chuva forte',61:'Chuva',63:'Chuva',65:'Chuva forte',71:'Neve',73:'Neve',75:'Neve',80:'Chuva',81:'Chuva',82:'Chuva forte',95:'Tempestade',96:'Tempestade',99:'Tempestade'};
+
+function fetchWeather(){
+  const today = new Date().toISOString().slice(0,10);
+  if(weatherCache && weatherCache.date === today) return Promise.resolve(weatherCache);
+  const cached = localStorage.getItem('weather_cache');
+  if(cached){
+    try { weatherCache = JSON.parse(cached); if(weatherCache.date===today) return Promise.resolve(weatherCache); } catch(e){}
+  }
+  return fetch('https://api.open-meteo.com/v1/forecast?latitude=-9.005&longitude=-35.222&daily=temperature_2m_max,temperature_2m_min,weathercode&current_weather=true&timezone=America%2FRecife')
+    .then(r=>r.json())
+    .then(data=>{
+      const d = data.daily;
+      weatherCache = {
+        date: today,
+        max: d.temperature_2m_max[0],
+        min: d.temperature_2m_min[0],
+        code: d.weathercode[0],
+        current: data.current_weather?.temperature
+      };
+      localStorage.setItem('weather_cache', JSON.stringify(weatherCache));
+      return weatherCache;
+    })
+    .catch(()=>null);
+}
+
+function weatherIcon(code){ return WEATHER_ICONS[code]||'🌡️'; }
+function weatherDesc(code){ return WEATHER_DESC[code]||'Clima'; }
+
+// ─── Dashboard: Upcoming bookings ───
+function renderDashUpcoming(filter){
+  const el = document.getElementById('dashUpcoming');
+  if(!el) return;
+  const today = new Date().toISOString().slice(0,10);
+  let upcoming = bookings.filter(b=>{
+    if(!b.date || !b.client) return false;
+    if(b.date < today) return false;
+    if(b.status==='cancelado') return false;
+    if(filter && filter!=='todos' && b.tipo!==filter) return false;
+    return true;
+  }).sort((a,b)=>{
+    if(a.date!==b.date) return a.date.localeCompare(b.date);
+    return (a.startTime||'').localeCompare(b.startTime||'');
+  }).slice(0,8);
+
+  if(upcoming.length===0){
+    el.innerHTML = `<div class="dash-empty">Nenhum agendamento próximo</div>`;
+    return;
+  }
+  el.innerHTML = `<div class="dash-upcoming-title">Próximos Agendamentos</div>` +
+    upcoming.map(b=>{
+      const route = getRoute(b.routeId);
+      const tipoIcon = b.tipo==='buggy'?'🚙':b.tipo==='piscinas'?'🏝️':'🚐';
+      const dateLabel = b.date===today?'Hoje':fmtDate(b.date);
+      return `<div class="dash-upcoming-card" onclick="openDetail('${b.id}')">
+        <div class="duc-time">${b.startTime||'—'}</div>
+        <div class="duc-info">
+          <div class="duc-client">${escHtml(b.client)}</div>
+          <div class="duc-route">${tipoIcon} ${route?route.name:b.tipo==='piscinas'?'Piscinas Naturais':'Transfer'} · ${dateLabel}</div>
+        </div>
+        <div class="duc-value">${fmtCurr(b.value)}</div>
+      </div>`;
+    }).join('');
+}
+
+// ─── Dashboard: Stats ───
+function renderDashStats(){
+  const el = document.getElementById('dashStats');
+  if(!el) return;
+  const today = new Date().toISOString().slice(0,10);
+  const todayCount = bookings.filter(b=>b.date===today && b.status!=='cancelado').length;
+  const weather = weatherCache;
+  const weatherHTML = weather
+    ? `<span>${weatherIcon(weather.code)} ${Math.round(weather.max)}° / ${Math.round(weather.min)}°</span>`
+    : `<span>🌡️ --°</span>`;
+  el.innerHTML = `
+    <div class="dash-stat">
+      <div class="dash-icon">📅</div>
+      <div class="dash-info">
+        <div class="dash-num">${todayCount}</div>
+        <div class="dash-label">Agendamentos Hoje</div>
+      </div>
+    </div>
+    <div class="dash-stat">
+      <div class="dash-icon">${weather?weatherIcon(weather.code):'🌡️'}</div>
+      <div class="dash-info">
+        <div class="dash-num">${weather?Math.round(weather.max)+'°':'--'}</div>
+        <div class="dash-label">${weather?weatherDesc(weather.code):'Carregando...'}</div>
+      </div>
+    </div>`;
+}
+
+// ─── Dashboard: Filter pills ───
+let dashFilter = 'todos';
+function renderDashFilter(){
+  const el = document.getElementById('dashFilter');
+  if(!el) return;
+  const types = [
+    {id:'todos',label:'Todos'},
+    {id:'buggy',label:'🚙 Buggy'},
+    {id:'piscinas',label:'🏝️ Piscinas'},
+    {id:'transfer',label:'🚐 Transfer'}
+  ];
+  el.innerHTML = types.map(t=>
+    `<button class="filter-btn${dashFilter===t.id?' active':''}" onclick="dashFilter='${t.id}';renderDashFilter();renderDashUpcoming('${t.id}')">${t.label}</button>`
+  ).join('');
+}
+
 // ─── Calendar State ───
 let calMonth = new Date().getMonth();
 let calYear = new Date().getFullYear();
@@ -1246,6 +1378,12 @@ function renderCalendar(){
 
   html += `</div>`;
   container.innerHTML = html;
+
+  // Render dashboard components
+  renderDashStats();
+  renderDashFilter();
+  renderDashUpcoming(dashFilter);
+  fetchWeather().then(()=>renderDashStats());
 }
 
 function timeToMinutes(t){
