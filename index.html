@@ -31,6 +31,9 @@
 
 /* Theme: Panic */
 .theme-panic{--t:#16FFBD;--t2:#12C998;--o:#C34271;--o2:#F070A1;--bg:#FFF5F8;--white:#FFFFFF;--surface:var(--white);--border:#439F76;--text:#102A30;--text2:#527178;--shadow:0 4px 20px rgba(22,255,189,.15)}
+
+/* Theme: Taste Rewind (dark) */
+.theme-taste{--t:#A855F7;--t2:#802BB1;--o:#D1D7E0;--o2:#564F6F;--bg:#2D283E;--white:#3D3755;--surface:#3D3755;--border:#564F6F;--text:#D1D7E0;--text2:#8A85A0;--shadow:0 4px 20px rgba(168,85,247,.2)}
 html,body{height:100%;width:100%;overflow-x:hidden;font-family:var(--font);background:var(--bg);color:var(--text);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 svg{shape-rendering:geometricPrecision}
 body{padding-bottom:80px;overflow-x:hidden}
@@ -441,7 +444,7 @@ textarea.form-input{resize:vertical;min-height:70px}
       </div>
       <div class="form-group">
         <label>🎨 Paleta de Cores</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
           <button class="theme-btn" data-theme="default" onclick="selectTheme('default')" style="padding:10px;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px">
             <span style="width:16px;height:16px;border-radius:50%;background:#00606C;display:inline-block"></span>
             Padrão
@@ -453,6 +456,10 @@ textarea.form-input{resize:vertical;min-height:70px}
           <button class="theme-btn" data-theme="panic" onclick="selectTheme('panic')" style="padding:10px;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px">
             <span style="width:16px;height:16px;border-radius:50%;background:#C34271;display:inline-block"></span>
             Panic
+          </button>
+          <button class="theme-btn" data-theme="taste" onclick="selectTheme('taste')" style="padding:10px;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px">
+            <span style="width:16px;height:16px;border-radius:50%;background:#802BB1;display:inline-block"></span>
+            Taste
           </button>
         </div>
       </div>
