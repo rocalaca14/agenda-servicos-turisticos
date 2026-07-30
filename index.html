@@ -291,6 +291,76 @@ textarea.form-input{resize:vertical;min-height:70px}
 .tl-block.status-concluido{background:var(--t2);border-left-color:var(--o);color:#fff}
 .tl-block.status-cancelado{background:#8A8A8A;border-left-color:var(--o);color:#fff}
 
+/* Animations */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}
+@keyframes scaleInBounce{0%{opacity:0;transform:scale(0.3)}50%{transform:scale(1.05)}70%{transform:scale(0.95)}100%{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes rotatePlus{from{transform:translateX(-50%) rotate(0deg)}to{transform:translateX(-50%) rotate(135deg)}}
+@keyframes rotatePlusBack{from{transform:translateX(-50%) rotate(135deg)}to{transform:translateX(-50%) rotate(0deg)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+.anim-fade{animation:fadeIn .3s ease forwards}
+.anim-slide-up{animation:slideUp .35s ease forwards}
+.anim-slide-down{animation:slideDown .35s ease forwards}
+.anim-scale-in{animation:scaleIn .3s ease forwards}
+.anim-scale-bounce{animation:scaleInBounce .4s ease forwards}
+.anim-stagger-1{animation:slideUp .35s ease .05s forwards;opacity:0}
+.anim-stagger-2{animation:slideUp .35s ease .1s forwards;opacity:0}
+.anim-stagger-3{animation:slideUp .35s ease .15s forwards;opacity:0}
+.anim-stagger-4{animation:slideUp .35s ease .2s forwards;opacity:0}
+.anim-stagger-5{animation:slideUp .35s ease .25s forwards;opacity:0}
+.anim-stagger-6{animation:slideUp .35s ease .3s forwards;opacity:0}
+.anim-stagger-7{animation:slideUp .35s ease .35s forwards;opacity:0}
+.anim-stagger-8{animation:slideUp .35s ease .4s forwards;opacity:0}
+
+/* View Transitions */
+.view-transition-in{animation:slideInRight .3s ease forwards}
+.view-transition-out{animation:slideInLeft .25s ease forwards}
+
+/* Calendar */
+.cal-day.has-bookings{animation:pulse 3s ease-in-out infinite}
+.cal-day:active{transform:scale(.92)!important}
+
+/* FAB */
+.fab{transition:transform .2s ease,box-shadow .2s ease}
+.fab:active{transform:translateX(-50%) scale(.92)!important}
+.fab.open svg{animation:rotatePlus .3s ease forwards}
+.fab:not(.open) svg{animation:rotatePlusBack .3s ease forwards}
+
+/* Theme buttons */
+.theme-btn{transition:transform .15s ease,border-color .2s ease,background .2s ease}
+.theme-btn:active{transform:scale(.95)}
+.theme-btn.active{transform:scale(1.02);border-width:2.5px}
+
+/* Booking cards */
+.booking-card{transition:transform .15s ease,box-shadow .2s ease}
+.booking-card:active{transform:scale(.98)!important}
+
+/* Dashboard stats */
+.dash-stat{animation:scaleIn .4s ease forwards}
+.dash-stat:nth-child(2){animation-delay:.1s;opacity:0}
+
+/* Receipt */
+.receipt{animation:fadeIn .4s ease forwards}
+.receipt .r-row{animation:slideUp .3s ease forwards;opacity:0}
+.receipt .r-row:nth-child(1){animation-delay:.1s}
+.receipt .r-row:nth-child(2){animation-delay:.15s}
+.receipt .r-row:nth-child(3){animation-delay:.2s}
+.receipt .r-row:nth-child(4){animation-delay:.25s}
+.receipt .r-row:nth-child(5){animation-delay:.3s}
+.receipt .r-row:nth-child(6){animation-delay:.35s}
+.receipt .r-row:nth-child(7){animation-delay:.4s}
+.receipt .r-row:nth-child(8){animation-delay:.45s}
+
+/* Modal */
+.modal-overlay{transition:opacity .25s ease}
+.modal-content{animation:slideUp .3s ease forwards}
+
 /* Transitions */
 .view-transition{animation:slideIn .3s ease}
 @keyframes slideIn{from{transform:translateX(60px);opacity:0}to{transform:translateX(0);opacity:1}}
@@ -498,7 +568,7 @@ textarea.form-input{resize:vertical;min-height:70px}
 </div>
 
 <!-- ===== FAB ===== -->
-<button class="fab" onclick="openForm()">
+<button class="fab" onclick="this.classList.toggle('open');openForm()">
   <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 </button>
 
@@ -1067,9 +1137,15 @@ function setupNav(){
 }
 function showView(view){
   currentView = view;
-  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(el=>{
+    el.classList.remove('active');
+    el.classList.remove('view-transition-in','view-transition-out');
+  });
   const el = document.getElementById(`view${view.charAt(0).toUpperCase()+view.slice(1)}`);
-  if(el) el.classList.add('active');
+  if(el){
+    el.classList.add('active','view-transition-in');
+    setTimeout(()=>el.classList.remove('view-transition-in'),300);
+  }
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===view));
   if(view==='agenda') renderAgenda();
   if(view==='calendar') renderCalendar();
@@ -1183,15 +1259,16 @@ function renderAgenda(){
     const isToday = date===today;
     return `<div class="date-group">
       <div class="date-header${isToday?' today':''}">
-        ${isToday?'📌 ':''}${fmtDate(date)} — ${getDayName(date)}
+        ${isToday?' ':''}${fmtDate(date)} — ${getDayName(date)}
         <span class="day-count">(${items.length})</span>
       </div>
-      ${items.map(b=>{
+      ${items.map((b,i)=>{
         const isPiscinas = b.tipo==='piscinas';
         const isTransfer = b.tipo==='transfer';
         const route = isPiscinas||isTransfer ? null : getRoute(b.routeId);
         const timeStr = isTransfer ? (b.transferPickupTime||'') : `${b.startTime} - ${safeEndTime(b)}`;
-        return `<div class="booking-card bc-${b.status}" onclick="openDetail('${b.id}')">
+        const staggerClass = i<8?`anim-stagger-${i+1}`:'';
+        return `<div class="booking-card bc-${b.status} ${staggerClass}" onclick="openDetail('${b.id}')">
           <div class="bc-top">
             <div>
               <div class="bc-time">${timeStr}</div>
@@ -1272,11 +1349,12 @@ function renderDashUpcoming(filter){
     return;
   }
   el.innerHTML = `<div class="dash-upcoming-title">Próximos Agendamentos</div>` +
-    upcoming.map(b=>{
+    upcoming.map((b,i)=>{
       const route = getRoute(b.routeId);
       const tipoIcon = b.tipo==='buggy'?'🚙':b.tipo==='piscinas'?'🏝️':'🚐';
       const dateLabel = b.date===today?'Hoje':fmtDate(b.date);
-      return `<div class="dash-upcoming-card" onclick="openDetail('${b.id}')">
+      const staggerClass = i<8?`anim-stagger-${i+1}`:'';
+      return `<div class="dash-upcoming-card ${staggerClass}" onclick="openDetail('${b.id}')">
         <div class="duc-time">${b.startTime||'—'}</div>
         <div class="duc-info">
           <div class="duc-client">${escHtml(b.client)}</div>
@@ -2731,7 +2809,7 @@ function generateReceipt(id){
       <p class="receipt-sub js-tagline">${escHtml(appSettings.tagline)}</p>
 
       <div style="text-align:center;margin:10px 0 4px">
-        <span style="display:inline-block;background:color-mix(in srgb, var(--t) 8%, transparent);color:var(--t);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 16px;border-radius:20px;border:1px solid var(--t);opacity:.85">${b.tipo==='buggy'?' Passeio de Buggy':b.tipo==='piscinas'?'🏝️ Piscinas Naturais':'🚐 Transfer'}</span>
+        <span class="anim-scale-bounce" style="display:inline-block;background:color-mix(in srgb, var(--t) 8%, transparent);color:var(--t);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 16px;border-radius:20px;border:1px solid var(--t);opacity:.85">${b.tipo==='buggy'?' Passeio de Buggy':b.tipo==='piscinas'?'🏝️ Piscinas Naturais':'🚐 Transfer'}</span>
       </div>
 
       <hr class="receipt-divider">
