@@ -184,12 +184,12 @@ textarea.form-input{resize:vertical;min-height:70px}
 .receipt .receipt-divider{border:none;height:1px;background:linear-gradient(90deg,transparent,var(--border),var(--o),var(--border),transparent);margin:14px 0;opacity:1}
 .receipt .r-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;letter-spacing:.2px}
 .receipt .r-row .r-label{color:var(--t);font-weight:600;opacity:.85;display:flex;align-items:center}
-.receipt .r-row .r-value{font-weight:700;text-align:right;color:#1A2E2E}
-.receipt .r-stops{margin:8px 0 0;padding-left:0;font-size:12px;color:#4A6A6A;list-style:none}
+.receipt .r-row .r-value{font-weight:700;text-align:right;color:var(--text)}
+.receipt .r-stops{margin:8px 0 0;padding-left:0;font-size:12px;color:var(--text2);list-style:none}
 .receipt .r-stops li{padding:3px 0;display:flex;align-items:center}
 .receipt .r-stops .r-section{font-weight:700;color:var(--t);margin:8px 0 4px;font-size:11px;letter-spacing:.5px;text-transform:uppercase;opacity:.6;padding-left:0;display:block}
 .receipt .r-footer{text-align:center;margin-top:14px;padding-top:12px;font-size:11px;color:var(--text2);letter-spacing:.5px;border-top:1px solid var(--border);opacity:.7}
-.receipt .r-highlight{background:linear-gradient(135deg,rgba(0,223,195,.07),rgba(0,96,108,.04));border-radius:10px;padding:12px 16px;margin:12px 0;border:1px solid var(--t);opacity:.8}
+.receipt .r-highlight{background:linear-gradient(135deg,rgba(0,223,195,.07),rgba(0,96,108,.04));border-radius:10px;padding:12px 16px;margin:12px 0;border:1px solid var(--t);opacity:.9}
 .receipt .r-highlight .r-row{font-size:14px}
 .receipt .r-highlight .r-row:last-child{padding-top:8px;margin-top:6px;border-top:1px solid rgba(0,223,195,.12)}
 
@@ -2724,7 +2724,7 @@ function generateReceipt(id){
       <p class="receipt-sub js-tagline">${escHtml(appSettings.tagline)}</p>
 
       <div style="text-align:center;margin:10px 0 4px">
-        <span style="display:inline-block;background:linear-gradient(135deg,var(--t),#004d4d);color:#fff;font-size:12px;font-weight:700;letter-spacing:.5px;padding:5px 18px;border-radius:20px">${b.tipo==='buggy'?'🚙 Passeio de Buggy':b.tipo==='piscinas'?'🏝️ Piscinas Naturais':'🚐 Transfer'}</span>
+        <span style="display:inline-block;background:linear-gradient(135deg,var(--t),var(--t2));color:#fff;font-size:12px;font-weight:700;letter-spacing:.5px;padding:5px 18px;border-radius:20px">${b.tipo==='buggy'?'🚙 Passeio de Buggy':b.tipo==='piscinas'?'🏝️ Piscinas Naturais':'🚐 Transfer'}</span>
       </div>
 
       <hr class="receipt-divider">
