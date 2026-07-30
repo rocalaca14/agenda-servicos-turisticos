@@ -25,6 +25,9 @@
 [style*="display:grid"]{overflow:hidden}
 .form-input,.signal-btn,.status-option{min-width:0!important}
 :root{--t:#00606C;--t2:#019391;--o:#00DFC3;--o2:#00BFA8;--bg:#F4FAFA;--white:#FFFFFF;--surface:var(--white);--border:#B7E5E2;--text:#102A30;--text2:#527178;--shadow:0 4px 20px rgba(0,0,0,.12);--radius:14px;--radius-sm:10px;--font:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif}
+
+/* Theme: Happy */
+.theme-happy{--t:#A64AC9;--t2:#8B3AA8;--o:#FCCD04;--o2:#E5B800;--bg:#F5E6CC;--white:#FFFFFF;--surface:var(--white);--border:#F5E6CC;--text:#102A30;--text2:#527178;--shadow:0 4px 20px rgba(166,74,201,.15)}
 html,body{height:100%;width:100%;overflow-x:hidden;font-family:var(--font);background:var(--bg);color:var(--text);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 svg{shape-rendering:geometricPrecision}
 body{padding-bottom:80px;overflow-x:hidden}
@@ -135,6 +138,9 @@ textarea.form-input{resize:vertical;min-height:70px}
 .filter-bar::-webkit-scrollbar{display:none}
 .filter-btn{white-space:nowrap;padding:6px 16px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);font-size:13px;font-weight:500;cursor:pointer;transition:.2s;font-family:var(--font);color:var(--text2)}
 .filter-btn.active{background:var(--t);color:var(--white);border-color:var(--t)}
+
+/* Theme buttons */
+.theme-btn.active{border-color:var(--t);background:rgba(0,189,185,.05)}
 
 /* Stats */
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
@@ -430,6 +436,19 @@ textarea.form-input{resize:vertical;min-height:70px}
         </div>
         <button class="btn btn-sm" onclick="removeLogo()" style="margin-top:6px;background:var(--bg);color:var(--text2);border:none;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px">Remover logo</button>
       </div>
+      <div class="form-group">
+        <label>🎨 Paleta de Cores</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button class="theme-btn" data-theme="default" onclick="selectTheme('default')" style="padding:10px;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px">
+            <span style="width:16px;height:16px;border-radius:50%;background:#00606C;display:inline-block"></span>
+            Padrão
+          </button>
+          <button class="theme-btn" data-theme="happy" onclick="selectTheme('happy')" style="padding:10px;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px">
+            <span style="width:16px;height:16px;border-radius:50%;background:#A64AC9;display:inline-block"></span>
+            Happy
+          </button>
+        </div>
+      </div>
     </div>
     <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
     <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px">💾 Backup de Dados</div>
@@ -631,7 +650,7 @@ let editingId = null;
 const formState = { tipo:'buggy', routeId:null, durationLabel:null, signal:0, customValue:0, quantity:1, discount:0, status:'confirmado', poolAdults:1, poolChildren:0, poolIndividualPrice:0, poolName:'', transferPassengers:1, transferPickupTime:'', transferPickup:'', transferDropoff:'', transferValue:0, transferPickupType:'recife', transferPickupCustom:'', transferDropoffType:'recife', transferDropoffCustom:'' };
 
 // ─── Settings ───
-let appSettings = { companyName:'Agenda Serviços Turísticos', tagline:'Serviços Turísticos - Maragogi-AL', location:'Maragogi-AL', logoDataUrl:'', logoZoom:1, instagram:'@destinosmaragogi', contactName:'Rodrigo', contactPhone:'(82) 99141-4023' };
+let appSettings = { companyName:'Agenda Serviços Turísticos', tagline:'Serviços Turísticos - Maragogi-AL', location:'Maragogi-AL', logoDataUrl:'', logoZoom:1, instagram:'@destinosmaragogi', contactName:'Rodrigo', contactPhone:'(82) 99141-4023', theme:'default' };
 const SETTINGS_KEY = 'destinos_maragogi_settings';
 
 // ─── Firebase ───
@@ -722,6 +741,8 @@ function applySettings(){
     }
   });
   applyLogoZoom();
+  // Theme
+  document.body.className = appSettings.theme && appSettings.theme !== 'default' ? 'theme-' + appSettings.theme : '';
 }
 function openSettings(){
   document.getElementById('settCompany').value = appSettings.companyName;
@@ -737,7 +758,18 @@ function openSettings(){
     document.getElementById('settLogoPreview').style.display = 'none';
   }
   applyLogoZoom();
+  // Theme buttons
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === (appSettings.theme || 'default'));
+  });
   openModal('settingsModal');
+}
+function selectTheme(theme){
+  appSettings.theme = theme;
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === theme);
+  });
+  document.body.className = theme && theme !== 'default' ? 'theme-' + theme : '';
 }
 // Logo upload handler
 document.addEventListener('change', function(e){
