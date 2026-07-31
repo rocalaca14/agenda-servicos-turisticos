@@ -202,25 +202,32 @@ textarea.form-input{resize:vertical;min-height:70px}
 .detail-row .value{font-weight:600;text-align:right;max-width:60%}
 
 /* Receipt */
-.receipt{position:relative;overflow:hidden;padding:28px 24px;border-radius:16px;max-width:380px;margin:0 auto;background:var(--surface);box-shadow:0 4px 24px rgba(0,96,108,.08)}
+.receipt{position:relative;overflow:hidden;padding:24px 20px;border-radius:16px;width:384px;aspect-ratio:3/4;margin:0 auto;background:var(--surface);box-shadow:0 4px 24px rgba(0,96,108,.08);display:flex;flex-direction:column}
 .receipt::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--t),var(--o),var(--o2));z-index:2}
 .receipt-pattern{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:.55;z-index:0}
 .receipt-pattern svg{width:100%;height:100%}
 .receipt>:not(.receipt-pattern){position:relative;z-index:1}
 
 .receipt h2{text-align:center;font-size:18px;font-weight:700;letter-spacing:.5px;color:var(--t);margin-bottom:2px}
-.receipt .receipt-sub{text-align:center;font-size:11px;color:var(--text2);letter-spacing:.3px;margin-bottom:14px}
-.receipt .receipt-divider{border:none;height:1px;background:linear-gradient(90deg,transparent,var(--border),var(--o),var(--border),transparent);margin:14px 0;opacity:1}
-.receipt .r-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;letter-spacing:.2px}
+.receipt .receipt-sub{text-align:center;font-size:11px;color:var(--text2);letter-spacing:.3px;margin-bottom:10px}
+.receipt .receipt-divider{border:none;height:1px;background:linear-gradient(90deg,transparent,var(--border),var(--o),var(--border),transparent);margin:10px 0;opacity:1}
+.receipt .r-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:4px 0;letter-spacing:.2px}
 .receipt .r-row .r-label{color:var(--t);font-weight:600;opacity:.85;display:flex;align-items:center}
 .receipt .r-row .r-value{font-weight:700;text-align:right;color:var(--text)}
-.receipt .r-stops{margin:8px 0 0;padding-left:0;font-size:12px;color:var(--text2);list-style:none}
-.receipt .r-stops li{padding:3px 0;display:flex;align-items:center}
-.receipt .r-stops .r-section{font-weight:700;color:var(--t);margin:8px 0 4px;font-size:11px;letter-spacing:.5px;text-transform:uppercase;opacity:.6;padding-left:0;display:block}
-.receipt .r-footer{text-align:center;margin-top:14px;padding-top:12px;font-size:11px;color:var(--text2);letter-spacing:.5px;border-top:1px solid var(--border);opacity:.7}
-.receipt .r-highlight{background:linear-gradient(135deg,rgba(0,223,195,.07),rgba(0,96,108,.04));border-radius:10px;padding:12px 16px;margin:12px 0;border:1px solid var(--t);opacity:.9}
-.receipt .r-highlight .r-row{font-size:14px}
-.receipt .r-highlight .r-row:last-child{padding-top:8px;margin-top:6px;border-top:1px solid rgba(0,223,195,.12)}
+.receipt .r-stops{margin:6px 0 0;padding-left:0;font-size:11px;color:var(--text2);list-style:none}
+.receipt .r-stops li{padding:2px 0;display:flex;align-items:center}
+.receipt .r-stops .r-section{font-weight:700;color:var(--t);margin:6px 0 3px;font-size:10px;letter-spacing:.5px;text-transform:uppercase;opacity:.6;padding-left:0;display:block}
+.receipt .r-footer{text-align:center;margin-top:auto;padding-top:8px;font-size:10px;color:var(--text2);letter-spacing:.5px;border-top:1px solid var(--border);opacity:.7}
+.receipt .r-highlight{background:linear-gradient(135deg,rgba(0,223,195,.07),rgba(0,96,108,.04));border-radius:10px;padding:10px 14px;border:1px solid var(--t);opacity:.9}
+.receipt .r-highlight .r-row{font-size:12px}
+.receipt .r-highlight .r-row:last-child{padding-top:6px;margin-top:4px;border-top:1px solid rgba(0,223,195,.12)}
+
+.receipt .r-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin:6px 0}
+.receipt .r-grid-item{display:flex;flex-direction:column;gap:2px}
+.receipt .r-grid-item .r-label{font-size:10px;font-weight:600;color:var(--t);opacity:.85;display:flex;align-items:center}
+.receipt .r-grid-item .r-value{font-size:12px;font-weight:700;color:var(--text);line-height:1.3}
+.receipt .r-bottom{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0}
+.receipt .r-route{background:rgba(0,223,195,.04);border-radius:10px;padding:10px 14px;border:1px solid rgba(0,223,195,.15)}
 
 /* Sidebar */
 .sidebar{position:fixed;top:0;left:-280px;bottom:0;width:280px;background:var(--surface);z-index:400;box-shadow:4px 0 24px rgba(0,0,0,.12);transition:left .3s ease;display:flex;flex-direction:column;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
@@ -3251,86 +3258,88 @@ function generateReceipt(id){
         </svg>
       </div>
 
-      <div class="logo-round" style="width:90px;height:90px;margin:0 auto 10px" id="receiptLogoWrap">
+      <div class="logo-round" style="width:80px;height:80px;margin:0 auto 6px" id="receiptLogoWrap">
         <img class="receipt-logo js-logo" src="${appSettings.logoDataUrl||'Logo%20Destinos%20Maragogi.png'}" alt="Logo" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='icon.svg'}else{this.style.display='none'}" style="transform:scale(${appSettings.logoZoom||1})">
       </div>
-      <h2 class="js-company">${escHtml(appSettings.companyName)}</h2>
+      <h2 class="js-company" style="font-size:17px;margin-bottom:1px">${escHtml(appSettings.companyName)}</h2>
       <p class="receipt-sub js-tagline">${escHtml(appSettings.tagline)}</p>
 
-      <div style="text-align:center;margin:10px 0 4px">
-        <span class="anim-scale-bounce" style="display:inline-block;background:rgba(1,147,145,0.08);color:var(--t);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 16px;border-radius:20px;border:1px solid var(--t);opacity:.85">${b.tipo==='buggy'?' Passeio de Buggy':b.tipo==='piscinas'?'🏝️ Piscinas Naturais':'🚐 Transfer'}</span>
+      <div style="text-align:center;margin:6px 0 4px">
+        <span class="anim-scale-bounce" style="display:inline-block;background:rgba(1,147,145,0.08);color:var(--t);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:20px;border:1px solid var(--t);opacity:.85">${b.tipo==='buggy'?' Passeio de Buggy':b.tipo==='piscinas'?'🏝️ Piscinas Naturais':'🚐 Transfer'}</span>
       </div>
 
       <hr class="receipt-divider">
 
-      <div class="r-row"><span class="r-label">${ric('calendar')}Data</span><span class="r-value">${fmtDate(b.date)} — ${getDayName(b.date)}</span></div>
-      <div class="r-row"><span class="r-label">${ric('clock')}Horário</span><span class="r-value">${b.startTime} — ${endTime}</span></div>
-      <div class="r-row"><span class="r-label">${ric('user')}Cliente</span><span class="r-value" style="font-weight:700">${escHtml(b.client)}</span></div>
-      <div class="r-row"><span class="r-label">${ric('phone')}Contato</span><span class="r-value">${escHtml(b.contact)}</span></div>
-      <div class="r-row"><span class="r-label">${ric('group')}Acompanhantes</span><span class="r-value">${b.companions||'—'}</span></div>
-      ${isTransfer ? `
-      <div class="r-row"><span class="r-label">${ric('pin')}Embarque</span><span class="r-value">${escHtml(b.transferPickup||'—')}</span></div>
-      <div class="r-row"><span class="r-label">${ric('pin')}Desembarque</span><span class="r-value">${escHtml(b.transferDropoff||'—')}</span></div>
-      ` : `
-      <div class="r-row"><span class="r-label">${ric('pin')}Embarque</span><span class="r-value">${escHtml(b.pickupDetail||'—')}</span></div>
-      `}
-
-      ${isPiscinas ? `
-      <div class="r-row"><span class="r-label">${ric('loc')}Piscina</span><span class="r-value">${escHtml(b.poolName||'—')}</span></div>
-      ${b.vesselType?`<div class="r-row"><span class="r-label">${ric('pin')}Embarcação</span><span class="r-value">${b.vesselType==='lancha'?'🚤 Lancha':b.vesselType==='jangada'?'⛵ Jangada':'🛥️ Catamarã'} ${b.vesselMode==='privada'?'🔒 Privada':'👥 Compartilhada'}</span></div>`:''}
-      <div class="r-row"><span class="r-label">${ric('group')}Adultos</span><span class="r-value">${b.poolAdults||0} × ${fmtCurr(b.poolIndividualPrice||0)}</span></div>
-      ${b.poolChildren>0?`<div class="r-row"><span class="r-label">${ric('group')}Crianças</span><span class="r-value">${b.poolChildren} × ${fmtCurr((b.poolIndividualPrice||0)*0.5)} (meia)</span></div>`:''}
-      ` : (isTransfer ? `
-      <div class="r-row"><span class="r-label">${ric('group')}Passageiros</span><span class="r-value">${b.transferPassengers||1}</span></div>
-      <div class="r-row"><span class="r-label">${ric('pin')}Embarque</span><span class="r-value">${escHtml(b.transferPickup||'—')}</span></div>
-      <div class="r-row"><span class="r-label">${ric('pin')}Desembarque</span><span class="r-value">${escHtml(b.transferDropoff||'—')}</span></div>
-      ` : `
-      <div class="r-row"><span class="r-label">${ric('buggy')}Quantidade</span><span class="r-value">${b.quantity||1} buggy${(b.quantity||1)>1?'\'s':''} privativo${(b.quantity||1)>1?'s':''}</span></div>
-      `)}
-
-      <hr class="receipt-divider">
-
-      ${isTransfer ? `
-      <div style="font-weight:700;font-size:14px;margin-bottom:4px;letter-spacing:.2px;color:var(--t)">${iconTransfer()} Transfer</div>
-      ${b.notes?`<div style="font-size:12px;color:#4A6A6A;margin:6px 0 0;padding:6px 0 0;border-top:1px dashed var(--border);display:flex;align-items:center"><span style="font-weight:700;display:flex;align-items:center">${ric('alert')} Obs:</span>&nbsp;${escHtml(b.notes)}</div>`:''}
-      ` : isPiscinas ? `
-      <div style="font-weight:700;font-size:14px;margin-bottom:4px;letter-spacing:.2px;color:var(--t)">${iconPiscinas()} Piscinas Naturais</div>
-      ${b.notes?`<div style="font-size:12px;color:#4A6A6A;margin:6px 0 0;padding:6px 0 0;border-top:1px dashed var(--border);display:flex;align-items:center"><span style="font-weight:700;display:flex;align-items:center">${ric('alert')} Obs:</span>&nbsp;${escHtml(b.notes)}</div>`:''}
-      ` : `
-      <div style="font-weight:700;font-size:13px;margin-bottom:4px;letter-spacing:.2px;color:var(--t)">${route?route.name:''} <span style="font-weight:400;color:#4A6A6A">(${b.durationLabel})</span></div>
-      <ul class="r-stops">${route?route.stops.map(s=>{
-        if(s.startsWith('Rota ')) return `<li class="r-section">${s}</li>`;
-        const icon = s.toLowerCase().startsWith('parada p/ almo')?ric('food'):ric('loc');
-        return `<li>${icon} ${s}</li>`;
-      }).join(''):''}</ul>
-      ${b.customStops?`<div style="font-size:12px;color:#4A6A6A;margin:6px 0 0;padding:6px 0 0;border-top:1px dashed var(--border);display:flex;align-items:center"><span style="font-weight:700;display:flex;align-items:center">${ric('alert')} Personalização:</span>&nbsp;${escHtml(b.customStops)}</div>`:''}
-      ${b.notes?`<div style="font-size:12px;color:#4A6A6A;margin:6px 0 0;padding:6px 0 0;border-top:1px dashed var(--border);display:flex;align-items:center"><span style="font-weight:700;display:flex;align-items:center">${ric('alert')} Obs:</span>&nbsp;${escHtml(b.notes)}</div>`:''}
-      `}
-      <hr class="receipt-divider">
-
-      <div class="r-highlight">
+      <div class="r-grid">
+        <div class="r-grid-item"><span class="r-label">${ric('user')}Cliente</span><span class="r-value">${escHtml(b.client)}</span></div>
+        <div class="r-grid-item"><span class="r-label">${ric('phone')}Contato</span><span class="r-value">${escHtml(b.contact)}</span></div>
+        <div class="r-grid-item"><span class="r-label">${ric('calendar')}Data</span><span class="r-value">${fmtDate(b.date)} — ${getDayName(b.date)}</span></div>
+        <div class="r-grid-item"><span class="r-label">${ric('clock')}Horário</span><span class="r-value">${b.startTime} — ${endTime}</span></div>
+        <div class="r-grid-item"><span class="r-label">${ric('group')}Acompanhantes</span><span class="r-value">${b.companions||'—'}</span></div>
         ${isTransfer ? `
-        <div class="r-row"><span class="r-label">Valor do Transfer</span><span class="r-value" style="font-weight:700">${fmtCurr(b.transferValue||0)}</span></div>
+        <div class="r-grid-item"><span class="r-label">${ric('pin')}Embarque</span><span class="r-value">${escHtml(b.transferPickup||'—')}</span></div>
         ` : isPiscinas ? `
-        <div class="r-row"><span class="r-label">Valor Total</span><span class="r-value" style="font-weight:800">${fmtCurr(b.value)}</span></div>
+        <div class="r-grid-item"><span class="r-label">${ric('loc')}Piscina</span><span class="r-value">${escHtml(b.poolName||'—')}</span></div>
         ` : `
-        ${(()=>{ const base = (b.value-(b.customValue||0)+(b.discount||0))/Math.max(b.quantity||1,1); return `<div class="r-row"><span class="r-label">Roteiro base${b.quantity>1?` (${b.quantity}× ${fmtCurr(base)})`:''}</span><span class="r-value" style="font-weight:700">${fmtCurr(base*Math.max(b.quantity||1,1))}</span></div>`; })()}
-        ${b.customValue>0?`<div class="r-row"><span class="r-label">Personalização</span><span class="r-value" style="font-weight:700">+ ${fmtCurr(b.customValue)}</span></div>`:''}
-      `}
-        ${b.discount>0?`<div class="r-row"><span class="r-label">Desconto</span><span class="r-value" style="font-weight:700;color:#D14C4C">- ${fmtCurr(b.discount)}</span></div>`:''}
-        <div class="r-row"><span class="r-label">Valor Total</span><span class="r-value" style="font-weight:800">${fmtCurr(b.value)}</span></div>
-        <div class="r-row"><span class="r-label">Valor Pago</span><span class="r-value" style="color:#019391;font-weight:700">${fmtCurr(b.signal)}</span></div>
-        <div class="r-row"><span class="r-label" style="font-weight:700">${remaining>0?'Saldo Restante':'Valor Pago'}</span><span class="r-value" style="font-weight:800;font-size:16px;color:${remaining>0?'#D14C4C':'#019391'}">${fmtCurr(remaining)}</span></div>
+        <div class="r-grid-item"><span class="r-label">${ric('pin')}Embarque</span><span class="r-value">${escHtml(b.pickupDetail||'—')}</span></div>
+        `}
+        ${isTransfer ? `
+        <div class="r-grid-item"><span class="r-label">${ric('pin')}Desembarque</span><span class="r-value">${escHtml(b.transferDropoff||'—')}</span></div>
+        <div class="r-grid-item"><span class="r-label">${ric('group')}Passageiros</span><span class="r-value">${b.transferPassengers||1}</span></div>
+        ` : isPiscinas ? `
+        ${b.vesselType?`<div class="r-grid-item"><span class="r-label">${ric('pin')}Embarcação</span><span class="r-value">${b.vesselType==='lancha'?'🚤 Lancha':b.vesselType==='jangada'?'⛵ Jangada':'🛥️ Catamarã'} ${b.vesselMode==='privada'?'🔒 Privada':'👥 Compartilhada'}</span></div>`:''}
+        <div class="r-grid-item"><span class="r-label">${ric('group')}Adultos</span><span class="r-value">${b.poolAdults||0} × ${fmtCurr(b.poolIndividualPrice||0)}</span></div>
+        ${b.poolChildren>0?`<div class="r-grid-item"><span class="r-label">${ric('group')}Crianças</span><span class="r-value">${b.poolChildren} × ${fmtCurr((b.poolIndividualPrice||0)*0.5)} (meia)</span></div>`:''}
+        ` : `
+        <div class="r-grid-item"><span class="r-label">${ric('buggy')}Quantidade</span><span class="r-value">${b.quantity||1} buggy${(b.quantity||1)>1?'\'s':''} privativo${(b.quantity||1)>1?'s':''}</span></div>
+        `}
       </div>
 
-      <div style="text-align:center;margin:8px 0">
+      <hr class="receipt-divider">
+
+      <div class="r-bottom">
+        <div class="r-route">
+          ${isTransfer ? `
+          <div style="font-weight:700;font-size:12px;margin-bottom:4px;letter-spacing:.2px;color:var(--t)">${iconTransfer()} Transfer</div>
+          ${b.notes?`<div style="font-size:11px;color:#4A6A6A;margin:4px 0 0;padding:4px 0 0;border-top:1px dashed var(--border)"><span style="font-weight:700">${ric('alert')} Obs:</span> ${escHtml(b.notes)}</div>`:''}
+          ` : isPiscinas ? `
+          <div style="font-weight:700;font-size:12px;margin-bottom:4px;letter-spacing:.2px;color:var(--t)">${iconPiscinas()} Piscinas Naturais</div>
+          ${b.notes?`<div style="font-size:11px;color:#4A6A6A;margin:4px 0 0;padding:4px 0 0;border-top:1px dashed var(--border)"><span style="font-weight:700">${ric('alert')} Obs:</span> ${escHtml(b.notes)}</div>`:''}
+          ` : `
+          <div style="font-weight:700;font-size:12px;margin-bottom:3px;letter-spacing:.2px;color:var(--t)">${route?route.name:''} <span style="font-weight:400;color:#4A6A6A">(${b.durationLabel})</span></div>
+          <ul class="r-stops">${route?route.stops.map(s=>{
+            if(s.startsWith('Rota ')) return `<li class="r-section">${s}</li>`;
+            const icon = s.toLowerCase().startsWith('parada p/ almo')?ric('food'):ric('loc');
+            return `<li>${icon} ${s}</li>`;
+          }).join(''):''}</ul>
+          ${b.customStops?`<div style="font-size:11px;color:#4A6A6A;margin:4px 0 0;padding:4px 0 0;border-top:1px dashed var(--border)"><span style="font-weight:700">${ric('alert')} Personalização:</span> ${escHtml(b.customStops)}</div>`:''}
+          ${b.notes?`<div style="font-size:11px;color:#4A6A6A;margin:4px 0 0;padding:4px 0 0;border-top:1px dashed var(--border)"><span style="font-weight:700">${ric('alert')} Obs:</span> ${escHtml(b.notes)}</div>`:''}
+          `}
+        </div>
+        <div class="r-highlight">
+          ${isTransfer ? `
+          <div class="r-row"><span class="r-label">Transfer</span><span class="r-value" style="font-weight:700">${fmtCurr(b.transferValue||0)}</span></div>
+          ` : isPiscinas ? `
+          <div class="r-row"><span class="r-label">Valor Total</span><span class="r-value" style="font-weight:800">${fmtCurr(b.value)}</span></div>
+          ` : `
+          ${(()=>{ const base = (b.value-(b.customValue||0)+(b.discount||0))/Math.max(b.quantity||1,1); return `<div class="r-row"><span class="r-label">Roteiro base${b.quantity>1?` (${b.quantity}× ${fmtCurr(base)})`:''}</span><span class="r-value" style="font-weight:700">${fmtCurr(base*Math.max(b.quantity||1,1))}</span></div>`; })()}
+          ${b.customValue>0?`<div class="r-row"><span class="r-label">Personalização</span><span class="r-value" style="font-weight:700">+ ${fmtCurr(b.customValue)}</span></div>`:''}
+          `}
+          ${b.discount>0?`<div class="r-row"><span class="r-label">Desconto</span><span class="r-value" style="font-weight:700;color:#D14C4C">- ${fmtCurr(b.discount)}</span></div>`:''}
+          <div class="r-row"><span class="r-label">Valor Total</span><span class="r-value" style="font-weight:800">${fmtCurr(b.value)}</span></div>
+          <div class="r-row"><span class="r-label">Valor Pago</span><span class="r-value" style="color:#019391;font-weight:700">${fmtCurr(b.signal)}</span></div>
+          <div class="r-row"><span class="r-label" style="font-weight:700">${remaining>0?'Saldo Restante':'Valor Pago'}</span><span class="r-value" style="font-weight:800;font-size:14px;color:${remaining>0?'#D14C4C':'#019391'}">${fmtCurr(remaining)}</span></div>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin:6px 0">
         <span class="pill pill-${b.status}">${statusLabel(b.status)}</span>
       </div>
 
-      <hr class="receipt-divider">
-
-      <div class="r-footer"><svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px;margin-right:4px" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ig" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f58529"/><stop offset=".25" stop-color="#dd2a7b"/><stop offset=".5" stop-color="#8134af"/><stop offset=".75" stop-color="#515bd4"/><stop offset="1" stop-color="#00d2ff"/></linearGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#ig)"/><circle cx="12" cy="12" r="5.5" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="18" cy="6" r="1.2" fill="#fff"/></svg>${escHtml(appSettings.instagram)} · ${escHtml(appSettings.location)}</div>
-      <div style="text-align:center;font-size:12px;color:#4A6A6A;margin-top:8px;font-weight:600;letter-spacing:.3px">Contato ${escHtml(appSettings.contactName)}: ${escHtml(appSettings.contactPhone)}</div>
+      <div class="r-footer">
+        <div><svg viewBox="0 0 24 24" width="12" height="12" style="vertical-align:-2px;margin-right:3px" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="igR" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f58529"/><stop offset=".25" stop-color="#dd2a7b"/><stop offset=".5" stop-color="#8134af"/><stop offset=".75" stop-color="#515bd4"/><stop offset="1" stop-color="#00d2ff"/></linearGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#igR)"/><circle cx="12" cy="12" r="5.5" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="18" cy="6" r="1.2" fill="#fff"/></svg>${escHtml(appSettings.instagram)} · ${escHtml(appSettings.location)}</div>
+        <div style="margin-top:4px;font-weight:600">Contato ${escHtml(appSettings.contactName)}: ${escHtml(appSettings.contactPhone)}</div>
+      </div>
     </div>
   `;
 
@@ -3359,7 +3368,7 @@ function receiptJPEG(callback){
   try {
     const clone = el.cloneNode(true);
     clone.removeAttribute('id');
-    clone.style.cssText = 'position:relative;overflow:hidden;padding:28px 24px;border-radius:16px;max-width:380px;margin:0 auto;background:#fff;box-shadow:none;width:'+el.offsetWidth+'px';
+    clone.style.cssText = 'position:relative;overflow:hidden;padding:24px 20px;border-radius:16px;width:384px;aspect-ratio:3/4;margin:0 auto;background:#fff;box-shadow:none;display:flex;flex-direction:column';
 
     const gradBar = document.createElement('div');
     gradBar.style.cssText = 'position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#019391,#F57C00,#E65100);z-index:2;border-radius:16px 16px 0 0';
@@ -3378,16 +3387,50 @@ function receiptJPEG(callback){
     }
 
     const logoWrap = clone.querySelector('.logo-round');
-    if(logoWrap) logoWrap.style.cssText = 'display:flex;border-radius:50%;overflow:hidden;flex-shrink:0;align-items:center;justify-content:center;width:90px;height:90px;margin:0 auto 10px';
+    if(logoWrap) logoWrap.style.cssText = 'display:flex;border-radius:50%;overflow:hidden;flex-shrink:0;align-items:center;justify-content:center;width:80px;height:80px;margin:0 auto 6px';
 
     clone.querySelectorAll('.receipt-divider').forEach(n=>{
-      n.style.background = 'linear-gradient(90deg,transparent,#e0e0e0,#019391,#e0e0e0,transparent)';
+      n.style.cssText = 'border:none;height:1px;background:linear-gradient(90deg,transparent,#e0e0e0,#F57C00,#e0e0e0,transparent);margin:10px 0;opacity:1';
+    });
+
+    clone.querySelectorAll('.r-grid').forEach(n=>{
+      n.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin:6px 0';
+    });
+
+    clone.querySelectorAll('.r-grid-item').forEach(n=>{
+      n.style.cssText = 'display:flex;flex-direction:column;gap:2px';
+      n.querySelectorAll('.r-label').forEach(l=>{ l.style.cssText = 'font-size:10px;font-weight:600;color:#019391;opacity:.85;display:flex;align-items:center'; });
+      n.querySelectorAll('.r-value').forEach(v=>{ v.style.cssText = 'font-size:12px;font-weight:700;color:#333;line-height:1.3'; });
+    });
+
+    clone.querySelectorAll('.r-bottom').forEach(n=>{
+      n.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0';
+    });
+
+    clone.querySelectorAll('.r-route').forEach(n=>{
+      n.style.cssText = 'background:rgba(0,223,195,.04);border-radius:10px;padding:10px 14px;border:1px solid rgba(0,223,195,.15)';
     });
 
     clone.querySelectorAll('.r-highlight').forEach(n=>{
-      n.style.background = 'linear-gradient(135deg,rgba(0,223,195,.07),rgba(0,96,108,.04))';
-      n.style.border = '1px solid #019391';
+      n.style.cssText = 'background:linear-gradient(135deg,rgba(0,223,195,.07),rgba(0,96,108,.04));border-radius:10px;padding:10px 14px;border:1px solid #019391;opacity:.9';
+      n.querySelectorAll('.r-row').forEach(r=>{ r.style.cssText = 'display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:3px 0;letter-spacing:.2px'; });
+      n.querySelectorAll('.r-label').forEach(l=>{ l.style.cssText = 'color:#019391;font-weight:600;opacity:.85;display:flex;align-items:center'; });
+      n.querySelectorAll('.r-value').forEach(v=>{ v.style.cssText = 'font-weight:700;text-align:right;color:#333'; });
     });
+
+    clone.querySelectorAll('.r-stops').forEach(n=>{
+      n.style.cssText = 'margin:6px 0 0;padding-left:0;font-size:11px;color:#5A8A8A;list-style:none';
+    });
+
+    clone.querySelectorAll('.pill').forEach(n=>{
+      const cls = n.className;
+      if(cls.includes('confirmado')) n.style.cssText = 'display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;background:#D7F8F3;color:#00606C';
+      else if(cls.includes('concluido')) n.style.cssText = 'display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;background:#D9EEEE;color:#019391';
+      else if(cls.includes('cancelado')) n.style.cssText = 'display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;background:#EBEBEB;color:#707070';
+    });
+
+    const footer = clone.querySelector('.r-footer');
+    if(footer) footer.style.cssText = 'text-align:center;margin-top:auto;padding-top:8px;font-size:10px;color:#5A8A8A;letter-spacing:.5px;border-top:1px solid #e0e0e0;opacity:.7';
 
     clone.querySelectorAll('*').forEach(n=>{
       const cs = getComputedStyle(n);
