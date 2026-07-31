@@ -3354,17 +3354,22 @@ function receiptJPEG(callback){
     return;
   }
   const prog = document.getElementById('receiptProgress');
+  const pattern = el.querySelector('.receipt-pattern');
   if(prog) prog.style.display = 'block';
+  if(pattern) pattern.style.display = 'none';
   try {
-    html2canvas(el,{scale:2,backgroundColor:'#fff',useCORS:true,allowTaint:true,logging:false,timeout:10000}).then(canvas=>{
+    html2canvas(el,{scale:2,backgroundColor:'#fff',useCORS:true,allowTaint:false,logging:false,timeout:10000}).then(canvas=>{
+      if(pattern) pattern.style.display = '';
       window._receiptCanvas = canvas;
       if(prog) prog.style.display = 'none';
       callback(canvas);
     }).catch(e=>{
+      if(pattern) pattern.style.display = '';
       if(prog) prog.style.display = 'none';
       alert('Erro ao gerar imagem: '+(e.message||'tente novamente'));
     });
   } catch(e) {
+    if(pattern) pattern.style.display = '';
     if(prog) prog.style.display = 'none';
     alert('Erro inesperado: '+(e.message||'tente novamente'));
   }
