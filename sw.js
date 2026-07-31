@@ -1,4 +1,4 @@
-const CACHE = "destinos-maragogi-v3";
+const CACHE = "destinos-maragogi-v4";
 const ASSETS = [
   "manifest.json",
   "icon-192.png",

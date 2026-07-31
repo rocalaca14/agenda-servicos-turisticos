@@ -85,7 +85,12 @@ body{padding-bottom:80px;overflow-x:hidden}
 .btn-secondary:hover{background:var(--o2)}
 .btn-outline{background:transparent;border:2px solid var(--t);color:var(--t)}
 .btn-danger{background:#e74c3c;color:var(--white)}
+.btn-ghost{background:transparent;color:var(--text2);border:1.5px solid var(--border)}
 .btn-sm{padding:6px 14px;font-size:12px}
+.detail-actions{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.detail-actions .detail-main{width:100%;padding:12px;font-size:14px}
+.detail-actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.detail-actions-grid .btn{width:100%;padding:10px 8px;font-size:12px;line-height:1.2}
 .btn-block{width:100%}
 .btn:disabled{opacity:.5;cursor:default}
 
@@ -504,7 +509,7 @@ textarea.form-input{resize:vertical;min-height:70px}
     <div class="modal-handle"></div>
     <div class="modal-title" id="detailTitle">Detalhes</div>
     <div id="detailBody"></div>
-    <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap" id="detailActions"></div>
+    <div id="detailActions"></div>
   </div>
 </div>
 
@@ -1025,7 +1030,7 @@ function importBackup(event){
 }
 
 // ─── Version & Service Worker ───
-const APP_VERSION = '5';
+const APP_VERSION = '6';
 
 // Force-kill old service workers and caches on version mismatch
 (async ()=>{
@@ -3088,19 +3093,23 @@ function openDetail(id){
   }
 
   const statusBtn = b.status==='confirmado'
-    ? `<button class="btn btn-primary btn-sm" onclick="setBookingStatus('${b.id}','concluido')">✅ Concluir</button>`
+    ? `<button class="btn btn-primary detail-main" onclick="setBookingStatus('${b.id}','concluido')">✅ Concluir agendamento</button>`
     : (b.status==='concluido'||b.status==='cancelado')
-      ? `<button class="btn btn-outline btn-sm" onclick="setBookingStatus('${b.id}','confirmado')">↩️ Reativar</button>`
+      ? `<button class="btn btn-outline detail-main" onclick="setBookingStatus('${b.id}','confirmado')">↩️ Reativar agendamento</button>`
       : '';
   actions.innerHTML = `
-    ${statusBtn}
-    <button class="btn btn-primary btn-sm" onclick="editBooking('${b.id}')">✏️ Editar</button>
-    <button class="btn btn-outline btn-sm" onclick="openReschedule('${b.id}')">📅 Reagendar</button>
-    <button class="btn btn-secondary btn-sm" onclick="generateReceipt('${b.id}')">📄 Comprovante</button>
-    <button class="btn btn-outline btn-sm" onclick="sendWhatsApp('${b.id}')">💬 WhatsApp</button>
-    <button class="btn btn-outline btn-sm" onclick="openTimeline('${b.date}')">📅 Ver Dia Completo</button>
-    <button class="btn btn-danger btn-sm" onclick="deleteBooking('${b.id}')">🗑️ Excluir</button>
-    <button class="btn btn-outline btn-sm" onclick="closeDetail()">Fechar</button>
+    <div class="detail-actions">
+      ${statusBtn}
+      <div class="detail-actions-grid">
+        <button class="btn btn-outline" onclick="editBooking('${b.id}')">✏️ Editar</button>
+        <button class="btn btn-outline" onclick="openReschedule('${b.id}')">📅 Reagendar</button>
+        <button class="btn btn-secondary" onclick="generateReceipt('${b.id}')">📄 Comprovante</button>
+        <button class="btn btn-outline" onclick="sendWhatsApp('${b.id}')">💬 WhatsApp</button>
+        <button class="btn btn-outline" onclick="openTimeline('${b.date}')">📅 Ver Dia Completo</button>
+        <button class="btn btn-danger" onclick="deleteBooking('${b.id}')">🗑️ Excluir</button>
+      </div>
+      <button class="btn btn-ghost" onclick="closeDetail()">Fechar</button>
+    </div>
   `;
 
   document.getElementById('detailModal').classList.add('active');
