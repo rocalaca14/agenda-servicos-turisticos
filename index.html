@@ -3356,7 +3356,7 @@ function receiptJPEG(callback){
   const prog = document.getElementById('receiptProgress');
   if(prog) prog.style.display = 'block';
   try {
-    html2canvas(el,{scale:2,backgroundColor:'#fff',useCORS:true,allowTaint:false,logging:false}).then(canvas=>{
+    html2canvas(el,{scale:2,backgroundColor:'#fff',useCORS:true,allowTaint:true,logging:false,timeout:10000}).then(canvas=>{
       window._receiptCanvas = canvas;
       if(prog) prog.style.display = 'none';
       callback(canvas);
