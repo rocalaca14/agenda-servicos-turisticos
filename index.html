@@ -3354,22 +3354,42 @@ function receiptJPEG(callback){
     return;
   }
   const prog = document.getElementById('receiptProgress');
-  const pattern = el.querySelector('.receipt-pattern');
   if(prog) prog.style.display = 'block';
-  if(pattern) pattern.style.display = 'none';
+
+  const tmpStyle = document.createElement('style');
+  tmpStyle.textContent = `
+    .receipt * { color: inherit !important; }
+    .receipt .r-label { color: #019391 !important; }
+    .receipt .r-value { color: #333 !important; }
+    .receipt h2 { color: #019391 !important; }
+    .receipt .receipt-sub { color: #5A8A8A !important; }
+    .receipt .r-stops { color: #5A8A8A !important; }
+    .receipt .r-footer { color: #5A8A8A !important; }
+    .receipt .r-section { color: #019391 !important; }
+    .receipt .pill-confirmado { background: #D7F8F3 !important; color: #00606C !important; }
+    .receipt .pill-concluido { background: #D9EEEE !important; color: #019391 !important; }
+    .receipt .pill-cancelado { background: #EBEBEB !important; color: #707070 !important; }
+    .receipt .receipt-divider { background: linear-gradient(90deg,transparent,#e0e0e0,#019391,#e0e0e0,transparent) !important; }
+    .receipt .r-highlight { background: linear-gradient(135deg,rgba(0,223,195,.07),rgba(0,96,108,.04)) !important; border: 1px solid #019391 !important; }
+    .receipt .r-highlight .r-row:last-child { border-top: 1px solid rgba(0,223,195,.12) !important; }
+    .receipt::before { background: linear-gradient(90deg,#019391,#F57C00,#E65100) !important; }
+    .receipt .anim-scale-bounce { background: rgba(1,147,145,0.08) !important; color: #019391 !important; border: 1px solid #019391 !important; }
+    .receipt-pattern { display: none !important; }
+  `;
+  document.head.appendChild(tmpStyle);
   try {
-    html2canvas(el,{scale:2,backgroundColor:'#fff',useCORS:true,allowTaint:false,logging:false,timeout:10000}).then(canvas=>{
-      if(pattern) pattern.style.display = '';
+    html2canvas(el,{scale:2,backgroundColor:'#fff',useCORS:true,allowTaint:false,logging:false,timeout:15000}).then(canvas=>{
+      tmpStyle.remove();
       window._receiptCanvas = canvas;
       if(prog) prog.style.display = 'none';
       callback(canvas);
     }).catch(e=>{
-      if(pattern) pattern.style.display = '';
+      tmpStyle.remove();
       if(prog) prog.style.display = 'none';
       alert('Erro ao gerar imagem: '+(e.message||'tente novamente'));
     });
   } catch(e) {
-    if(pattern) pattern.style.display = '';
+    tmpStyle.remove();
     if(prog) prog.style.display = 'none';
     alert('Erro inesperado: '+(e.message||'tente novamente'));
   }
