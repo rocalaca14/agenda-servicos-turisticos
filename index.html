@@ -3360,21 +3360,41 @@ function receiptJPEG(callback){
     const clone = el.cloneNode(true);
     clone.removeAttribute('id');
     clone.style.cssText = 'position:relative;overflow:hidden;padding:28px 24px;border-radius:16px;max-width:380px;margin:0 auto;background:#fff;box-shadow:none;width:'+el.offsetWidth+'px';
+
+    const gradBar = document.createElement('div');
+    gradBar.style.cssText = 'position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#019391,#F57C00,#E65100);z-index:2;border-radius:16px 16px 0 0';
+    clone.insertBefore(gradBar, clone.firstChild);
+
     const pat = clone.querySelector('.receipt-pattern');
     if(pat) pat.remove();
+
     const logoWrap = clone.querySelector('.logo-round');
     if(logoWrap){
       const logoImg = logoWrap.querySelector('img');
       if(logoImg && !logoImg.src.startsWith('data:')) logoWrap.remove();
     }
-    clone.querySelectorAll('*').forEach(n=>{
-      const s = getComputedStyle(n);
-      if(s.animation && s.animation !== 'none') n.style.animation = 'none';
+
+    clone.querySelectorAll('svg[viewBox="0 0 400 960"]').forEach(svg=>{
+      svg.querySelectorAll('[stroke]').forEach(n=>{
+        const s = n.getAttribute('stroke');
+        if(s && s.includes('var(--')) n.setAttribute('stroke', s.replace(/var\(--t\)/g,'#019391').replace(/var\(--o\)/g,'#F57C00').replace(/var\(--o2\)/g,'#E65100'));
+      });
     });
+
+    clone.querySelectorAll('*').forEach(n=>{
+      const cs = getComputedStyle(n);
+      if(cs.animation && cs.animation !== 'none') n.style.animation = 'none';
+    });
+
     clone.querySelectorAll('[style]').forEach(n=>{
       let v = n.getAttribute('style');
       if(v && v.includes('var(--')) n.setAttribute('style', v.replace(/var\(--t\)/g,'#019391').replace(/var\(--t2\)/g,'#017572').replace(/var\(--o\)/g,'#F57C00').replace(/var\(--o2\)/g,'#E65100').replace(/var\(--border\)/g,'#e0e0e0').replace(/var\(--surface\)/g,'#ffffff').replace(/var\(--text\)/g,'#333333').replace(/var\(--text2\)/g,'#5A8A8A').replace(/var\(--text3\)/g,'#999999'));
     });
+
+    clone.querySelectorAll('.receipt-divider').forEach(n=>{
+      n.style.background = 'linear-gradient(90deg,transparent,#e0e0e0,#019391,#e0e0e0,transparent)';
+    });
+
     const wrap = document.createElement('div');
     wrap.style.cssText = 'position:fixed;left:-9999px;top:0';
     wrap.appendChild(clone);
