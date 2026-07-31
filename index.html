@@ -135,7 +135,7 @@ textarea.form-input{resize:vertical;min-height:70px}
 .date-header{display:flex;align-items:center;gap:8px;padding:8px 4px;font-size:14px;font-weight:700;color:var(--text);border-bottom:2px solid var(--t);margin-bottom:10px}
 .date-header.today{color:var(--t)}
 .date-header .day-count{font-weight:400;color:var(--text2);font-size:12px}
-.booking-card{padding:12px;background:var(--surface);border-radius:var(--radius-sm);box-shadow:var(--shadow);margin-bottom:8px;cursor:pointer;transition:.2s;border-left:4px solid var(--border)}
+.booking-card{padding:12px;background:var(--surface);border-radius:var(--radius-sm);box-shadow:var(--shadow);margin-bottom:8px;cursor:pointer;transition:.2s;border-left:4px solid var(--border);position:relative}
 .booking-card:active{transform:scale(.98)}
 .booking-card .bc-top{display:flex;justify-content:space-between;align-items:start;gap:8px}
 .booking-card .bc-time{font-size:13px;font-weight:700;color:var(--text)}
@@ -146,6 +146,23 @@ textarea.form-input{resize:vertical;min-height:70px}
 .booking-card.bc-confirmado{border-left-color:#28a745}
 .booking-card.bc-concluido{border-left-color:#007bff}
 .booking-card.bc-cancelado{border-left-color:#dc3545;opacity:.7}
+.bc-menu-wrap{position:relative;flex-shrink:0}
+.bc-more{border:none;background:transparent;color:var(--text2);font-size:18px;line-height:1;padding:2px 6px;border-radius:6px;cursor:pointer;transition:transform .12s var(--ease-standard)}
+.bc-more:active{transform:scale(.9);background:var(--bg)}
+.bc-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;min-width:190px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:60;padding:4px;overflow:hidden}
+.bc-menu.open{display:block;animation:fadeSlideIn .18s var(--ease-standard) forwards}
+.bc-menu-item{display:flex;width:100%;align-items:center;gap:8px;padding:10px 12px;border:none;background:none;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;font-family:var(--font);text-align:left}
+.bc-menu-item:active{background:var(--bg)}
+.bc-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.bc-pay{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:11px;color:var(--text2);flex-wrap:wrap}
+.bc-pay b{color:var(--text)}
+.pay-badge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:.3px;white-space:nowrap}
+.pay-pago{background:#D9F0E0;color:#1E8449}
+.pay-parcial{background:#FDF0D9;color:#B9770E}
+.pay-pendente{background:#FCE4E4;color:#C0392B}
+.bc-btn{border:1.5px solid var(--border);background:var(--surface);color:var(--text2);font-size:11px;font-weight:600;padding:5px 11px;border-radius:999px;cursor:pointer;transition:transform .12s var(--ease-standard),background .2s var(--ease-standard);font-family:var(--font)}
+.bc-btn:active{transform:scale(.97)}
+.bc-btn-primary{border-color:var(--t);background:var(--t);color:var(--white)}
 
 /* Filter bar */
 .filter-bar{display:flex;gap:6px;overflow-x:auto;padding:0 0 12px;margin-bottom:4px;-webkit-overflow-scrolling:touch}
@@ -234,6 +251,16 @@ textarea.form-input{resize:vertical;min-height:70px}
 .dash-upcoming-card .duc-client{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dash-upcoming-card .duc-route{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dash-upcoming-card .duc-value{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap}
+.dash-sub{font-size:10px;opacity:.78;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-next{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,var(--t),#004D4D);border-radius:var(--radius);padding:14px;color:#fff;margin:12px 0 8px;box-shadow:var(--shadow);cursor:pointer;animation:fadeSlideIn .22s var(--ease-standard) forwards}
+.dash-next:active{transform:scale(.985)}
+.dash-next .dn-time{font-size:22px;font-weight:800;line-height:1;white-space:nowrap;flex-shrink:0}
+.dash-next .dn-time small{display:block;font-size:9px;font-weight:700;opacity:.85;letter-spacing:.6px;margin-top:4px}
+.dash-next .dn-info{flex:1;min-width:0}
+.dash-next .dn-client{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-next .dn-route{font-size:11px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.dash-next .dn-btn{margin-top:6px;display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.16);color:#fff;border:none;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;transition:transform .12s var(--ease-standard),background .2s var(--ease-standard)}
+.dash-next .dn-btn:active{transform:scale(.97)}
 .dash-empty{text-align:center;padding:20px;color:var(--text2);font-size:13px}
 
 /* Skeleton Loading */
@@ -454,8 +481,9 @@ textarea.form-input{resize:vertical;min-height:70px}
 <!-- ===== VIEW: AGENDA ===== -->
 <div class="view" id="viewAgenda">
   <div style="padding:0 0 8px">
-    <input class="form-input" id="searchInput" placeholder="🔍 Buscar por nome do cliente..." style="font-size:14px;padding:8px 12px" oninput="searchQuery=this.value.trim().toLowerCase();renderAgenda()">
+    <input class="form-input" id="searchInput" placeholder="🔍 Buscar por nome ou telefone..." style="font-size:14px;padding:8px 12px" oninput="searchQuery=this.value.trim().toLowerCase();renderAgenda()">
   </div>
+  <div class="filter-bar" id="periodBar" style="margin-top:4px"></div>
   <div class="filter-bar" id="filterBar"></div>
   <div id="agendaList"></div>
 </div>
@@ -477,6 +505,15 @@ textarea.form-input{resize:vertical;min-height:70px}
     <div class="modal-title" id="detailTitle">Detalhes</div>
     <div id="detailBody"></div>
     <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap" id="detailActions"></div>
+  </div>
+</div>
+
+<!-- ===== MODAL: RESCHEDULE ===== -->
+<div class="modal-overlay" id="rescheduleModal">
+  <div class="modal-content">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📅 Reagendar</div>
+    <div id="rescheduleBody"></div>
   </div>
 </div>
 
@@ -573,6 +610,7 @@ textarea.form-input{resize:vertical;min-height:70px}
     </div>
     <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
     <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px">💾 Backup de Dados</div>
+    <div id="lastBackupInfo" style="font-size:12px;color:var(--text2);margin-bottom:8px"></div>
     <button class="btn btn-sm btn-outline" onclick="exportBackup()" style="width:100%;margin-bottom:6px">📤 Exportar (fazer download .json)</button>
     <div style="position:relative">
       <button class="btn btn-sm btn-outline" style="width:100%" onclick="document.getElementById('importBackupInput').click()">📥 Importar (carregar .json)</button>
@@ -765,7 +803,9 @@ let bookings = [];
 let currentView = 'calendar';
 let filterStatus = 'todos';
 let filterType = 'todos';
+let filterPeriod = 'todos';
 let editingId = null;
+let formDupSource = null;
 
 // ─── Form state ───
 const formState = { tipo:'buggy', routeId:null, durationLabel:null, signal:0, customValue:0, quantity:1, discount:0, status:'confirmado', poolAdults:1, poolChildren:0, poolIndividualPrice:0, poolName:'', transferPassengers:1, transferPickupTime:'', transferPickup:'', transferDropoff:'', transferValue:0, transferPickupType:'recife', transferPickupCustom:'', transferDropoffType:'recife', transferDropoffCustom:'' };
@@ -884,6 +924,9 @@ function openSettings(){
     btn.classList.toggle('active', btn.dataset.theme === (appSettings.theme || 'default'));
   });
   openModal('settingsModal');
+  const lastBackup = localStorage.getItem('last_backup_at');
+  const lbEl = document.getElementById('lastBackupInfo');
+  if(lbEl) lbEl.textContent = lastBackup ? ('Último backup: '+new Date(lastBackup).toLocaleString('pt-BR')) : 'Nenhum backup realizado ainda';
 }
 function selectTheme(theme){
   appSettings.theme = theme;
@@ -940,6 +983,9 @@ function exportBackup(){
     routes: JSON.parse(localStorage.getItem(ROUTES_KEY)||'null'),
     settings: JSON.parse(localStorage.getItem(SETTINGS_KEY)||'null')
   };
+  localStorage.setItem('last_backup_at', new Date().toISOString());
+  const lbEl = document.getElementById('lastBackupInfo');
+  if(lbEl) lbEl.textContent = 'Último backup: '+new Date().toLocaleString('pt-BR');
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1125,10 +1171,13 @@ function suggestClient(input){
   if(val.length < 2){ list.innerHTML=''; list.style.display='none'; return; }
   const seen = {};
   const matches = [];
+  const digits = val.replace(/\D/g,'');
   bookings.forEach(b=>{
     if(!b.client || seen[b.client]) return;
     seen[b.client] = true;
-    if(b.client.toLowerCase().includes(val)){
+    const matchName = b.client.toLowerCase().includes(val);
+    const matchPhone = digits.length>=2 && (b.contact||'').replace(/\D/g,'').includes(digits);
+    if(matchName || matchPhone){
       matches.push({name:b.client, contact:b.contact||'', companions:b.companions||''});
     }
   });
@@ -1226,11 +1275,47 @@ function todayStr(){
   const d=new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
+function timeToMinutes(t){
+  if(!t) return 0;
+  const p = String(t).split(':');
+  return Number(p[0]||0)*60 + Number(p[1]||0);
+}
+function effTime(b){
+  return b.tipo==='transfer' ? (b.transferPickupTime||'') : (b.startTime||'');
+}
+function inPeriod(dateStr, period){
+  if(period==='todos') return true;
+  const today = todayStr();
+  if(period==='hoje') return dateStr===today;
+  const t = new Date();
+  t.setDate(t.getDate()+(period==='amanha'?1:6));
+  const lim = t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+  return dateStr>=today && dateStr<=lim;
+}
 
 // ─── RENDER: Agenda ───
 function renderAgenda(){
   const list = document.getElementById('agendaList');
   const filterBar = document.getElementById('filterBar');
+  const periodBar = document.getElementById('periodBar');
+
+  // Period filters (P6)
+  if(periodBar){
+    periodBar.innerHTML = [
+      {id:'todos',label:'Todos'},
+      {id:'hoje',label:'📅 Hoje'},
+      {id:'amanha',label:'⏭️ Amanhã'},
+      {id:'7dias',label:'🗓️ Próx. 7 dias'}
+    ].map(f=>
+      `<button class="filter-btn${filterPeriod===f.id?' active':''}" data-period="${f.id}">${f.label}</button>`
+    ).join('');
+    periodBar.querySelectorAll('[data-period]').forEach(el=>{
+      el.addEventListener('click',()=>{
+        filterPeriod = el.dataset.period;
+        renderAgenda();
+      });
+    });
+  }
 
   // Type filters
   const typeFilters = [
@@ -1268,12 +1353,17 @@ function renderAgenda(){
   filtered = filtered.filter(b => b && b.client && b.date && b.value !== undefined);
   if(filterType!=='todos') filtered = filtered.filter(b=>b.tipo===filterType);
   if(filterStatus!=='todos') filtered = filtered.filter(b=>b.status===filterStatus);
-  if(searchQuery) filtered = filtered.filter(b=>b.client.toLowerCase().includes(searchQuery));
+  if(filterPeriod!=='todos') filtered = filtered.filter(b=>inPeriod(b.date,filterPeriod));
+  if(searchQuery) filtered = filtered.filter(b=>{
+    if((b.client||'').toLowerCase().includes(searchQuery)) return true;
+    const digits = searchQuery.replace(/\D/g,'');
+    return digits.length>=2 && (b.contact||'').replace(/\D/g,'').includes(digits);
+  });
 
   // Group by date
   const groups = {};
   const today = todayStr();
-  filtered.sort((a,b)=>a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
+  filtered.sort((a,b)=>a.date.localeCompare(b.date) || timeToMinutes(effTime(a))-timeToMinutes(effTime(b)));
   filtered.forEach(b=>{
     if(!groups[b.date]) groups[b.date]=[];
     groups[b.date].push(b);
@@ -1305,14 +1395,29 @@ function renderAgenda(){
               <div class="bc-client">${escHtml(b.client)}</div>
               <div class="bc-route">${isTransfer?iconTransfer()+' Transfer':isPiscinas?iconPiscinas()+' Piscinas Naturais':(route?route.name:'')} ${b.durationLabel?`<span class="route-badge">${b.durationLabel}</span>`:''}</div>
             </div>
-            <span class="pill pill-${b.status}">${statusLabel(b.status)}</span>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span class="pill pill-${b.status}">${statusLabel(b.status)}</span>
+              <div class="bc-menu-wrap">
+                <button type="button" class="bc-more" onclick="event.stopPropagation();toggleBcMenu('${b.id}')" aria-label="Mais ações">⋯</button>
+                <div class="bc-menu" id="bcMenu-${b.id}">
+                  ${menuItemsHTML(b)}
+                </div>
+              </div>
+            </div>
           </div>
           <div class="bc-bottom">
             <span class="bc-value">${fmtCurr(b.value)}</span>
             ${!isPiscinas && !isTransfer && b.quantity>1?`<span style="font-size:11px;color:var(--text2)">${b.quantity} buggy's</span>`:''}
             ${isPiscinas && b.poolAdults?(()=>{ const s=b.poolChildren>1?'s':''; const vi=b.vesselType?((b.vesselType==='lancha'?'🚤':b.vesselType==='jangada'?'⛵':'🛥️')+' '+b.vesselType+(b.vesselMode?' '+b.vesselMode:'')):''; return `<span style="font-size:11px;color:var(--text2)">${vi?vi+' · ':''}${b.poolAdults} adulto${b.poolAdults>1?'s':''}${b.poolChildren>0?', '+b.poolChildren+' criança'+s:''}</span>`; })():''}
             ${isTransfer?`<span style="font-size:11px;color:var(--text2)">${b.transferPassengers} passageiro${b.transferPassengers>1?'s':''}${b.transferPickup?' · '+escHtml(b.transferPickup):''}</span>`:''}
-            ${b.signal>0?`<span style="font-size:12px;color:#27ae60">Pago: ${fmtCurr(b.signal)}</span>`:''}
+          </div>
+          <div class="bc-pay">
+            <span>Entrada <b>${fmtCurr(b.signal)}</b></span>
+            <span>Restante <b style="color:${(b.value||0)-(b.signal||0)>0?'#D14C4C':'#1E8449'}">${fmtCurr((b.value||0)-(b.signal||0))}</b></span>
+            ${payBadgeHTML(b)}
+          </div>
+          <div class="bc-actions" onclick="event.stopPropagation()">
+            ${quickActionsHTML(b)}
           </div>
         </div>`;
       }).join('')}
@@ -1323,6 +1428,90 @@ function renderAgenda(){
 function statusLabel(s){
   return s==='confirmado'?'Confirmado':s==='concluido'?'Concluído':'Cancelado';
 }
+function payStatus(b){
+  const v = b.value||0;
+  const s = b.signal||0;
+  if(v<=0 || s>=v) return {key:'pago', label:'Pago', color:'#1E8449'};
+  if(s>0) return {key:'parcial', label:'Parcial', color:'#B9770E'};
+  return {key:'pendente', label:'Pendente', color:'#C0392B'};
+}
+function payBadgeHTML(b){
+  const ps = payStatus(b);
+  return `<span class="pay-badge pay-${ps.key}">${ps.label==='Pago'?'✅ ':ps.label==='Parcial'?'💸 ':'🔴 '}${ps.label}</span>`;
+}
+
+// ─── Quick actions (P2) ───
+function quickActionsHTML(b){
+  if(b.status==='confirmado') return `
+    <button type="button" class="bc-btn bc-btn-primary" onclick="setBookingStatus('${b.id}','concluido')">✅ Concluir</button>
+    <button type="button" class="bc-btn" onclick="sendWhatsApp('${b.id}')">💬 WhatsApp</button>`;
+  if(b.status==='concluido') return `
+    <button type="button" class="bc-btn" onclick="generateReceipt('${b.id}')">📄 Comprovante</button>
+    <button type="button" class="bc-btn" onclick="sendWhatsApp('${b.id}')">💬 WhatsApp</button>`;
+  return `
+    <button type="button" class="bc-btn" onclick="editBooking('${b.id}')">✏️ Editar</button>
+    <button type="button" class="bc-btn bc-btn-primary" onclick="setBookingStatus('${b.id}','confirmado')">↩️ Reativar</button>`;
+}
+function menuItemsHTML(b){
+  const items = [];
+  if(b.status!=='cancelado'){
+    items.push(['✏️ Editar',`editBooking('${b.id}')`]);
+    items.push(['📅 Reagendar',`openReschedule('${b.id}')`]);
+    items.push(['📋 Duplicar',`duplicateBooking('${b.id}')`]);
+  }
+  if(b.status==='confirmado'){
+    items.push(['📄 Comprovante',`generateReceipt('${b.id}')`]);
+    items.push(['❌ Cancelar agendamento',`setBookingStatus('${b.id}','cancelado')`]);
+  }
+  if(b.status==='concluido'){
+    items.push(['↩️ Reativar',`setBookingStatus('${b.id}','confirmado')`]);
+  }
+  items.push(['🗑️ Excluir',`deleteBooking('${b.id}')`]);
+  return items.map(it=>`<button type="button" class="bc-menu-item" onclick="event.stopPropagation();${it[1]}">${it[0]}</button>`).join('');
+}
+function setBookingStatus(id, status){
+  const b = bookings.find(x=>x.id===id);
+  if(!b) return;
+  b.status = status;
+  saveBookings();
+  closeDetail();
+  document.querySelectorAll('.bc-menu.open').forEach(m=>m.classList.remove('open'));
+  renderAgenda();
+  renderCalendar();
+  renderDashStats();
+  renderDashUpcoming(dashFilter);
+  if(status==='concluido') toastSuccess('✅ Agendamento concluído');
+  else if(status==='confirmado') toastSuccess('↩️ Agendamento reativado');
+  else if(status==='cancelado') toastWarning('Agendamento cancelado');
+}
+function sendWhatsApp(id){
+  const b = bookings.find(x=>x.id===id);
+  if(!b) return;
+  const isPiscinas = b.tipo==='piscinas';
+  const isTransfer = b.tipo==='transfer';
+  const route = isPiscinas||isTransfer ? null : getRoute(b.routeId);
+  const roteiro = isPiscinas?'🏝️ Piscinas Naturais':isTransfer?'🚐 Transfer':(route?route.name:'');
+  const time = isTransfer?(b.transferPickupTime||''):b.startTime;
+  const msg = `Olá ${b.client}! 🙌\n\n📅 ${fmtDate(b.date)} — ${getDayName(b.date)}\n⏰ ${time}${!isTransfer&&b.startTime?' - '+safeEndTime(b):''}\n📍 ${roteiro}\n💰 Valor: ${fmtCurr(b.value)}\n💵 Pago: ${fmtCurr(b.signal)}\n\nQualquer dúvida é só chamar! 😊`;
+  const phone = (b.contact||'').replace(/\D/g,'');
+  if(phone){
+    window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+  }else{
+    alert('Cliente sem número de WhatsApp cadastrado.');
+  }
+}
+function toggleBcMenu(id){
+  const menu = document.getElementById('bcMenu-'+id);
+  if(!menu) return;
+  const willOpen = !menu.classList.contains('open');
+  document.querySelectorAll('.bc-menu.open').forEach(m=>m.classList.remove('open'));
+  if(willOpen) menu.classList.add('open');
+}
+document.addEventListener('click',(e)=>{
+  if(!e.target.closest('.bc-menu-wrap')){
+    document.querySelectorAll('.bc-menu.open').forEach(m=>m.classList.remove('open'));
+  }
+});
 
 // ─── Weather (Open-Meteo) ───
 let weatherCache = null;
@@ -1363,6 +1552,37 @@ function renderDashUpcoming(filter){
   const el = document.getElementById('dashUpcoming');
   if(!el) return;
   const today = new Date().toISOString().slice(0,10);
+
+  // P1: próximo agendamento de hoje
+  const activeToday = bookings.filter(b=>{
+    if(!b.date || !b.client) return false;
+    if(b.date!==today) return false;
+    if(b.status!=='confirmado') return false;
+    if(filter && filter!=='todos' && b.tipo!==filter) return false;
+    return true;
+  }).sort((a,b)=>timeToMinutes(effTime(a))-timeToMinutes(effTime(b)));
+  const next = activeToday[0];
+  let nextHTML = '';
+  if(next){
+    const route = getRoute(next.routeId);
+    const tipoIcon = next.tipo==='buggy'?'🚙':next.tipo==='piscinas'?'🏝️':'🚐';
+    const routeLabel = next.tipo==='transfer'?'Transfer':next.tipo==='piscinas'?'Piscinas Naturais':(route?route.name:'');
+    const emb = next.tipo==='transfer'
+      ? (next.transferPickup?`🚐 ${escHtml(next.transferPickup)}`:'')
+      : (next.pickupDetail?`📍 ${escHtml(next.pickupDetail)}`:next.pickup==='hoteis'?'📍 Hotéis':next.pickup==='maragogi'?'📍 Centro de Maragogi':'📍 Ponto de Encontro');
+    nextHTML = `<div class="dash-next anim-stagger-1" onclick="openDetail('${next.id}')">
+      <div class="dn-time">${next.tipo==='transfer'?(next.transferPickupTime||'—'):(next.startTime||'—')}<small>PRÓXIMO</small></div>
+      <div class="dn-info">
+        <div class="dn-client">${escHtml(next.client)}</div>
+        <div class="dn-route">${tipoIcon} ${routeLabel}${emb?' · '+emb:''}</div>
+        <button type="button" class="dn-btn" onclick="event.stopPropagation();openDetail('${next.id}')">Ver agendamento →</button>
+      </div>
+    </div>`;
+  } else if(!filter || filter==='todos'){
+    const hadToday = bookings.some(b=>b.date===today && b.status!=='cancelado');
+    if(hadToday) nextHTML = `<div class="dash-empty anim-stagger-1">Nenhum outro agendamento hoje</div>`;
+  }
+
   let upcoming = bookings.filter(b=>{
     if(!b.date || !b.client) return false;
     if(b.date < today) return false;
@@ -1371,21 +1591,21 @@ function renderDashUpcoming(filter){
     return true;
   }).sort((a,b)=>{
     if(a.date!==b.date) return a.date.localeCompare(b.date);
-    return (a.startTime||'').localeCompare(b.startTime||'');
+    return timeToMinutes(effTime(a))-timeToMinutes(effTime(b));
   }).slice(0,8);
 
   if(upcoming.length===0){
-    el.innerHTML = `<div class="dash-empty">Nenhum agendamento próximo</div>`;
+    el.innerHTML = nextHTML + `<div class="dash-empty">Nenhum agendamento próximo</div>`;
     return;
   }
-  el.innerHTML = `<div class="dash-upcoming-title">Próximos Agendamentos</div>` +
+  el.innerHTML = nextHTML + `<div class="dash-upcoming-title">Próximos Agendamentos</div>` +
     upcoming.map((b,i)=>{
       const route = getRoute(b.routeId);
       const tipoIcon = b.tipo==='buggy'?'🚙':b.tipo==='piscinas'?'🏝️':'🚐';
       const dateLabel = b.date===today?'Hoje':fmtDate(b.date);
       const staggerClass = i<8?`anim-stagger-${i+1}`:'';
       return `<div class="dash-upcoming-card ${staggerClass}" onclick="openDetail('${b.id}')">
-        <div class="duc-time">${b.startTime||'—'}</div>
+        <div class="duc-time">${effTime(b)||'—'}</div>
         <div class="duc-info">
           <div class="duc-client">${escHtml(b.client)}</div>
           <div class="duc-route">${tipoIcon} ${route?route.name:b.tipo==='piscinas'?'Piscinas Naturais':'Transfer'} · ${dateLabel}</div>
@@ -1400,7 +1620,13 @@ function renderDashStats(){
   const el = document.getElementById('dashStats');
   if(!el) return;
   const today = new Date().toISOString().slice(0,10);
-  const todayCount = bookings.filter(b=>b.date===today && b.status!=='cancelado').length;
+  const todays = bookings.filter(b=>b.date===today && b.status!=='cancelado');
+  const todayCount = todays.length;
+  const byType = [];
+  if(todays.some(b=>b.tipo==='buggy')) byType.push(todays.filter(b=>b.tipo==='buggy').length+' Buggy');
+  if(todays.some(b=>b.tipo==='piscinas')) byType.push(todays.filter(b=>b.tipo==='piscinas').length+' Piscinas');
+  if(todays.some(b=>b.tipo==='transfer')) byType.push(todays.filter(b=>b.tipo==='transfer').length+' Transfer');
+  const breakdown = byType.join(' · ');
   const weather = weatherCache;
   const weatherHTML = weather
     ? `<span>${weatherIcon(weather.code)} ${Math.round(weather.max)}° / ${Math.round(weather.min)}°</span>`
@@ -1409,11 +1635,12 @@ function renderDashStats(){
     ? `<div style="font-size:10px;opacity:.7;margin-top:2px">🌅 ${weather.sunrise} · 🌇 ${weather.sunset||'--:--'}</div>`
     : '';
   el.innerHTML = `
-    <div class="dash-stat">
+    <div class="dash-stat" onclick="openTimeline('${today}')" style="cursor:pointer">
       <div class="dash-icon">📅</div>
       <div class="dash-info">
         <div class="dash-num">${todayCount}</div>
-        <div class="dash-label">Agendamentos Hoje</div>
+        <div class="dash-label">${todayCount>0?'Agendamentos Hoje':'Nenhum agendamento para hoje'}</div>
+        ${todayCount>0?`<div class="dash-sub">${breakdown} · Ver dia →</div>`:''}
       </div>
     </div>
     <div class="dash-stat">
@@ -1956,34 +2183,35 @@ function deleteRoute(idx){
 }
 
 // ─── RENDER: Form ───
-function openForm(bookingId){
+function openForm(bookingId, dupSource){
   showView('form');
   editingId = bookingId||null;
-  const edit = editingId ? bookings.find(b=>b.id===editingId) : null;
-  if(edit){
-    formState.tipo = edit.tipo||'buggy';
-    formState.routeId = edit.routeId;
-    formState.durationLabel = edit.durationLabel;
-    formState.signal = edit.signal;
-    formState.customValue = edit.customValue||0;
-    formState.quantity = edit.quantity||1;
-    formState.discount = edit.discount||0;
-    formState.status = edit.status;
-    formState.poolAdults = edit.poolAdults||1;
-    formState.poolChildren = edit.poolChildren||0;
-    formState.poolIndividualPrice = edit.poolIndividualPrice||0;
-    formState.poolName = edit.poolName||'';
-    formState.vesselType = edit.vesselType||'lancha';
-    formState.vesselMode = edit.vesselMode||'compartilhada';
-    formState.transferPassengers = edit.transferPassengers||1;
-    formState.transferPickupTime = edit.transferPickupTime||'';
-    formState.transferPickup = edit.transferPickup||'';
-    formState.transferDropoff = edit.transferDropoff||'';
-    formState.transferValue = edit.transferValue||0;
-    formState.transferPickupType = edit.transferPickupType||(edit.transferPickup==='Aeroporto Recife'?'recife':edit.transferPickup==='Aeroporto Maceió'?'maceio':'outro');
-    formState.transferPickupCustom = edit.transferPickupCustom||(edit.transferPickupType?edit.transferPickup:formState.transferPickupType==='outro'?edit.transferPickup:'')||'';
-    formState.transferDropoffType = edit.transferDropoffType||(edit.transferDropoff==='Aeroporto Recife'?'recife':edit.transferDropoff==='Aeroporto Maceió'?'maceio':'outro');
-    formState.transferDropoffCustom = edit.transferDropoffCustom||(edit.transferDropoffType?edit.transferDropoff:formState.transferDropoffType==='outro'?edit.transferDropoff:'')||'';
+  formDupSource = dupSource||null;
+  const src = formDupSource || (editingId ? bookings.find(b=>b.id===editingId) : null);
+  if(src){
+    formState.tipo = src.tipo||'buggy';
+    formState.routeId = src.routeId;
+    formState.durationLabel = src.durationLabel;
+    formState.signal = src.signal;
+    formState.customValue = src.customValue||0;
+    formState.quantity = src.quantity||1;
+    formState.discount = src.discount||0;
+    formState.status = src.status;
+    formState.poolAdults = src.poolAdults||1;
+    formState.poolChildren = src.poolChildren||0;
+    formState.poolIndividualPrice = src.poolIndividualPrice||0;
+    formState.poolName = src.poolName||'';
+    formState.vesselType = src.vesselType||'lancha';
+    formState.vesselMode = src.vesselMode||'compartilhada';
+    formState.transferPassengers = src.transferPassengers||1;
+    formState.transferPickupTime = src.transferPickupTime||'';
+    formState.transferPickup = src.transferPickup||'';
+    formState.transferDropoff = src.transferDropoff||'';
+    formState.transferValue = src.transferValue||0;
+    formState.transferPickupType = src.transferPickupType||(src.transferPickup==='Aeroporto Recife'?'recife':src.transferPickup==='Aeroporto Maceió'?'maceio':'outro');
+    formState.transferPickupCustom = src.transferPickupCustom||(src.transferPickupType?src.transferPickup:formState.transferPickupType==='outro'?src.transferPickup:'')||'';
+    formState.transferDropoffType = src.transferDropoffType||(src.transferDropoff==='Aeroporto Recife'?'recife':src.transferDropoff==='Aeroporto Maceió'?'maceio':'outro');
+    formState.transferDropoffCustom = src.transferDropoffCustom||(src.transferDropoffType?src.transferDropoff:formState.transferDropoffType==='outro'?src.transferDropoff:'')||'';
   }else{
     formState.tipo = 'buggy';
     formState.routeId = null;
@@ -2015,8 +2243,8 @@ function openForm(bookingId){
 }
 function renderForm(){
   const container = document.getElementById('formContainer');
-  const edit = editingId ? bookings.find(b=>b.id===editingId) : null;
-  const title = edit ? 'Editar Agendamento' : 'Novo Agendamento';
+  const edit = editingId ? bookings.find(b=>b.id===editingId) : (formDupSource||null);
+  const title = editingId ? 'Editar Agendamento' : (formDupSource ? 'Duplicar Agendamento' : 'Novo Agendamento');
   const t = formState.tipo||'buggy';
 
   container.innerHTML = `
@@ -2330,8 +2558,8 @@ function renderForm(){
       </div>
 
       <div style="display:flex;gap:8px">
-        <button class="btn btn-primary btn-block" id="btnSaveBooking">${edit?'Salvar Alterações':'Cadastrar Agendamento'}</button>
-        ${edit?`<button class="btn btn-outline" id="btnCancelEdit">Cancelar</button>`:''}
+        <button class="btn btn-primary btn-block" id="btnSaveBooking">${editingId?'Salvar Alterações':(formDupSource?'Salvar Cópia':'Cadastrar Agendamento')}</button>
+        ${editingId||formDupSource?`<button class="btn btn-outline" id="btnCancelEdit">Cancelar</button>`:''}
       </div>
     </div>
   `;
@@ -2681,6 +2909,7 @@ function saveBooking(){
   saveBookings();
   feedbackSave();
   editingId = null;
+  formDupSource = null;
   setTimeout(function(){
     if(saveBtn){
       saveBtn.textContent = '✓ Salvo';
@@ -2716,7 +2945,74 @@ function feedbackSave(){
 
 function cancelEdit(){
   editingId = null;
+  formDupSource = null;
   showView('agenda');
+}
+
+// ─── Reschedule (P3) ───
+let rescheduleId = null;
+function openReschedule(id){
+  const b = bookings.find(x=>x.id===id);
+  if(!b) return;
+  rescheduleId = id;
+  closeDetail();
+  const isTransfer = b.tipo==='transfer';
+  const body = document.getElementById('rescheduleBody');
+  body.innerHTML = `
+    <div class="detail-row"><span class="label">Cliente</span><span class="value">${escHtml(b.client)}</span></div>
+    <div class="form-group" style="margin-top:14px">
+      <label>Nova data</label>
+      <input class="form-input" type="date" id="rsDate" value="${b.date}">
+    </div>
+    <div class="form-group">
+      <label>${isTransfer?'Horário de embarque':'Novo horário'}</label>
+      <input class="form-input" type="time" id="rsTime" value="${isTransfer?(b.transferPickupTime||'07:00'):(b.startTime||'08:00')}">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="saveReschedule()">💾 Salvar</button>
+      <button class="btn btn-outline" onclick="closeModal('rescheduleModal')">Cancelar</button>
+    </div>
+  `;
+  document.getElementById('rescheduleModal').classList.add('active');
+}
+function saveReschedule(){
+  const b = bookings.find(x=>x.id===rescheduleId);
+  if(!b) return;
+  const date = document.getElementById('rsDate').value;
+  const time = document.getElementById('rsTime').value;
+  if(!date){ alert('Informe a nova data.'); return; }
+  if(!time){ alert('Informe o novo horário.'); return; }
+  b.date = date;
+  if(b.tipo==='transfer'){
+    b.transferPickupTime = time;
+  }else{
+    b.startTime = time;
+    b.endTime = calcEndTime(time,b.routeId,b.durationLabel);
+  }
+  saveBookings();
+  closeModal('rescheduleModal');
+  document.querySelectorAll('.bc-menu.open').forEach(m=>m.classList.remove('open'));
+  renderAgenda();
+  renderCalendar();
+  renderDashStats();
+  renderDashUpcoming(dashFilter);
+  toastSuccess('✅ Agendamento reagendado');
+}
+
+// ─── Duplicate (P4) ───
+function duplicateBooking(id){
+  const src = bookings.find(x=>x.id===id);
+  if(!src) return;
+  const clone = JSON.parse(JSON.stringify(src));
+  clone.date = '';
+  if(clone.tipo==='transfer'){
+    clone.transferPickupTime = '';
+  }else{
+    clone.startTime = '';
+    clone.endTime = '';
+  }
+  openForm(null, clone);
+  toastInfo('📋 Dados copiados. Defina a nova data e horário.');
 }
 
 // ─── Detail Modal ───
@@ -2744,6 +3040,7 @@ function openDetail(id){
       <div class="detail-row"><span class="label">Valor Total</span><span class="value">${fmtCurr(b.value)}</span></div>
       <div class="detail-row"><span class="label">Valor Pago</span><span class="value" style="color:#019391">${fmtCurr(b.signal)}</span></div>
       <div class="detail-row"><span class="label">Restante</span><span class="value" style="color:${b.value-b.signal>0?'#D14C4C':'#019391'}">${fmtCurr(b.value-b.signal)}</span></div>
+      <div class="detail-row"><span class="label">Pagamento</span><span class="value">${payBadgeHTML(b)}</span></div>
       <div class="detail-row"><span class="label">Contato</span><span class="value"><a href="https://wa.me/55${b.contact.replace(/\D/g,'')}" target="_blank" style="color:var(--t);text-decoration:none">${escHtml(b.contact)}</a></span></div>
       <div class="detail-row"><span class="label">Acompanhantes</span><span class="value">${b.companions||'—'}</span></div>
       <div class="detail-row"><span class="label">Embarque</span><span class="value">${escHtml(b.pickupDetail||'—')}</span></div>
@@ -2762,6 +3059,7 @@ function openDetail(id){
       <div class="detail-row"><span class="label">Valor Total</span><span class="value">${fmtCurr(b.value)}</span></div>
       <div class="detail-row"><span class="label">Valor Pago</span><span class="value" style="color:#019391">${fmtCurr(b.signal)}</span></div>
       <div class="detail-row"><span class="label">Restante</span><span class="value" style="color:${b.value-b.signal>0?'#D14C4C':'#019391'}">${fmtCurr(b.value-b.signal)}</span></div>
+      <div class="detail-row"><span class="label">Pagamento</span><span class="value">${payBadgeHTML(b)}</span></div>
       <div class="detail-row"><span class="label">Contato</span><span class="value"><a href="https://wa.me/55${b.contact.replace(/\D/g,'')}" target="_blank" style="color:var(--t);text-decoration:none">${escHtml(b.contact)}</a></span></div>
       <div class="detail-row"><span class="label">Acompanhantes</span><span class="value">${b.companions||'—'}</span></div>
       <div class="detail-row"><span class="label">Status</span><span class="value"><span class="pill pill-${b.status}">${statusLabel(b.status)}</span></span></div>
@@ -2782,15 +3080,24 @@ function openDetail(id){
       <div class="detail-row"><span class="label">Valor Total</span><span class="value">${fmtCurr(b.value)}</span></div>
       <div class="detail-row"><span class="label">Valor Pago</span><span class="value" style="color:#019391">${fmtCurr(b.signal)}</span></div>
       <div class="detail-row"><span class="label">Restante</span><span class="value" style="color:${b.value-b.signal>0?'#D14C4C':'#019391'}">${fmtCurr(b.value-b.signal)}</span></div>
+      <div class="detail-row"><span class="label">Pagamento</span><span class="value">${payBadgeHTML(b)}</span></div>
       <div class="detail-row"><span class="label">Status</span><span class="value"><span class="pill pill-${b.status}">${statusLabel(b.status)}</span></span></div>
       ${b.customStops?`<div class="detail-row"><span class="label">Personalização</span><span class="value">${escHtml(b.customStops)}</span></div>`:''}
       ${b.notes?`<div class="detail-row"><span class="label">Obs</span><span class="value">${escHtml(b.notes)}</span></div>`:''}
     `;
   }
 
+  const statusBtn = b.status==='confirmado'
+    ? `<button class="btn btn-primary btn-sm" onclick="setBookingStatus('${b.id}','concluido')">✅ Concluir</button>`
+    : (b.status==='concluido'||b.status==='cancelado')
+      ? `<button class="btn btn-outline btn-sm" onclick="setBookingStatus('${b.id}','confirmado')">↩️ Reativar</button>`
+      : '';
   actions.innerHTML = `
+    ${statusBtn}
     <button class="btn btn-primary btn-sm" onclick="editBooking('${b.id}')">✏️ Editar</button>
+    <button class="btn btn-outline btn-sm" onclick="openReschedule('${b.id}')">📅 Reagendar</button>
     <button class="btn btn-secondary btn-sm" onclick="generateReceipt('${b.id}')">📄 Comprovante</button>
+    <button class="btn btn-outline btn-sm" onclick="sendWhatsApp('${b.id}')">💬 WhatsApp</button>
     <button class="btn btn-outline btn-sm" onclick="openTimeline('${b.date}')">📅 Ver Dia Completo</button>
     <button class="btn btn-danger btn-sm" onclick="deleteBooking('${b.id}')">🗑️ Excluir</button>
     <button class="btn btn-outline btn-sm" onclick="closeDetail()">Fechar</button>
@@ -2849,6 +3156,7 @@ document.querySelectorAll('.modal-overlay').forEach(el=>{
   el.addEventListener('click',(e)=>{
     if(e.target===el){
       el.classList.remove('active');
+      document.querySelectorAll('.bc-menu.open').forEach(m=>m.classList.remove('open'));
       if(el.id==='detailModal' && window._afterDetailClose){ const f=window._afterDetailClose; window._afterDetailClose=null; setTimeout(f,100); }
       if(el.id==='receiptModal'){
         document.getElementById('shareButton').style.display = 'none';
