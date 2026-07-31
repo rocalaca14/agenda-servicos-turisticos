@@ -3356,40 +3356,41 @@ function receiptJPEG(callback){
   const prog = document.getElementById('receiptProgress');
   if(prog) prog.style.display = 'block';
 
-  const tmpStyle = document.createElement('style');
-  tmpStyle.textContent = `
-    .receipt * { color: inherit !important; }
-    .receipt .r-label { color: #019391 !important; }
-    .receipt .r-value { color: #333 !important; }
-    .receipt h2 { color: #019391 !important; }
-    .receipt .receipt-sub { color: #5A8A8A !important; }
-    .receipt .r-stops { color: #5A8A8A !important; }
-    .receipt .r-footer { color: #5A8A8A !important; }
-    .receipt .r-section { color: #019391 !important; }
-    .receipt .pill-confirmado { background: #D7F8F3 !important; color: #00606C !important; }
-    .receipt .pill-concluido { background: #D9EEEE !important; color: #019391 !important; }
-    .receipt .pill-cancelado { background: #EBEBEB !important; color: #707070 !important; }
-    .receipt .receipt-divider { background: linear-gradient(90deg,transparent,#e0e0e0,#019391,#e0e0e0,transparent) !important; }
-    .receipt .r-highlight { background: linear-gradient(135deg,rgba(0,223,195,.07),rgba(0,96,108,.04)) !important; border: 1px solid #019391 !important; }
-    .receipt .r-highlight .r-row:last-child { border-top: 1px solid rgba(0,223,195,.12) !important; }
-    .receipt::before { background: linear-gradient(90deg,#019391,#F57C00,#E65100) !important; }
-    .receipt .anim-scale-bounce { background: rgba(1,147,145,0.08) !important; color: #019391 !important; border: 1px solid #019391 !important; }
-    .receipt-pattern { display: none !important; }
-  `;
-  document.head.appendChild(tmpStyle);
   try {
-    html2canvas(el,{scale:2,backgroundColor:'#fff',useCORS:true,allowTaint:false,logging:false,timeout:15000}).then(canvas=>{
-      tmpStyle.remove();
+    const clone = el.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.style.cssText = 'position:relative;overflow:hidden;padding:28px 24px;border-radius:16px;max-width:380px;margin:0 auto;background:#fff;box-shadow:none;width:'+el.offsetWidth+'px';
+    const pat = clone.querySelector('.receipt-pattern');
+    if(pat) pat.remove();
+    const logoWrap = clone.querySelector('.logo-round');
+    if(logoWrap){
+      const logoImg = logoWrap.querySelector('img');
+      if(logoImg && !logoImg.src.startsWith('data:')) logoWrap.remove();
+    }
+    clone.querySelectorAll('*').forEach(n=>{
+      const s = getComputedStyle(n);
+      if(s.animation && s.animation !== 'none') n.style.animation = 'none';
+    });
+    clone.querySelectorAll('[style]').forEach(n=>{
+      let v = n.getAttribute('style');
+      if(v && v.includes('var(--')) n.setAttribute('style', v.replace(/var\(--t\)/g,'#019391').replace(/var\(--t2\)/g,'#017572').replace(/var\(--o\)/g,'#F57C00').replace(/var\(--o2\)/g,'#E65100').replace(/var\(--border\)/g,'#e0e0e0').replace(/var\(--surface\)/g,'#ffffff').replace(/var\(--text\)/g,'#333333').replace(/var\(--text2\)/g,'#5A8A8A').replace(/var\(--text3\)/g,'#999999'));
+    });
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:fixed;left:-9999px;top:0';
+    wrap.appendChild(clone);
+    document.body.appendChild(wrap);
+
+    html2canvas(clone,{scale:2,backgroundColor:'#fff',useCORS:true,allowTaint:false,logging:false,timeout:15000}).then(canvas=>{
+      wrap.remove();
       window._receiptCanvas = canvas;
       if(prog) prog.style.display = 'none';
       callback(canvas);
     }).catch(e=>{
-      tmpStyle.remove();
+      wrap.remove();
       if(prog) prog.style.display = 'none';
       alert('Erro ao gerar imagem: '+(e.message||'tente novamente'));
     });
   } catch(e) {
-    tmpStyle.remove();
     if(prog) prog.style.display = 'none';
     alert('Erro inesperado: '+(e.message||'tente novamente'));
   }
