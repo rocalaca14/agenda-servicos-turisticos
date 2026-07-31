@@ -24,7 +24,7 @@
 [style*="display:grid"]>*{min-width:0;overflow-wrap:break-word;max-width:100%}
 [style*="display:grid"]{overflow:hidden}
 .form-input,.signal-btn,.status-option{min-width:0!important}
-:root{--t:#00606C;--t2:#019391;--o:#00DFC3;--o2:#00BFA8;--bg:#F4FAFA;--white:#FFFFFF;--surface:var(--white);--border:#B7E5E2;--text:#102A30;--text2:#527178;--shadow:0 4px 20px rgba(0,0,0,.12);--radius:14px;--radius-sm:10px;--font:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif}
+:root{--t:#00606C;--t2:#019391;--o:#00DFC3;--o2:#00BFA8;--bg:#F4FAFA;--white:#FFFFFF;--surface:var(--white);--border:#B7E5E2;--text:#102A30;--text2:#527178;--shadow:0 4px 20px rgba(0,0,0,.12);--radius:14px;--radius-sm:10px;--font:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;--ease-standard:cubic-bezier(0.4,0,0.2,1);--ease-smooth:cubic-bezier(0.22,1,0.36,1);--ease-overshoot:cubic-bezier(0.34,1.56,0.64,1)}
 
 /* Theme: Happy */
 .theme-happy{--t:#A64AC9;--t2:#8B3AA8;--o:#FCCD04;--o2:#E5B800;--bg:#F5E6CC;--white:#FFFFFF;--surface:var(--white);--border:#F5E6CC;--text:#102A30;--text2:#527178;--shadow:0 4px 20px rgba(166,74,201,.15)}
@@ -37,6 +37,11 @@
 
 /* Theme: Tropical (brand colors) */
 .theme-tropical{--t:#00B4B4;--t2:#008B8B;--o:#F5A623;--o2:#E09000;--bg:#FAFAFA;--white:#FFFFFF;--surface:var(--white);--border:#E0E0E0;--text:#333333;--text2:#9E9E9E;--shadow:0 4px 20px rgba(0,180,180,.12)}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}
+}
 html,body{height:100%;width:100%;overflow-x:hidden;font-family:var(--font);background:var(--bg);color:var(--text);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 svg{shape-rendering:geometricPrecision}
 body{padding-bottom:80px;overflow-x:hidden}
@@ -72,7 +77,7 @@ body{padding-bottom:80px;overflow-x:hidden}
 .card-sub{font-size:13px;color:var(--text2)}
 
 /* Buttons */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);border:none;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;font-family:var(--font);text-decoration:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);border:none;font-size:14px;font-weight:600;cursor:pointer;transition:transform .12s var(--ease-standard),background .2s var(--ease-standard);font-family:var(--font);text-decoration:none}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--t);color:var(--white)}
 .btn-primary:hover{background:var(--t2)}
@@ -166,8 +171,7 @@ textarea.form-input{resize:vertical;min-height:70px}
 /* Modal overlay */
 .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:300;justify-content:center;align-items:flex-end;padding-bottom:env(safe-area-inset-bottom,0)}
 .modal-overlay.active{display:flex}
-.modal-content{background:var(--surface);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;padding:20px;animation:slideUp .25s ease}
-@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-content{background:var(--surface);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;padding:20px}
 .modal-handle{width:40px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 16px}
 .modal-title{font-size:18px;font-weight:700;margin-bottom:12px}
 .detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px}
@@ -241,23 +245,20 @@ textarea.form-input{resize:vertical;min-height:70px}
 .skeleton-btn{height:44px;border-radius:var(--radius-sm)}
 
 /* Month Transition */
-.month-slide-in{animation:slideMonth .3s ease forwards}
-.month-slide-out{animation:slideMonthOut .25s ease forwards}
+.month-slide-in{animation:slideMonth .25s var(--ease-smooth) forwards}
+.month-slide-out{animation:slideMonthOut .18s var(--ease-smooth) forwards}
 
 /* Toast */
 .toast-container{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-.toast{background:var(--surface);color:var(--text);padding:12px 20px;border-radius:var(--radius);box-shadow:0 4px 24px rgba(0,0,0,.15);border-left:4px solid var(--t);display:flex;align-items:center;gap:10px;font-size:14px;max-width:90vw;animation:toastIn .3s ease forwards;pointer-events:auto}
+.toast{background:var(--surface);color:var(--text);padding:12px 20px;border-radius:var(--radius);box-shadow:0 4px 24px rgba(0,0,0,.15);border-left:4px solid var(--t);display:flex;align-items:center;gap:10px;font-size:14px;max-width:90vw;animation:toastIn .16s var(--ease-standard) forwards;pointer-events:auto}
 .toast.success{border-color:#27ae60}
 .toast.error{border-color:#e74c3c}
 .toast.warning{border-color:#f5a623}
 .toast.info{border-color:var(--t)}
-.toast.hiding{animation:toastOut .25s ease forwards}
+.toast.hiding{animation:toastOut .14s var(--ease-standard) forwards}
 
 /* Empty State */
-.empty-state svg{animation:float 3s ease-in-out infinite}
-
-/* FAB Pulse */
-.fab.pulse{animation:pulse 2s ease-in-out infinite}
+.empty-state svg{animation:float 6s ease-in-out infinite}
 
 /* Calendar */
 .cal-nav{display:flex;align-items:center;justify-content:space-between;padding:0 0 16px}
@@ -270,17 +271,19 @@ textarea.form-input{resize:vertical;min-height:70px}
 .cal-day{position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border-radius:50%;transition:.15s;padding:2px;background:var(--surface);border:1.5px solid var(--border);overflow:visible}
 .cal-day:active{transform:scale(.92)}
 .cal-day .day-num{font-size:16px;font-weight:700;color:var(--text);z-index:1;position:relative;transform-origin:center}
-.cal-day.today .day-num{color:var(--o);font-weight:900;font-size:22px;animation:bounceDay 2s cubic-bezier(0.25,0.46,0.45,0.94) forwards}
+.cal-day.today .day-num{color:var(--o);font-weight:900;font-size:22px;animation:dayNumIn .18s var(--ease-standard) forwards}
 .cal-day.other-month .day-num{color:var(--border)}
 .cal-day.has-bookings{cursor:pointer}
-.cal-day-badge{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;border-radius:9px;background:var(--o);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,.2);padding:0 4px;animation:scaleInBounce .6s ease 2s forwards;opacity:0}
+.cal-day-badge{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;border-radius:9px;background:var(--o);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,.2);padding:0 4px;animation:badgeIn .2s var(--ease-standard) forwards;opacity:0}
 .cal-day-ring{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
 .cal-day-ring svg{width:100%;height:100%;shape-rendering:geometricPrecision}
-.cal-day-ring circle.segment{transition:stroke-dashoffset 2s cubic-bezier(0.25,0.46,0.45,0.94)}
-@keyframes bounceDay{0%{transform:scale(1)}15%{transform:scale(1.8)}40%{transform:scale(0.85)}100%{transform:scale(1)}}
+.cal-day-ring circle.segment{transition:stroke-dashoffset .65s var(--ease-smooth)}
+@keyframes dayNumIn{from{opacity:.7;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+@keyframes badgeIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+@keyframes badgeReceiptIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
 
 /* Day popup */
-.day-popup{position:fixed;bottom:0;left:0;right:0;z-index:350;background:var(--surface);border-radius:var(--radius) var(--radius) 0 0;padding:16px;max-height:65vh;overflow-y:auto;animation:slideUp .25s ease;box-shadow:0 -4px 24px rgba(0,0,0,.1)}
+.day-popup{position:fixed;bottom:0;left:0;right:0;z-index:350;background:var(--surface);border-radius:var(--radius) var(--radius) 0 0;padding:16px;max-height:65vh;overflow-y:auto;animation:modalIn .24s var(--ease-smooth) forwards;box-shadow:0 -4px 24px rgba(0,0,0,.1)}
 .day-popup .popup-handle{width:36px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 10px}
 .day-popup .popup-day{font-size:14px;font-weight:700;margin-bottom:8px;color:var(--t)}
 .day-popup-item{padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:8px}
@@ -324,76 +327,69 @@ textarea.form-input{resize:vertical;min-height:70px}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
-@keyframes slideInLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}
 @keyframes scaleIn{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}
-@keyframes scaleInBounce{0%{opacity:0;transform:scale(0.3)}50%{transform:scale(1.05)}70%{transform:scale(0.95)}100%{opacity:1;transform:scale(1)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-@keyframes rotatePlus{from{transform:translateX(-50%) rotate(0deg)}to{transform:translateX(-50%) rotate(135deg)}}
-@keyframes rotatePlusBack{from{transform:translateX(-50%) rotate(135deg)}to{transform:translateX(-50%) rotate(0deg)}}
+@keyframes rotatePlus{from{transform:translateX(-50%) rotate(0deg)}to{transform:translateX(-50%) rotate(45deg)}}
+@keyframes rotatePlusBack{from{transform:translateX(-50%) rotate(45deg)}to{transform:translateX(-50%) rotate(0deg)}}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-@keyframes slideMonth{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
-@keyframes slideMonthOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-30px)}}
-@keyframes toastIn{from{opacity:0;transform:translateY(20px) scale(0.9)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes toastOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(20px) scale(0.9)}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes slideMonth{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideMonthOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-16px)}}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-4px)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 .anim-fade{animation:fadeIn .3s ease forwards}
 .anim-slide-up{animation:slideUp .35s ease forwards}
 .anim-slide-down{animation:slideDown .35s ease forwards}
 .anim-scale-in{animation:scaleIn .3s ease forwards}
-.anim-scale-bounce{animation:scaleInBounce .4s ease forwards}
-.anim-stagger-1{animation:slideUp .35s ease .05s forwards;opacity:0}
-.anim-stagger-2{animation:slideUp .35s ease .1s forwards;opacity:0}
-.anim-stagger-3{animation:slideUp .35s ease .15s forwards;opacity:0}
-.anim-stagger-4{animation:slideUp .35s ease .2s forwards;opacity:0}
-.anim-stagger-5{animation:slideUp .35s ease .25s forwards;opacity:0}
-.anim-stagger-6{animation:slideUp .35s ease .3s forwards;opacity:0}
-.anim-stagger-7{animation:slideUp .35s ease .35s forwards;opacity:0}
-.anim-stagger-8{animation:slideUp .35s ease .4s forwards;opacity:0}
+.anim-scale-bounce{animation:badgeReceiptIn .18s var(--ease-standard) forwards}
+.anim-stagger-1{animation:slideUp .2s var(--ease-standard) .02s forwards;opacity:0}
+.anim-stagger-2{animation:slideUp .2s var(--ease-standard) .04s forwards;opacity:0}
+.anim-stagger-3{animation:slideUp .2s var(--ease-standard) .06s forwards;opacity:0}
+.anim-stagger-4{animation:slideUp .2s var(--ease-standard) .08s forwards;opacity:0}
+.anim-stagger-5{animation:slideUp .2s var(--ease-standard) .1s forwards;opacity:0}
+.anim-stagger-6{animation:slideUp .2s var(--ease-standard) .12s forwards;opacity:0}
+.anim-stagger-7{animation:slideUp .2s var(--ease-standard) .14s forwards;opacity:0}
+.anim-stagger-8{animation:slideUp .2s var(--ease-standard) .16s forwards;opacity:0}
 
 /* View Transitions */
-.view-transition-in{animation:slideInRight .3s ease forwards}
-.view-transition-out{animation:slideInLeft .25s ease forwards}
+.view-transition-in{animation:slideInRight .25s var(--ease-smooth) forwards}
+.view-transition-out{animation:slideInLeft .22s var(--ease-smooth) forwards}
 
 /* Calendar */
 .cal-day.has-bookings{animation:pulse 3s ease-in-out infinite}
 .cal-day:active{transform:scale(.92)!important}
 
 /* FAB */
-.fab{transition:transform .2s ease,box-shadow .2s ease}
-.fab:active{transform:translateX(-50%) scale(.92)!important}
-.fab.open svg{animation:rotatePlus .3s ease forwards}
-.fab:not(.open) svg{animation:rotatePlusBack .3s ease forwards}
+.fab{transition:transform .2s var(--ease-overshoot),box-shadow .2s var(--ease-standard)}
+.fab:active{transform:translateX(-50%) scale(1.04)!important}
+.fab.open svg{animation:rotatePlus .2s var(--ease-overshoot) forwards}
+.fab:not(.open) svg{animation:rotatePlusBack .2s var(--ease-overshoot) forwards}
 
 /* Theme buttons */
-.theme-btn{transition:transform .15s ease,border-color .2s ease,background .2s ease}
-.theme-btn:active{transform:scale(.95)}
-.theme-btn.active{transform:scale(1.02);border-width:2.5px}
+.theme-btn{transition:transform .15s var(--ease-standard),border-color .25s var(--ease-standard),background .25s var(--ease-standard)}
+.theme-btn:active{transform:scale(.96)}
+.theme-btn.active{transform:scale(1);border-width:2.5px}
 
 /* Booking cards */
-.booking-card{transition:transform .15s ease,box-shadow .2s ease}
-.booking-card:active{transform:scale(.98)!important}
+.booking-card{transition:transform .12s var(--ease-standard),box-shadow .2s var(--ease-standard)}
+.booking-card:active{transform:scale(.985)!important}
 
 /* Dashboard stats */
-.dash-stat{animation:scaleIn .4s ease forwards}
-.dash-stat:nth-child(2){animation-delay:.1s;opacity:0}
+.dash-stat{animation:fadeSlideIn .22s var(--ease-standard) forwards}
+.dash-stat:nth-child(2){animation-delay:.04s;opacity:0}
 
 /* Receipt */
-.receipt{animation:fadeIn .4s ease forwards}
-.receipt .r-row{animation:slideUp .3s ease forwards;opacity:0}
-.receipt .r-row:nth-child(1){animation-delay:.1s}
-.receipt .r-row:nth-child(2){animation-delay:.15s}
-.receipt .r-row:nth-child(3){animation-delay:.2s}
-.receipt .r-row:nth-child(4){animation-delay:.25s}
-.receipt .r-row:nth-child(5){animation-delay:.3s}
-.receipt .r-row:nth-child(6){animation-delay:.35s}
-.receipt .r-row:nth-child(7){animation-delay:.4s}
-.receipt .r-row:nth-child(8){animation-delay:.45s}
+.receipt{animation:fadeSlideIn .28s var(--ease-smooth) forwards}
+.receipt .r-row{animation:fadeSlideIn .28s var(--ease-smooth) forwards}
 
 /* Modal */
-.modal-overlay{transition:opacity .25s ease}
-.modal-content{animation:slideUp .3s ease forwards}
+.modal-overlay{transition:opacity .18s var(--ease-standard)}
+.modal-content{animation:modalIn .24s var(--ease-smooth) forwards}
+@keyframes modalIn{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 
 /* Transitions */
 .view-transition{animation:slideIn .3s ease}
@@ -1302,7 +1298,7 @@ function renderAgenda(){
         const route = isPiscinas||isTransfer ? null : getRoute(b.routeId);
         const timeStr = isTransfer ? (b.transferPickupTime||'') : `${b.startTime} - ${safeEndTime(b)}`;
         const staggerClass = i<8?`anim-stagger-${i+1}`:'';
-        return `<div class="booking-card bc-${b.status} ${staggerClass}" onclick="openDetail('${b.id}')">
+        return `<div class="booking-card bc-${b.status} ${staggerClass}" id="bc-${b.id}" onclick="openDetail('${b.id}')">
           <div class="bc-top">
             <div>
               <div class="bc-time">${timeStr}</div>
@@ -1585,7 +1581,7 @@ function showToast(message,type='info',duration=3000){
   if(duration > 0){
     setTimeout(()=>{
       toast.classList.add('hiding');
-      setTimeout(()=>toast.remove(),250);
+      setTimeout(()=>toast.remove(),160);
     },duration);
   }
   return toast;
@@ -2677,10 +2673,28 @@ function saveBooking(){
   }else{
     bookings.push(booking);
   }
+  const saveBtn = document.getElementById('btnSaveBooking');
+  if(saveBtn){
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Salvando…';
+  }
   saveBookings();
   feedbackSave();
   editingId = null;
-  showView('agenda');
+  setTimeout(function(){
+    if(saveBtn){
+      saveBtn.textContent = '✓ Salvo';
+      saveBtn.style.background = '#27ae60';
+    }
+    setTimeout(function(){
+      showView('agenda');
+      if(saveBtn){
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Cadastrar Agendamento';
+        saveBtn.style.background = '';
+      }
+    },350);
+  },120);
 }
 
 function feedbackSave(){
@@ -2813,10 +2827,21 @@ function sendConfirmation(id){
 
 function deleteBooking(id){
   if(!confirm('Tem certeza que deseja excluir este agendamento?')) return;
-  bookings = bookings.filter(b=>b.id!==id);
-  saveBookings();
   closeDetail();
-  renderAgenda();
+  const card = document.getElementById('bc-'+id);
+  const doDelete = function(){
+    bookings = bookings.filter(b=>b.id!==id);
+    saveBookings();
+    renderAgenda();
+  };
+  if(card){
+    card.style.transition = 'opacity .25s var(--ease-standard),transform .25s var(--ease-standard)';
+    card.style.opacity = '0';
+    card.style.transform = 'translateX(-20px)';
+    setTimeout(doDelete,250);
+  }else{
+    doDelete();
+  }
 }
 
 // Close modal on backdrop click
