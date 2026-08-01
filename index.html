@@ -222,12 +222,12 @@ textarea.form-input{resize:vertical;min-height:70px}
 .receipt .r-highlight .r-row{font-size:11px}
 .receipt .r-highlight .r-row:last-child{padding-top:3px;margin-top:2px;border-top:1px solid rgba(0,223,195,.12)}
 
-.receipt .r-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;margin:4px 0}
+.receipt .r-grid{display:grid;grid-template-columns:1fr;gap:4px;margin:4px 0}
 .receipt .r-grid-item{display:flex;flex-direction:column;gap:0}
 .receipt .r-grid-item .r-label{font-size:9px;font-weight:600;color:var(--t);opacity:.85;display:flex;align-items:center}
 .receipt .r-grid-item .r-value{font-size:11px;font-weight:700;color:var(--text);line-height:1.2}
-.receipt .r-bottom{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0}
-.receipt .r-route{background:rgba(0,223,195,.04);border-radius:8px;padding:6px 10px;border:1px solid rgba(0,223,195,.15)}
+.receipt .r-bottom{display:grid;grid-template-columns:1fr;gap:6px;margin:4px 0}
+.receipt .r-route{min-width:0}
 
 /* Sidebar */
 .sidebar{position:fixed;top:0;left:-280px;bottom:0;width:280px;background:var(--surface);z-index:400;box-shadow:4px 0 24px rgba(0,0,0,.12);transition:left .3s ease;display:flex;flex-direction:column;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
@@ -3394,7 +3394,7 @@ function receiptJPEG(callback){
     });
 
     clone.querySelectorAll('.r-grid').forEach(n=>{
-      n.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;margin:4px 0';
+      n.style.cssText = 'display:grid;grid-template-columns:1fr;gap:4px;margin:4px 0';
     });
 
     clone.querySelectorAll('.r-grid-item').forEach(n=>{
@@ -3404,11 +3404,11 @@ function receiptJPEG(callback){
     });
 
     clone.querySelectorAll('.r-bottom').forEach(n=>{
-      n.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0';
+      n.style.cssText = 'display:grid;grid-template-columns:1fr;gap:6px;margin:4px 0';
     });
 
     clone.querySelectorAll('.r-route').forEach(n=>{
-      n.style.cssText = 'background:rgba(0,223,195,.04);border-radius:8px;padding:6px 10px;border:1px solid rgba(0,223,195,.15)';
+      n.style.cssText = 'min-width:0';
     });
 
     clone.querySelectorAll('.r-highlight').forEach(n=>{
