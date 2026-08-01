@@ -202,7 +202,7 @@ textarea.form-input{resize:vertical;min-height:70px}
 .detail-row .value{font-weight:600;text-align:right;max-width:60%}
 
 /* Receipt */
-.receipt{position:relative;overflow:hidden;padding:14px 16px;border-radius:16px;width:384px;aspect-ratio:3/4;margin:0 auto;background:var(--surface);box-shadow:0 4px 24px rgba(0,96,108,.08);display:flex;flex-direction:column}
+.receipt{position:relative;padding:14px 16px;border-radius:16px;width:384px;max-width:100%;margin:0 auto;background:var(--surface);box-shadow:0 4px 24px rgba(0,96,108,.08);display:flex;flex-direction:column}
 .receipt::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--t),var(--o),var(--o2));z-index:2}
 .receipt-pattern{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:.55;z-index:0}
 .receipt-pattern svg{width:100%;height:100%}
@@ -3368,7 +3368,7 @@ function receiptJPEG(callback){
   try {
     const clone = el.cloneNode(true);
     clone.removeAttribute('id');
-    clone.style.cssText = 'position:relative;overflow:hidden;padding:14px 16px;border-radius:16px;width:384px;aspect-ratio:3/4;margin:0 auto;background:#fff;box-shadow:none;display:flex;flex-direction:column';
+    clone.style.cssText = 'position:relative;border-radius:16px;width:384px;min-height:512px;margin:0 auto;background:#fff;box-shadow:none;display:flex;flex-direction:column;padding:14px 16px';
 
     const gradBar = document.createElement('div');
     gradBar.style.cssText = 'position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#019391,#F57C00,#E65100);z-index:2';
