@@ -42,7 +42,7 @@
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}
 }
-html,body{height:100%;width:100%;overflow-x:hidden;font-family:var(--font);background:var(--bg);color:var(--text);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+html,body{height:100%;width:100%;overflow-x:hidden;font-family:var(--font);background:var(--bg);color:var(--text);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 svg{shape-rendering:geometricPrecision}
 body{padding-bottom:80px;overflow-x:hidden}
 
@@ -206,7 +206,7 @@ textarea.form-input{resize:vertical;min-height:70px}
 /* Modal overlay */
 .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:300;justify-content:center;align-items:flex-end;padding-bottom:env(safe-area-inset-bottom,0)}
 .modal-overlay.active{display:flex}
-.modal-content{background:var(--surface);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;padding:20px}
+.modal-content{background:var(--surface);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;padding:20px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0))}
 .modal-handle{width:40px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 16px}
 .modal-title{font-size:18px;font-weight:700;margin-bottom:12px}
 .detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px}
@@ -1141,7 +1141,7 @@ function importBackup(event){
 }
 
 // ─── Version & Service Worker ───
-const APP_VERSION = '6';
+const APP_VERSION = '7';
 
 // Force-kill old service workers and caches on version mismatch
 (async ()=>{
@@ -2566,9 +2566,11 @@ function escHtml(s){
 }
 function openModal(id){
   document.getElementById(id).classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
 function closeModal(id){
   document.getElementById(id).classList.remove('active');
+  document.body.style.overflow = '';
   if(id==='receiptModal'){
     document.getElementById('shareButton').style.display = 'none';
     window._receiptCanvas = null;
@@ -3505,6 +3507,7 @@ function openReschedule(id){
     </div>
   `;
   document.getElementById('rescheduleModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
 function saveReschedule(){
   const b = bookings.find(x=>x.id===rescheduleId);
@@ -3643,10 +3646,12 @@ function openDetail(id){
   `;
 
   document.getElementById('detailModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
 
 function closeDetail(){
   document.getElementById('detailModal').classList.remove('active');
+  document.body.style.overflow = '';
   if(window._afterDetailClose){ const f=window._afterDetailClose; window._afterDetailClose=null; setTimeout(f,100); }
 }
 
@@ -3871,6 +3876,7 @@ function generateReceipt(id){
   `;
 
   document.getElementById('receiptModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
   document.getElementById('shareButton').style.display = 'flex';
   window._receiptCanvas = null;
 }
