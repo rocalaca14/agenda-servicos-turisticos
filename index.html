@@ -1541,6 +1541,8 @@ function showView(view){
     el.classList.remove('active');
     el.classList.remove('view-transition-in','view-transition-out');
   });
+  document.querySelectorAll('.modal-overlay.active').forEach(el=>el.classList.remove('active'));
+  document.body.style.overflow = '';
   const el = document.getElementById(`view${view.charAt(0).toUpperCase()+view.slice(1)}`);
   if(el){
     el.classList.add('active','view-transition-in');
@@ -2434,6 +2436,7 @@ function showDayDetail(dateStr){
   removeDayPopup();
   // Close any open modals
   document.querySelectorAll('.modal-overlay.active').forEach(el=>el.classList.remove('active'));
+  document.body.style.overflow = '';
   showView('dayDetail');
   const container = document.getElementById('dayDetailContainer');
   if(!container) return;
@@ -3704,6 +3707,7 @@ document.querySelectorAll('.modal-overlay').forEach(el=>{
   el.addEventListener('click',(e)=>{
     if(e.target===el){
       el.classList.remove('active');
+      document.body.style.overflow = '';
       document.querySelectorAll('.bc-menu.open').forEach(m=>m.classList.remove('open'));
       if(el.id==='detailModal' && window._afterDetailClose){ const f=window._afterDetailClose; window._afterDetailClose=null; setTimeout(f,100); }
       if(el.id==='receiptModal'){
