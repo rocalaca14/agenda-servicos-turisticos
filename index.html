@@ -632,6 +632,32 @@ textarea.form-input{resize:vertical;min-height:70px}
           </button>
         </div>
       </div>
+      <div class="form-group">
+        <label>🖼️ Fundo do Comprovante (imagem personalizada)</label>
+        <input type="file" id="settReceiptBgInput" accept="image/png,image/jpeg,image/webp" style="font-size:13px;color:var(--text2)">
+        <div id="settReceiptBgPreview" style="display:none;margin-top:8px">
+          <div style="width:100%;height:80px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);position:relative;background:repeating-conic-gradient(#eee 0% 25%,#fff 0% 50%) 50%/16px 16px">
+            <img id="settReceiptBgImg" style="width:100%;height:100%;object-fit:cover">
+          </div>
+          <button class="btn btn-sm" onclick="removeReceiptBg()" style="margin-top:6px;background:var(--bg);color:var(--text2);border:none;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px">Remover imagem</button>
+        </div>
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:10px">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <label style="font-size:12px;color:var(--text2);margin:0">Transparência</label>
+              <span id="settReceiptOpacityVal" style="font-size:12px;color:var(--text2);font-weight:600">10%</span>
+            </div>
+            <input type="range" id="settReceiptOpacity" min="0" max="100" value="10" style="width:100%;accent-color:var(--t)">
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <label style="font-size:12px;color:var(--text2);margin:0">Escala da imagem</label>
+              <span id="settReceiptScaleVal" style="font-size:12px;color:var(--text2);font-weight:600">100%</span>
+            </div>
+            <input type="range" id="settReceiptScale" min="20" max="300" value="100" style="width:100%;accent-color:var(--t)">
+          </div>
+        </div>
+      </div>
     </div>
     <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
     <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px">💾 Backup e Sincronização</div>
@@ -899,7 +925,7 @@ let formDupSource = null;
 const formState = { tipo:'buggy', routeId:null, durationLabel:null, signal:0, customValue:0, quantity:1, discount:0, status:'confirmado', poolAdults:1, poolChildren:0, poolIndividualPrice:0, poolName:'', transferPassengers:1, transferPickupTime:'', transferPickup:'', transferDropoff:'', transferValue:0, transferPickupType:'recife', transferPickupCustom:'', transferDropoffType:'recife', transferDropoffCustom:'' };
 
 // ─── Settings ───
-let appSettings = { companyName:'Agenda Serviços Turísticos', tagline:'Serviços Turísticos - Maragogi-AL', location:'Maragogi-AL', logoDataUrl:'', logoZoom:1, instagram:'@destinosmaragogi', contactName:'Rodrigo', contactPhone:'(82) 99141-4023', theme:'default' };
+let appSettings = { companyName:'Agenda Serviços Turísticos', tagline:'Serviços Turísticos - Maragogi-AL', location:'Maragogi-AL', logoDataUrl:'', logoZoom:1, instagram:'@destinosmaragogi', contactName:'Rodrigo', contactPhone:'(82) 99141-4023', theme:'default', receiptBgUrl:'', receiptBgOpacity:0.1, receiptBgScale:1 };
 const SETTINGS_KEY = 'destinos_maragogi_settings';
 
 // ─── Firebase ───
@@ -967,6 +993,11 @@ function saveSettings(){
   // If preview is hidden, logo was removed
   const preview = document.getElementById('settLogoPreview');
   if(preview.style.display==='none') appSettings.logoDataUrl = '';
+  // Receipt BG
+  const receiptPreview = document.getElementById('settReceiptBgPreview');
+  if(receiptPreview.style.display==='none') appSettings.receiptBgUrl = '';
+  appSettings.receiptBgOpacity = parseInt(document.getElementById('settReceiptOpacity').value)/100;
+  appSettings.receiptBgScale = parseInt(document.getElementById('settReceiptScale').value)/100;
   delete appSettings.primaryColor;
   delete appSettings.accentColor;
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(appSettings));
@@ -1010,6 +1041,23 @@ function openSettings(){
   document.querySelectorAll('.theme-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.theme === (appSettings.theme || 'default'));
   });
+  // Receipt BG preview
+  const receiptBgPreview = document.getElementById('settReceiptBgPreview');
+  const receiptBgImg = document.getElementById('settReceiptBgImg');
+  if(appSettings.receiptBgUrl){
+    receiptBgImg.src = appSettings.receiptBgUrl;
+    receiptBgPreview.style.display = '';
+  }else{
+    receiptBgPreview.style.display = 'none';
+  }
+  const opSlider = document.getElementById('settReceiptOpacity');
+  const opLabel = document.getElementById('settReceiptOpacityVal');
+  opSlider.value = Math.round((appSettings.receiptBgOpacity||0.1)*100);
+  opLabel.textContent = opSlider.value + '%';
+  const scSlider = document.getElementById('settReceiptScale');
+  const scLabel = document.getElementById('settReceiptScaleVal');
+  scSlider.value = Math.round((appSettings.receiptBgScale||1)*100);
+  scLabel.textContent = scSlider.value + '%';
   openModal('settingsModal');
   const lastBackup = localStorage.getItem('last_backup_at');
   const lbEl = document.getElementById('lastBackupInfo');
@@ -1046,6 +1094,18 @@ document.addEventListener('change', function(e){
     };
     reader.readAsDataURL(file);
   }
+  if(e.target.id==='settReceiptBgInput'){
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      const dataUrl = ev.target.result;
+      document.getElementById('settReceiptBgImg').src = dataUrl;
+      document.getElementById('settReceiptBgPreview').style.display = '';
+      appSettings.receiptBgUrl = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  }
 });
 
 function applyLogoZoom(){
@@ -1069,6 +1129,20 @@ function removeLogo(){
   appSettings.logoZoom=1;
   applyLogoZoom();
 }
+function removeReceiptBg(){
+  document.getElementById('settReceiptBgInput').value='';
+  document.getElementById('settReceiptBgPreview').style.display='none';
+  document.getElementById('settReceiptBgImg').src='';
+  appSettings.receiptBgUrl='';
+}
+document.addEventListener('input', function(e){
+  if(e.target.id==='settReceiptOpacity'){
+    document.getElementById('settReceiptOpacityVal').textContent = e.target.value + '%';
+  }
+  if(e.target.id==='settReceiptScale'){
+    document.getElementById('settReceiptScaleVal').textContent = e.target.value + '%';
+  }
+});
 
 // ─── Backup ───
 let _autoBackupInterval = null;
@@ -3751,10 +3825,12 @@ function generateReceipt(id){
   window._receiptEndTime = endTime;
 
   const content = document.getElementById('receiptContent');
-  content.innerHTML = `
-    <div class="receipt" id="receiptEl">
-      <div class="receipt-pattern">
-        <svg viewBox="0 0 400 960" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  const receiptBgStyle = appSettings.receiptBgUrl
+    ? `position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:${appSettings.receiptBgOpacity||0.1};transform:scale(${appSettings.receiptBgScale||1});z-index:0;pointer-events:none`
+    : '';
+  const receiptBgContent = appSettings.receiptBgUrl
+    ? `<img src="${appSettings.receiptBgUrl}" style="${receiptBgStyle}">`
+    : `<svg viewBox="0 0 400 960" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
           <g fill="none" stroke="var(--t)" stroke-linecap="round" stroke-linejoin="round">
             <path stroke-width="8" opacity="0.10" d="M-30,160C80,60 180,220 300,120S420,200 430,160"/>
             <path stroke-width="10" opacity="0.08" d="M-30,200C60,140 160,260 280,180S400,240 430,200"/>
@@ -3793,7 +3869,11 @@ function generateReceipt(id){
             <path stroke-width="6" opacity="0.06" d="M300,740C320,730 340,740 360,732 380,724 390,735 410,728"/>
             <path stroke-width="8" opacity="0.08" d="M80,740C100,730 130,745 160,735 190,725 220,745 250,735 270,728 290,742 310,730"/>
           </g>
-        </svg>
+        </svg>`;
+  content.innerHTML = `
+    <div class="receipt" id="receiptEl">
+      <div class="receipt-pattern">
+        ${receiptBgContent}
       </div>
 
       <div class="logo-round" style="width:80px;height:80px;margin:0 auto 6px" id="receiptLogoWrap">
@@ -3915,13 +3995,17 @@ function receiptJPEG(callback){
 
     const pat = clone.querySelector('.receipt-pattern');
     if(pat){
-      pat.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:.55;z-index:0';
+      pat.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0';
       pat.querySelectorAll('svg').forEach(svg=>{
+        pat.style.opacity = '.55';
         svg.style.cssText = 'width:100%;height:100%';
         svg.querySelectorAll('[stroke]').forEach(n=>{
           const sv = n.getAttribute('stroke');
           if(sv && sv.includes('var(--')) n.setAttribute('stroke', sv.replace(/var\(--t\)/g,'#019391'));
         });
+      });
+      pat.querySelectorAll('img').forEach(img=>{
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;opacity:'+(appSettings.receiptBgOpacity||0.1)+';transform:scale('+(appSettings.receiptBgScale||1)+')';
       });
     }
 
