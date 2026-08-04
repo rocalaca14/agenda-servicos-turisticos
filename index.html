@@ -77,7 +77,9 @@ body{padding-bottom:80px;overflow-x:hidden}
 .card-sub{font-size:13px;color:var(--text2)}
 
 /* Buttons */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);border:none;font-size:14px;font-weight:600;cursor:pointer;transition:transform .12s var(--ease-standard),background .2s var(--ease-standard);font-family:var(--font);text-decoration:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);border:none;font-size:14px;font-weight:600;cursor:pointer;transition:transform .18s var(--ease-smooth),background .18s var(--ease-smooth),box-shadow .18s var(--ease-smooth);font-family:var(--font);text-decoration:none}
+.btn:active{transform:scale(.97);box-shadow:inset 0 1px 3px rgba(0,0,0,.1)}
+.btn:focus-visible{outline:2px solid var(--o);outline-offset:2px}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--t);color:var(--white)}
 .btn-primary:hover{background:var(--t2)}
@@ -137,11 +139,21 @@ textarea.form-input{resize:vertical;min-height:70px}
 
 /* Agenda group */
 .date-group{margin-bottom:16px}
-.date-header{display:flex;align-items:center;gap:8px;padding:8px 4px;font-size:14px;font-weight:700;color:var(--text);border-bottom:2px solid var(--t);margin-bottom:10px}
+.date-header{display:flex;align-items:center;gap:8px;padding:8px 4px;font-size:14px;font-weight:700;color:var(--text);border-bottom:2px solid var(--t);margin-bottom:10px;cursor:pointer;user-select:none}
 .date-header.today{color:var(--t)}
 .date-header .day-count{font-weight:400;color:var(--text2);font-size:12px}
-.booking-card{padding:12px;background:var(--surface);border-radius:var(--radius-sm);box-shadow:var(--shadow);margin-bottom:8px;cursor:pointer;transition:.2s;border-left:4px solid var(--border);position:relative}
-.booking-card:active{transform:scale(.98)}
+.group-toggle{display:inline-flex;transition:transform .2s var(--ease-smooth);font-size:10px;color:var(--text2)}
+.group-toggle.collapsed{transform:rotate(-90deg)}
+.date-group.collapsed .booking-card{display:none}
+.booking-card{overflow:hidden;position:relative}
+.swipe-indicator{position:absolute;top:0;bottom:0;width:60px;display:flex;align-items:center;justify-content:center;font-size:20px;opacity:0;transition:opacity .15s;pointer-events:none}
+.swipe-indicator.left{left:0;background:linear-gradient(90deg,rgba(39,174,96,.15),transparent);color:#27ae60}
+.swipe-indicator.right{right:0;background:linear-gradient(270deg,rgba(0,123,255,.15),transparent);color:#007bff}
+.focus-mode .bc-pay,.focus-mode .bc-actions,.focus-mode .bc-bottom,.focus-mode .bc-route{display:none!important}
+.focus-mode .booking-card{padding:8px 12px}
+.booking-card{padding:12px;background:rgba(255,255,255,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:var(--radius-sm);box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);margin-bottom:8px;cursor:pointer;transition:transform .18s var(--ease-smooth),box-shadow .18s var(--ease-smooth);border-left:4px solid var(--border);border-top:1px solid rgba(255,255,255,.45);border-right:1px solid rgba(255,255,255,.25);border-bottom:1px solid rgba(0,0,0,.04);position:relative}
+.booking-card:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.booking-card:active{transform:scale(.985);box-shadow:0 1px 2px rgba(0,0,0,.06)}
 .booking-card .bc-top{display:flex;justify-content:space-between;align-items:start;gap:8px}
 .booking-card .bc-time{font-size:13px;font-weight:700;color:var(--text)}
 .booking-card .bc-client{font-size:14px;font-weight:600}
@@ -165,8 +177,9 @@ textarea.form-input{resize:vertical;min-height:70px}
 .pay-pago{background:#D9F0E0;color:#1E8449}
 .pay-parcial{background:#FDF0D9;color:#B9770E}
 .pay-pendente{background:#FCE4E4;color:#C0392B}
-.bc-btn{border:1.5px solid var(--border);background:var(--surface);color:var(--text2);font-size:11px;font-weight:600;padding:5px 11px;border-radius:999px;cursor:pointer;transition:transform .12s var(--ease-standard),background .2s var(--ease-standard);font-family:var(--font)}
-.bc-btn:active{transform:scale(.97)}
+.bc-btn{border:1.5px solid var(--border);background:var(--surface);color:var(--text2);font-size:11px;font-weight:600;padding:5px 11px;border-radius:999px;cursor:pointer;transition:transform .18s var(--ease-smooth),background .18s var(--ease-smooth),box-shadow .18s var(--ease-smooth);font-family:var(--font)}
+.bc-btn:active{transform:scale(.97);box-shadow:inset 0 1px 2px rgba(0,0,0,.08)}
+.bc-btn:focus-visible{outline:2px solid var(--t);outline-offset:2px}
 .bc-btn-primary{border-color:var(--t);background:var(--t);color:var(--white)}
 
 /* Filter bar */
@@ -312,7 +325,7 @@ textarea.form-input{resize:vertical;min-height:70px}
 .cal-day .day-num{font-size:16px;font-weight:700;color:var(--text);z-index:1;position:relative;transform-origin:center}
 .cal-day.today .day-num{color:var(--o);font-weight:900;font-size:22px;animation:dayNumIn .18s var(--ease-standard) forwards}
 .cal-day.other-month .day-num{color:var(--border)}
-.cal-day.has-bookings{cursor:pointer}
+.cal-day.has-bookings{cursor:pointer;background:linear-gradient(135deg,rgba(0,223,195,.06),rgba(1,147,145,.04))}
 .cal-day-badge{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;border-radius:9px;background:var(--o);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,.2);padding:0 4px;animation:badgeIn .2s var(--ease-standard) forwards;opacity:0}
 .cal-day-ring{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
 .cal-day-ring svg{width:100%;height:100%;shape-rendering:geometricPrecision}
@@ -414,7 +427,7 @@ textarea.form-input{resize:vertical;min-height:70px}
 .theme-btn.active{transform:scale(1);border-width:2.5px}
 
 /* Booking cards */
-.booking-card{transition:transform .12s var(--ease-standard),box-shadow .2s var(--ease-standard)}
+.booking-card{transition:transform .18s var(--ease-smooth),box-shadow .18s var(--ease-smooth)}
 .booking-card:active{transform:scale(.985)!important}
 
 /* Dashboard stats */
@@ -493,7 +506,7 @@ textarea.form-input{resize:vertical;min-height:70px}
 <!-- ===== VIEW: AGENDA ===== -->
 <div class="view" id="viewAgenda">
   <div style="padding:0 0 8px">
-    <input class="form-input" id="searchInput" placeholder="🔍 Buscar por nome ou telefone..." style="font-size:14px;padding:8px 12px" oninput="searchQuery=this.value.trim().toLowerCase();renderAgenda()">
+    <input class="form-input" id="searchInput" placeholder="🔍 Buscar por nome, telefone, data, roteiro..." style="font-size:14px;padding:8px 12px" oninput="debounceSearch(this.value)">
   </div>
   <div class="filter-bar" id="periodBar" style="margin-top:4px"></div>
   <div class="filter-bar" id="filterBar"></div>
@@ -621,8 +634,25 @@ textarea.form-input{resize:vertical;min-height:70px}
       </div>
     </div>
     <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
-    <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px">💾 Backup de Dados</div>
-    <div id="lastBackupInfo" style="font-size:12px;color:var(--text2);margin-bottom:8px"></div>
+    <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px">💾 Backup e Sincronização</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px">
+        <span style="color:var(--text2)">Firebase</span>
+        <span id="firebaseStatus" style="font-weight:600;color:${DB?'#27ae60':'#e74c3c'}">${DB?'🟢 Online':'🔴 Offline'}</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px">
+        <span style="color:var(--text2)">Último backup</span>
+        <span id="lastBackupInfo" style="font-weight:500;color:var(--text2)"></span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px">
+        <span style="color:var(--text2)">Última sincronização</span>
+        <span id="lastSyncInfo" style="font-weight:500;color:var(--text2)"></span>
+      </div>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);cursor:pointer;margin-bottom:12px">
+      <input type="checkbox" id="autoBackupToggle" onchange="toggleAutoBackup(this.checked)" style="accent-color:var(--t)">
+      Backup automático (a cada 5 min)
+    </label>
     <button class="btn btn-sm btn-outline" onclick="exportBackup()" style="width:100%;margin-bottom:6px">📤 Exportar (fazer download .json)</button>
     <div style="position:relative">
       <button class="btn btn-sm btn-outline" style="width:100%" onclick="document.getElementById('importBackupInput').click()">📥 Importar (carregar .json)</button>
@@ -643,6 +673,30 @@ textarea.form-input{resize:vertical;min-height:70px}
     <div id="routeEditorBody" style="max-height:60vh;overflow-y:auto"></div>
     <div style="text-align:center;margin-top:16px">
       <button class="btn" onclick="closeModal('routeEditorModal')" style="background:var(--bg);color:var(--text2);display:inline-flex">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: TRASH ===== -->
+<div class="modal-overlay" id="trashModal" onclick="if(event.target===this)closeModal('trashModal')">
+  <div class="modal-content" style="padding-bottom:calc(20px + env(safe-area-inset-bottom,0))">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="margin-bottom:12px">🗑️ Lixeira</div>
+    <div id="trashBody" style="max-height:60vh;overflow-y:auto"></div>
+    <div style="text-align:center;margin-top:12px">
+      <button class="btn" onclick="closeModal('trashModal')" style="background:var(--bg);color:var(--text2)">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: LONG PRESS MENU ===== -->
+<div class="modal-overlay" id="longPressModal" onclick="if(event.target===this)closeModal('longPressModal')">
+  <div class="modal-content" style="padding-bottom:calc(20px + env(safe-area-inset-bottom,0))">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="longPressTitle" style="margin-bottom:12px">Ações</div>
+    <div id="longPressBody" style="display:flex;flex-direction:column;gap:4px"></div>
+    <div style="margin-top:12px">
+      <button class="btn btn-ghost" onclick="closeModal('longPressModal')" style="width:100%">Cancelar</button>
     </div>
   </div>
 </div>
@@ -694,6 +748,8 @@ textarea.form-input{resize:vertical;min-height:70px}
   <div class="sidebar-placeholder">🚁 Voos — em breve</div>
   <div class="sidebar-placeholder">🚁 Voos — em breve</div>
   <div style="margin-top:auto;padding:12px 20px;border-top:1px solid var(--border)">
+    <button class="sidebar-btn" onclick="toggleSidebar();openTrashModal()" style="font-size:12px;color:var(--text2)">🗑️ Lixeira <span id="trashBadge" style="display:none;background:#e74c3c;color:#fff;font-size:10px;padding:1px 6px;border-radius:9px;margin-left:4px"></span></button>
+    <button class="sidebar-btn" onclick="toggleSidebar();toggleFocusMode()" style="font-size:12px;color:var(--text2)">🎯 Modo Foco</button>
     <button class="sidebar-btn" onclick="toggleSidebar();openSettings()" style="font-size:12px;color:var(--text2)">⚙️ Personalização</button>
     <button class="sidebar-btn" onclick="toggleSidebar();showView('agenda');renderAgenda()" style="font-size:12px;color:var(--text2)">📋 Lista de Agendamentos</button>
     <button class="sidebar-btn" onclick="toggleSidebar();showView('stats');renderStats()" style="font-size:12px;color:var(--text2)">📊 Estatísticas</button>
@@ -781,6 +837,26 @@ function iconPiscinas(){
 }
 function iconTransfer(){
   return `<svg viewBox="0 0 20 16" width="16" height="16" style="vertical-align:middle"><rect x="1" y="4" width="18" height="7" rx="2" fill="#333"/><rect x="6" y="2" width="8" height="4" rx="1.5" fill="#444"/><rect x="7" y="3" width="6" height="2" rx="1" fill="#90CAF9"/><circle cx="5" cy="12" r="3" fill="#222"/><circle cx="15" cy="12" r="3" fill="#222"/></svg>`;
+}
+
+function emptyStateHTML(type){
+  const svgs = {
+    noBookings: `<svg viewBox="0 0 80 80" fill="none" stroke="var(--border)" stroke-width="2" stroke-linecap="round"><rect x="16" y="12" width="48" height="52" rx="6"/><line x1="16" y1="28" x2="64" y2="28"/><line x1="30" y1="12" x2="30" y2="20"/><line x1="50" y1="12" x2="50" y2="20"/><circle cx="40" cy="48" r="8" stroke-dasharray="4 3"/><line x1="36" y1="44" x2="44" y2="52"/><line x1="44" y1="44" x2="36" y2="52"/></svg>`,
+    noSearch: `<svg viewBox="0 0 80 80" fill="none" stroke="var(--border)" stroke-width="2" stroke-linecap="round"><circle cx="34" cy="34" r="18"/><line x1="47" y1="47" x2="62" y2="62"/><text x="34" y="39" text-anchor="middle" fill="var(--border)" stroke="none" font-size="18" font-weight="700">?</text></svg>`,
+    noMonth: `<svg viewBox="0 0 80 80" fill="none" stroke="var(--border)" stroke-width="2" stroke-linecap="round"><rect x="16" y="16" width="48" height="44" rx="6"/><line x1="16" y1="32" x2="64" y2="32"/><line x1="30" y1="16" x2="30" y2="24"/><line x1="50" y1="16" x2="50" y2="24"/><path d="M30 48 Q40 38 50 48" stroke-dasharray="4 3"/></svg>`,
+    noRoutes: `<svg viewBox="0 0 80 80" fill="none" stroke="var(--border)" stroke-width="2" stroke-linecap="round"><path d="M20 60 L32 36 L44 52 L56 28 L64 44"/><circle cx="20" cy="60" r="3" fill="var(--border)"/><circle cx="32" cy="36" r="3" fill="var(--border)"/><circle cx="44" cy="52" r="3" fill="var(--border)"/><circle cx="56" cy="28" r="3" fill="var(--border)"/><circle cx="64" cy="44" r="3" fill="var(--border)"/></svg>`,
+    noStats: `<svg viewBox="0 0 80 80" fill="none" stroke="var(--border)" stroke-width="2" stroke-linecap="round"><rect x="12" y="12" width="56" height="56" rx="6"/><line x1="24" y1="56" x2="24" y2="44"/><line x1="36" y1="56" x2="36" y2="32"/><line x1="48" y1="56" x2="48" y2="38"/><line x1="60" y1="56" x2="60" y2="28"/><line x1="20" y1="56" x2="64" y2="56" opacity=".4"/></svg>`,
+    noBackup: `<svg viewBox="0 0 80 80" fill="none" stroke="var(--border)" stroke-width="2" stroke-linecap="round"><rect x="20" y="28" width="40" height="36" rx="4"/><path d="M28 28 L40 16 L52 28"/><line x1="40" y1="16" x2="40" y2="40"/><polyline points="32,50 40,42 48,50"/></svg>`
+  };
+  const texts = {
+    noBookings: 'Nenhuma reserva encontrada',
+    noSearch: 'Nenhum resultado para sua busca',
+    noMonth: 'Nenhum agendamento neste mês',
+    noRoutes: 'Nenhum roteiro cadastrado',
+    noStats: 'Sem dados estatísticos ainda',
+    noBackup: 'Nenhum backup realizado'
+  };
+  return `<div class="empty-state">${svgs[type]||svgs.noBookings}<p>${texts[type]||texts.noBookings}</p></div>`;
 }
 
 const ROUTES_KEY = 'destinos_maragogi_routes';
@@ -931,14 +1007,22 @@ function openSettings(){
     document.getElementById('settLogoPreview').style.display = 'none';
   }
   applyLogoZoom();
-  // Theme buttons
   document.querySelectorAll('.theme-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.theme === (appSettings.theme || 'default'));
   });
   openModal('settingsModal');
   const lastBackup = localStorage.getItem('last_backup_at');
   const lbEl = document.getElementById('lastBackupInfo');
-  if(lbEl) lbEl.textContent = lastBackup ? ('Último backup: '+new Date(lastBackup).toLocaleString('pt-BR')) : 'Nenhum backup realizado ainda';
+  if(lbEl) lbEl.textContent = lastBackup ? new Date(lastBackup).toLocaleString('pt-BR') : 'Nenhum';
+  const fsEl = document.getElementById('firebaseStatus');
+  if(fsEl){
+    fsEl.textContent = DB ? '🟢 Online' : '🔴 Offline';
+    fsEl.style.color = DB ? '#27ae60' : '#e74c3c';
+  }
+  const lsEl = document.getElementById('lastSyncInfo');
+  if(lsEl) lsEl.textContent = DB ? 'Ativa' : 'Sem conexão';
+  const abToggle = document.getElementById('autoBackupToggle');
+  if(abToggle) abToggle.checked = localStorage.getItem('auto_backup')==='1';
 }
 function selectTheme(theme){
   appSettings.theme = theme;
@@ -987,6 +1071,23 @@ function removeLogo(){
 }
 
 // ─── Backup ───
+let _autoBackupInterval = null;
+function toggleAutoBackup(enabled){
+  localStorage.setItem('auto_backup', enabled?'1':'0');
+  if(enabled){
+    _autoBackupInterval = setInterval(exportBackup, 5*60*1000);
+    toastSuccess('Backup automático ativado');
+  }else{
+    clearInterval(_autoBackupInterval);
+    _autoBackupInterval = null;
+    toastInfo('Backup automático desativado');
+  }
+}
+function initAutoBackup(){
+  if(localStorage.getItem('auto_backup')==='1'){
+    _autoBackupInterval = setInterval(exportBackup, 5*60*1000);
+  }
+}
 function exportBackup(){
   const data = {
     version: APP_VERSION,
@@ -996,6 +1097,7 @@ function exportBackup(){
     settings: JSON.parse(localStorage.getItem(SETTINGS_KEY)||'null')
   };
   localStorage.setItem('last_backup_at', new Date().toISOString());
+  haptic('success');
   const lbEl = document.getElementById('lastBackupInfo');
   if(lbEl) lbEl.textContent = 'Último backup: '+new Date().toLocaleString('pt-BR');
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
@@ -1026,10 +1128,12 @@ function importBackup(event){
       dbSave('bookings', data.bookings);
       if(data.routes) dbSave('routes', data.routes);
       if(data.settings) dbSave('settings', data.settings);
+      haptic('success');
       alert(`Importado com sucesso! ${data.bookings.length} agendamentos.`);
       event.target.value = '';
       window.location.reload();
     } catch(err) {
+      haptic('error');
       alert('Erro ao importar: '+(err.message||'arquivo inválido'));
     }
   };
@@ -1084,6 +1188,11 @@ document.addEventListener('DOMContentLoaded',()=>{
 
     loadBookings();
     setupNav();
+    setupLongPress();
+    initAutoBackup();
+    purgeExpiredTrash();
+    updateTrashBadge();
+    initFocusMode();
     renderCalendar();
     applySettings();
     const today = new Date();
@@ -1173,6 +1282,206 @@ function loadBookings(){
       renderAgenda();
     }
   });
+}
+
+// ─── Busca Universal (Spotlight) ───
+let _searchDebounce = null;
+function debounceSearch(val){
+  clearTimeout(_searchDebounce);
+  _searchDebounce = setTimeout(()=>{
+    searchQuery = val.trim().toLowerCase();
+    renderAgenda();
+  },150);
+}
+function universalSearch(b, q){
+  if(!q) return {match:true,score:0};
+  const ql = q.toLowerCase();
+  const digits = q.replace(/\D/g,'');
+  const route = b.routeId ? getRoute(b.routeId) : null;
+  const routeName = route ? route.name.toLowerCase() : '';
+  const tipoLabel = b.tipo==='piscinas'?'piscinas naturais':b.tipo==='transfer'?'transfer':'buggy';
+  const dayName = getDayName(b.date).toLowerCase();
+  const dateBr = fmtDate(b.date).toLowerCase();
+  const valStr = String(b.value||'');
+  const signalStr = String(b.signal||'');
+  const pickup = (b.pickupDetail||b.transferPickup||'').toLowerCase();
+  const dropoff = (b.transferDropoff||'').toLowerCase();
+  const poolName = (b.poolName||'').toLowerCase();
+  const notes = (b.notes||'').toLowerCase();
+  const status = (b.status||'').toLowerCase();
+  const fields = [
+    {v:b.client?.toLowerCase()||'', w:10},
+    {v:b.contact?.toLowerCase()||'', w:8},
+    {v:ql&&dayName.includes(ql)?dayName:'', w:7},
+    {v:ql&&dateBr.includes(ql)?dateBr:'', w:6},
+    {v:routeName, w:5},
+    {v:tipoLabel, w:5},
+    {v:pickup, w:4},
+    {v:dropoff, w:4},
+    {v:poolName, w:4},
+    {v:status, w:3},
+    {v:valStr, w:3},
+    {v:signalStr, w:2},
+    {v:notes, w:1}
+  ];
+  let bestScore = 0;
+  for(const f of fields){
+    if(!f.v) continue;
+    if(f.v===ql){ bestScore=Math.max(bestScore,f.w*10); break; }
+    if(f.v.startsWith(ql)){ bestScore=Math.max(bestScore,f.w*5); continue; }
+    if(f.v.includes(ql)){ bestScore=Math.max(bestScore,f.w); continue; }
+    if(digits.length>=2){
+      const fd = f.v.replace(/\D/g,'');
+      if(fd.includes(digits)){ bestScore=Math.max(bestScore,f.w*0.5); }
+    }
+  }
+  return {match:bestScore>0, score:bestScore};
+}
+function highlightText(text, q){
+  if(!q||!text) return escHtml(text);
+  const s = escHtml(text);
+  const ql = q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return s.replace(new RegExp('('+ql+')','gi'),'<mark style="background:rgba(0,223,195,.25);border-radius:2px;padding:0 1px">$1</mark>');
+}
+
+// ─── Date Group Collapse ───
+let _collapsedGroups = {};
+try{ _collapsedGroups = JSON.parse(localStorage.getItem('collapsed_groups')||'{}'); }catch(e){}
+function toggleDateGroup(dateStr){
+  const group = document.querySelector(`.date-group[data-date="${dateStr}"]`);
+  if(!group) return;
+  const isCollapsed = group.classList.toggle('collapsed');
+  const toggle = group.querySelector('.group-toggle');
+  if(toggle) toggle.classList.toggle('collapsed', isCollapsed);
+  _collapsedGroups[dateStr] = isCollapsed;
+  localStorage.setItem('collapsed_groups', JSON.stringify(_collapsedGroups));
+}
+function isGroupCollapsed(dateStr){
+  if(_collapsedGroups[dateStr]!==undefined) return _collapsedGroups[dateStr];
+  const today = todayStr();
+  if(dateStr < today){
+    _collapsedGroups[dateStr] = true;
+    localStorage.setItem('collapsed_groups', JSON.stringify(_collapsedGroups));
+    return true;
+  }
+  return false;
+}
+
+// ─── Histórico da Reserva ───
+function logHistory(b, action, extra){
+  if(!b) return;
+  if(!b.history) b.history = [];
+  const entry = {action, at: new Date().toISOString()};
+  if(extra) Object.assign(entry, extra);
+  b.history.push(entry);
+  if(b.history.length > 20) b.history = b.history.slice(-20);
+}
+function historyLabel(action){
+  const labels = {created:'🟢 Criada',edited:'✏️ Editada',rescheduled:'📅 Reagendada',status_changed:'🔄 Status alterado',deleted:'❌ Excluída'};
+  return labels[action]||action;
+}
+function renderHistoryHTML(b){
+  if(!b.history || b.history.length===0) return '';
+  const items = b.history.slice(-10).reverse().map(h=>{
+    const d = new Date(h.at);
+    const dateStr = d.toLocaleDateString('pt-BR');
+    const timeStr = d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    const extra = h.from && h.to ? ` (${statusLabel(h.from)} → ${statusLabel(h.to)})` : '';
+    return `<div class="detail-row" style="border-bottom:1px solid rgba(0,0,0,.05)"><span class="label" style="font-size:12px">${historyLabel(h.action)}${extra}</span><span class="value" style="font-size:11px;color:var(--text2)">${dateStr} ${timeStr}</span></div>`;
+  }).join('');
+  return `<div style="margin-top:16px"><div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px">📋 Histórico</div>${items}</div>`;
+}
+
+// ─── Lixeira ───
+const TRASH_KEY = 'destinos_maragogi_trash';
+const TRASH_DAYS = 30;
+function loadTrash(){
+  try{ return JSON.parse(localStorage.getItem(TRASH_KEY)||'[]'); }catch(e){ return []; }
+}
+function saveTrash(items){ localStorage.setItem(TRASH_KEY, JSON.stringify(items)); }
+function moveToTrash(id){
+  const b = bookings.find(x=>x.id===id);
+  if(!b) return;
+  logHistory(b, 'deleted');
+  const trash = loadTrash();
+  trash.push({id:b.id, booking:JSON.parse(JSON.stringify(b)), deletedAt:new Date().toISOString(), expiresAt:new Date(Date.now()+TRASH_DAYS*86400000).toISOString()});
+  if(trash.length>100) trash.splice(0, trash.length-100);
+  saveTrash(trash);
+  bookings = bookings.filter(x=>x.id!==id);
+  saveBookings();
+}
+function purgeExpiredTrash(){
+  const trash = loadTrash();
+  const now = new Date().toISOString();
+  const kept = trash.filter(t=>t.expiresAt > now);
+  if(kept.length !== trash.length) saveTrash(kept);
+}
+function restoreFromTrash(id){
+  const trash = loadTrash();
+  const idx = trash.findIndex(t=>t.id===id);
+  if(idx<0) return;
+  const item = trash[idx];
+  const b = item.booking;
+  delete b.history; // limpar histórico de exclusão
+  b.history = [{action:'restored', at:new Date().toISOString()}];
+  bookings.push(b);
+  saveBookings();
+  trash.splice(idx,1);
+  saveTrash(trash);
+}
+function permanentDelete(id){
+  const trash = loadTrash();
+  const kept = trash.filter(t=>t.id!==id);
+  saveTrash(kept);
+}
+function openTrashModal(){
+  const trash = loadTrash();
+  const body = document.getElementById('trashBody');
+  if(!body) return;
+  if(trash.length===0){
+    body.innerHTML = emptyStateHTML('noBackup').replace('Nenhum backup realizado','Lixeira vazia');
+  }else{
+    body.innerHTML = trash.map(t=>{
+      const b = t.booking;
+      const d = new Date(t.deletedAt).toLocaleDateString('pt-BR');
+      const exp = new Date(t.expiresAt).toLocaleDateString('pt-BR');
+      return `<div class="booking-card" style="margin-bottom:8px;cursor:default">
+        <div class="bc-top"><div>
+          <div class="bc-client">${escHtml(b.client)}</div>
+          <div class="bc-route">${fmtDate(b.date)} — ${b.tipo||'buggy'}</div>
+          <div style="font-size:11px;color:var(--text2)">Excluída: ${d} · Expira: ${exp}</div>
+        </div></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="bc-btn bc-btn-primary" onclick="restoreFromTrash('${t.id}');openTrashModal()">↩️ Restaurar</button>
+          <button class="bc-btn" style="border-color:#e74c3c;color:#e74c3c" onclick="permanentDelete('${t.id}');openTrashModal()">🗑️ Excluir</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  openModal('trashModal');
+}
+function updateTrashBadge(){
+  const count = loadTrash().length;
+  const badge = document.getElementById('trashBadge');
+  if(!badge) return;
+  if(count>0){
+    badge.textContent = count;
+    badge.style.display = '';
+  }else{
+    badge.style.display = 'none';
+  }
+}
+
+// ─── Modo Foco ───
+let focusMode = localStorage.getItem('focus_mode')==='1';
+function toggleFocusMode(){
+  focusMode = !focusMode;
+  localStorage.setItem('focus_mode', focusMode?'1':'0');
+  document.body.classList.toggle('focus-mode', focusMode);
+  toastInfo(focusMode?'Modo foco ativado':'Modo foco desativado');
+}
+function initFocusMode(){
+  if(focusMode) document.body.classList.add('focus-mode');
 }
 
 // ─── Cliente Recorrente ───
@@ -1366,11 +1675,11 @@ function renderAgenda(){
   if(filterType!=='todos') filtered = filtered.filter(b=>b.tipo===filterType);
   if(filterStatus!=='todos') filtered = filtered.filter(b=>b.status===filterStatus);
   if(filterPeriod!=='todos') filtered = filtered.filter(b=>inPeriod(b.date,filterPeriod));
-  if(searchQuery) filtered = filtered.filter(b=>{
-    if((b.client||'').toLowerCase().includes(searchQuery)) return true;
-    const digits = searchQuery.replace(/\D/g,'');
-    return digits.length>=2 && (b.contact||'').replace(/\D/g,'').includes(digits);
-  });
+  if(searchQuery){
+    const scored = filtered.map(b=>({b, score:universalSearch(b,searchQuery).score})).filter(x=>x.score>0);
+    scored.sort((a,b)=>b.score-a.score || (b.b.date||'').localeCompare(a.b.date||''));
+    filtered = scored.map(x=>x.b);
+  }
 
   // Group by date
   const groups = {};
@@ -1383,15 +1692,18 @@ function renderAgenda(){
 
   const entries = Object.entries(groups);
   if(entries.length===0){
-    list.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg><p>Nenhum agendamento encontrado</p></div>`;
+    list.innerHTML = searchQuery ? emptyStateHTML('noSearch') : emptyStateHTML('noBookings');
     return;
   }
 
   list.innerHTML = entries.map(([date,items])=>{
     const isToday = date===today;
-    return `<div class="date-group">
-      <div class="date-header${isToday?' today':''}">
-        ${isToday?' ':''}${fmtDate(date)} — ${getDayName(date)}
+    const sq = searchQuery;
+    const collapsed = !sq && isGroupCollapsed(date);
+    return `<div class="date-group${collapsed?' collapsed':''}" data-date="${date}">
+      <div class="date-header${isToday?' today':''}" onclick="toggleDateGroup('${date}')">
+        <span class="group-toggle${collapsed?' collapsed':''}">▼</span>
+        ${isToday?' ':''}${sq?highlightText(fmtDate(date)+' — '+getDayName(date),sq):fmtDate(date)+' — '+getDayName(date)}
         <span class="day-count">(${items.length})</span>
       </div>
       ${items.map((b,i)=>{
@@ -1399,13 +1711,14 @@ function renderAgenda(){
         const isTransfer = b.tipo==='transfer';
         const route = isPiscinas||isTransfer ? null : getRoute(b.routeId);
         const timeStr = isTransfer ? (b.transferPickupTime||'') : `${b.startTime} - ${safeEndTime(b)}`;
+        const routeName = isTransfer?'Transfer':isPiscinas?'Piscinas Naturais':(route?route.name:'');
         const staggerClass = i<8?`anim-stagger-${i+1}`:'';
         return `<div class="booking-card bc-${b.status} ${staggerClass}" id="bc-${b.id}" onclick="openDetail('${b.id}')">
           <div class="bc-top">
             <div>
-              <div class="bc-time">${timeStr}</div>
-              <div class="bc-client">${escHtml(b.client)}</div>
-              <div class="bc-route">${isTransfer?iconTransfer()+' Transfer':isPiscinas?iconPiscinas()+' Piscinas Naturais':(route?route.name:'')} ${b.durationLabel?`<span class="route-badge">${b.durationLabel}</span>`:''}</div>
+              <div class="bc-time">${sq?highlightText(timeStr,sq):timeStr}</div>
+              <div class="bc-client">${sq?highlightText(b.client,sq):escHtml(b.client)}</div>
+              <div class="bc-route">${isTransfer?iconTransfer()+' ':isPiscinas?iconPiscinas()+' ':(route?route.name:'')} ${sq&&routeName?highlightText(routeName,sq):''}${b.durationLabel?`<span class="route-badge">${b.durationLabel}</span>`:''}</div>
             </div>
             <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
               <span class="pill pill-${b.status}">${statusLabel(b.status)}</span>
@@ -1418,7 +1731,7 @@ function renderAgenda(){
             </div>
           </div>
           <div class="bc-bottom">
-            <span class="bc-value">${fmtCurr(b.value)}</span>
+            <span class="bc-value">${sq?highlightText(fmtCurr(b.value),sq):fmtCurr(b.value)}</span>
             ${!isPiscinas && !isTransfer && b.quantity>1?`<span style="font-size:11px;color:var(--text2)">${b.quantity} buggy's</span>`:''}
             ${isPiscinas && b.poolAdults?(()=>{ const s=b.poolChildren>1?'s':''; const vi=b.vesselType?((b.vesselType==='lancha'?'🚤':b.vesselType==='jangada'?'⛵':'🛥️')+' '+b.vesselType+(b.vesselMode?' '+b.vesselMode:'')):''; return `<span style="font-size:11px;color:var(--text2)">${vi?vi+' · ':''}${b.poolAdults} adulto${b.poolAdults>1?'s':''}${b.poolChildren>0?', '+b.poolChildren+' criança'+s:''}</span>`; })():''}
             ${isTransfer?`<span style="font-size:11px;color:var(--text2)">${b.transferPassengers} passageiro${b.transferPassengers>1?'s':''}${b.transferPickup?' · '+escHtml(b.transferPickup):''}</span>`:''}
@@ -1484,6 +1797,8 @@ function menuItemsHTML(b){
 function setBookingStatus(id, status){
   const b = bookings.find(x=>x.id===id);
   if(!b) return;
+  haptic(status==='cancelado'?'error':'success');
+  logHistory(b, 'status_changed', {from:b.status, to:status});
   b.status = status;
   saveBookings();
   closeDetail();
@@ -1492,7 +1807,10 @@ function setBookingStatus(id, status){
   renderCalendar();
   renderDashStats();
   renderDashUpcoming(dashFilter);
-  if(status==='concluido') toastSuccess('✅ Agendamento concluído');
+  if(status==='concluido'){
+    toastSuccess('✅ Agendamento concluído');
+    checkDayConfetti(b.date);
+  }
   else if(status==='confirmado') toastSuccess('↩️ Agendamento reativado');
   else if(status==='cancelado') toastWarning('Agendamento cancelado');
 }
@@ -1524,6 +1842,107 @@ document.addEventListener('click',(e)=>{
     document.querySelectorAll('.bc-menu.open').forEach(m=>m.classList.remove('open'));
   }
 });
+
+// ─── Long Press Menu ───
+let _longPressTimer = null;
+let _longPressMoved = false;
+let _longPressTarget = null;
+function openLongPressMenu(id){
+  const b = bookings.find(x=>x.id===id);
+  if(!b) return;
+  haptic('success');
+  document.getElementById('longPressTitle').textContent = b.client;
+  const items = [
+    {label:'✏️ Editar',action:`editBooking('${b.id}')`},
+    {label:'📋 Duplicar',action:`duplicateBooking('${b.id}')`},
+    {label:'💬 WhatsApp',action:`sendWhatsApp('${b.id}')`},
+  ];
+  if(b.status==='confirmado') items.push({label:'✅ Concluir',action:`setBookingStatus('${b.id}','concluido')`});
+  if(b.status==='confirmado') items.push({label:'❌ Cancelar',action:`setBookingStatus('${b.id}','cancelado')`});
+  if(b.status==='concluido') items.push({label:'↩️ Reativar',action:`setBookingStatus('${b.id}','confirmado')`});
+  items.push({label:'🗑️ Excluir',action:`deleteBooking('${b.id}')`,danger:true});
+  document.getElementById('longPressBody').innerHTML = items.map(it=>
+    `<button class="btn${it.danger?' btn-danger':' btn-outline'}" onclick="closeModal('longPressModal');${it.action}" style="width:100%;justify-content:flex-start">${it.label}</button>`
+  ).join('');
+  openModal('longPressModal');
+}
+function setupLongPress(){
+  let swipeStartX = 0, swipeStartY = 0, swipeCard = null, swiping = false;
+  function onSwipeStart(x, y, card){
+    swipeStartX = x; swipeStartY = y; swipeCard = card; swiping = false;
+    if(card){
+      let ind = card.querySelector('.swipe-indicator.left');
+      if(!ind){ ind = document.createElement('div'); ind.className='swipe-indicator left'; ind.textContent='✏️'; card.appendChild(ind); }
+      ind = card.querySelector('.swipe-indicator.right');
+      if(!ind){ ind = document.createElement('div'); ind.className='swipe-indicator right'; ind.textContent='💬'; card.appendChild(ind); }
+    }
+  }
+  function onSwipeMove(x, y){
+    if(!swipeCard) return;
+    const dx = x - swipeStartX;
+    const dy = y - swipeStartY;
+    if(Math.abs(dy) > Math.abs(dx) && !swiping){ swipeCard = null; return; }
+    if(Math.abs(dx) > 10) swiping = true;
+    if(!swiping) return;
+    swipeCard.style.transform = `translateX(${Math.max(-80,Math.min(80,dx))}px)`;
+    swipeCard.style.transition = 'none';
+    const left = swipeCard.querySelector('.swipe-indicator.left');
+    const right = swipeCard.querySelector('.swipe-indicator.right');
+    if(left) left.style.opacity = dx > 30 ? Math.min(1,(dx-30)/40) : 0;
+    if(right) right.style.opacity = dx < -30 ? Math.min(1,(-dx-30)/40) : 0;
+  }
+  function onSwipeEnd(){
+    if(!swipeCard) return;
+    const card = swipeCard;
+    const transform = card.style.transform;
+    const match = transform.match(/translateX\(([-\d.]+)px\)/);
+    const dx = match ? parseFloat(match[1]) : 0;
+    card.style.transition = 'transform .2s var(--ease-smooth)';
+    card.style.transform = '';
+    const left = card.querySelector('.swipe-indicator.left');
+    const right = card.querySelector('.swipe-indicator.right');
+    if(left) left.style.opacity = 0;
+    if(right) right.style.opacity = 0;
+    if(swiping && Math.abs(dx) > 60){
+      const id = card.id.replace('bc-','');
+      if(dx > 60) editBooking(id);
+      else if(dx < -60) sendWhatsApp(id);
+    }
+    swipeCard = null; swiping = false;
+  }
+  document.addEventListener('touchstart',(e)=>{
+    const card = e.target.closest('.booking-card');
+    if(!card) return;
+    _longPressMoved = false;
+    _longPressTarget = card;
+    const touch = e.touches[0];
+    onSwipeStart(touch.clientX, touch.clientY, card);
+    const id = card.id.replace('bc-','');
+    _longPressTimer = setTimeout(()=>{ if(!_longPressMoved) openLongPressMenu(id); },500);
+  },{passive:true});
+  document.addEventListener('touchmove',(e)=>{
+    _longPressMoved = true;
+    clearTimeout(_longPressTimer);
+    if(e.touches[0]) onSwipeMove(e.touches[0].clientX, e.touches[0].clientY);
+  },{passive:true});
+  document.addEventListener('touchend',()=>{ clearTimeout(_longPressTimer); onSwipeEnd(); });
+  document.addEventListener('mousedown',(e)=>{
+    const card = e.target.closest('.booking-card');
+    if(!card) return;
+    _longPressMoved = false;
+    _longPressTarget = card;
+    onSwipeStart(e.clientX, e.clientY, card);
+    const id = card.id.replace('bc-','');
+    _longPressTimer = setTimeout(()=>{ if(!_longPressMoved) openLongPressMenu(id); },500);
+  });
+  document.addEventListener('mousemove',(e)=>{
+    if(!swipeCard) return;
+    _longPressMoved = true;
+    clearTimeout(_longPressTimer);
+    onSwipeMove(e.clientX, e.clientY);
+  });
+  document.addEventListener('mouseup',()=>{ clearTimeout(_longPressTimer); onSwipeEnd(); });
+}
 
 // ─── Weather (Open-Meteo) ───
 let weatherCache = null;
@@ -1592,7 +2011,7 @@ function renderDashUpcoming(filter){
     </div>`;
   } else if(!filter || filter==='todos'){
     const hadToday = bookings.some(b=>b.date===today && b.status!=='cancelado');
-    if(hadToday) nextHTML = `<div class="dash-empty anim-stagger-1">Nenhum outro agendamento hoje</div>`;
+    if(hadToday) nextHTML = `<div class="dash-empty anim-stagger-1" style="display:flex;align-items:center;gap:6px;justify-content:center"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round"><circle cx="10" cy="10" r="7"/><polyline points="10,6 10,10 13,12"/></svg>Nenhum outro agendamento hoje</div>`;
   }
 
   let upcoming = bookings.filter(b=>{
@@ -1607,7 +2026,7 @@ function renderDashUpcoming(filter){
   }).slice(0,8);
 
   if(upcoming.length===0){
-    el.innerHTML = nextHTML + `<div class="dash-empty">Nenhum agendamento próximo</div>`;
+    el.innerHTML = nextHTML + `<div class="dash-empty" style="display:flex;align-items:center;gap:6px;justify-content:center"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="14" height="12" rx="2"/><line x1="3" y1="9" x2="17" y2="9"/></svg>Nenhum agendamento próximo</div>`;
     return;
   }
   el.innerHTML = nextHTML + `<div class="dash-upcoming-title">Próximos Agendamentos</div>` +
@@ -1829,6 +2248,78 @@ function toastSuccess(msg,duration){ return showToast(msg,'success',duration); }
 function toastError(msg,duration){ return showToast(msg,'error',duration); }
 function toastWarning(msg,duration){ return showToast(msg,'warning',duration); }
 function toastInfo(msg,duration){ return showToast(msg,'info',duration); }
+
+function showSharePrompt(bookingId){
+  const b = bookings.find(x=>x.id===bookingId);
+  if(!b) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay active';
+  overlay.style.zIndex = '500';
+  overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+  overlay.innerHTML = `
+    <div class="modal-content" style="max-width:340px;text-align:center;padding:24px 20px">
+      <div style="font-size:32px;margin-bottom:8px">📄</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px">Reserva salva com sucesso!</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:20px">Deseja compartilhar o comprovante agora?</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="this.closest('.modal-overlay').remove();generateReceipt('${b.id}')" style="flex:1">Compartilhar</button>
+        <button class="btn btn-outline" onclick="this.closest('.modal-overlay').remove()" style="flex:1">Depois</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function showConfetti(){
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999';
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors = ['#00DFC3','#019391','#F57C00','#27ae60','#28a745','#007bff','#e74c3c'];
+  const particles = Array.from({length:150},()=>({
+    x: Math.random()*canvas.width,
+    y: Math.random()*canvas.height - canvas.height,
+    w: Math.random()*8+4,
+    h: Math.random()*6+3,
+    color: colors[Math.floor(Math.random()*colors.length)],
+    vx: (Math.random()-0.5)*4,
+    vy: Math.random()*3+2,
+    rot: Math.random()*360,
+    rotSpeed: (Math.random()-0.5)*10,
+    opacity: 1
+  }));
+  let start = null;
+  function frame(ts){
+    if(!start) start = ts;
+    const elapsed = ts - start;
+    if(elapsed > 2000){ canvas.remove(); return; }
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const fade = elapsed > 1600 ? 1 - (elapsed-1600)/400 : 1;
+    particles.forEach(p=>{
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.05;
+      p.rot += p.rotSpeed;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot*Math.PI/180);
+      ctx.globalAlpha = fade;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+function checkDayConfetti(dateStr){
+  const dayBookings = bookings.filter(b=>b.date===dateStr);
+  if(dayBookings.length===0) return;
+  const allDone = dayBookings.every(b=>b.status==='concluido');
+  if(allDone) showConfetti();
+}
 
 // ─── Skeleton Loading ───
 function showSkeleton(containerId,count=3){
@@ -2923,8 +3414,12 @@ function saveBooking(){
 
   if(editingId){
     const idx = bookings.findIndex(b=>b.id===editingId);
-    if(idx>=0) bookings[idx]=booking;
+    if(idx>=0){
+      logHistory(bookings[idx], 'edited');
+      bookings[idx]=booking;
+    }
   }else{
+    logHistory(booking, 'created');
     bookings.push(booking);
   }
   const saveBtn = document.getElementById('btnSaveBooking');
@@ -2934,6 +3429,7 @@ function saveBooking(){
   }
   saveBookings();
   feedbackSave();
+  const savedId = booking.id;
   editingId = null;
   formDupSource = null;
   setTimeout(function(){
@@ -2948,12 +3444,21 @@ function saveBooking(){
         saveBtn.textContent = 'Cadastrar Agendamento';
         saveBtn.style.background = '';
       }
+      setTimeout(()=> showSharePrompt(savedId), 500);
     },350);
   },120);
 }
 
+function haptic(type){
+  try{
+    if(!navigator.vibrate) return;
+    if(type==='error') navigator.vibrate([30,50,30]);
+    else if(type==='cancel') navigator.vibrate(10);
+    else navigator.vibrate(30);
+  }catch(e){}
+}
 function feedbackSave(){
-  if(navigator.vibrate) navigator.vibrate(30);
+  haptic('success');
   try{
     const ctx = new (window.AudioContext||window.webkitAudioContext)();
     const osc = ctx.createOscillator();
@@ -3008,6 +3513,7 @@ function saveReschedule(){
   const time = document.getElementById('rsTime').value;
   if(!date){ alert('Informe a nova data.'); return; }
   if(!time){ alert('Informe o novo horário.'); return; }
+  logHistory(b, 'rescheduled');
   b.date = date;
   if(b.tipo==='transfer'){
     b.transferPickupTime = time;
@@ -3072,6 +3578,7 @@ function openDetail(id){
       <div class="detail-row"><span class="label">Embarque</span><span class="value">${escHtml(b.pickupDetail||'—')}</span></div>
       <div class="detail-row"><span class="label">Status</span><span class="value"><span class="pill pill-${b.status}">${statusLabel(b.status)}</span></span></div>
       ${b.notes?`<div class="detail-row"><span class="label">Obs</span><span class="value">${escHtml(b.notes)}</span></div>`:''}
+      ${renderHistoryHTML(b)}
     `;
   }else if(b.tipo==='transfer'){
     body.innerHTML = `
@@ -3090,6 +3597,7 @@ function openDetail(id){
       <div class="detail-row"><span class="label">Acompanhantes</span><span class="value">${b.companions||'—'}</span></div>
       <div class="detail-row"><span class="label">Status</span><span class="value"><span class="pill pill-${b.status}">${statusLabel(b.status)}</span></span></div>
       ${b.notes?`<div class="detail-row"><span class="label">Obs</span><span class="value">${escHtml(b.notes)}</span></div>`:''}
+      ${renderHistoryHTML(b)}
     `;
   }else{
     const route = getRoute(b.routeId);
@@ -3110,6 +3618,7 @@ function openDetail(id){
       <div class="detail-row"><span class="label">Status</span><span class="value"><span class="pill pill-${b.status}">${statusLabel(b.status)}</span></span></div>
       ${b.customStops?`<div class="detail-row"><span class="label">Personalização</span><span class="value">${escHtml(b.customStops)}</span></div>`:''}
       ${b.notes?`<div class="detail-row"><span class="label">Obs</span><span class="value">${escHtml(b.notes)}</span></div>`:''}
+      ${renderHistoryHTML(b)}
     `;
   }
 
@@ -3164,12 +3673,16 @@ function sendConfirmation(id){
 
 function deleteBooking(id){
   if(!confirm('Tem certeza que deseja excluir este agendamento?')) return;
+  haptic('cancel');
   closeDetail();
   const card = document.getElementById('bc-'+id);
   const doDelete = function(){
-    bookings = bookings.filter(b=>b.id!==id);
-    saveBookings();
+    moveToTrash(id);
     renderAgenda();
+    renderCalendar();
+    renderDashStats();
+    renderDashUpcoming(dashFilter);
+    updateTrashBadge();
   };
   if(card){
     card.style.transition = 'opacity .25s var(--ease-standard),transform .25s var(--ease-standard)';
