@@ -17,8 +17,15 @@
 <script defer src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
 <style>
-#loading{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;font-family:var(--font);color:var(--text2);font-size:14px;background:var(--bg)}
-#loading .sp{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--t);border-radius:50%;animation:spin .8s linear infinite}
+#loading{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;font-family:var(--font);color:var(--text2);font-size:14px;background:var(--bg);transition:opacity .45s ease;overflow:hidden}
+#loading.hide{opacity:0;pointer-events:none}
+#loading .splash-logo{width:108px;height:108px;border-radius:26px;overflow:hidden;box-shadow:0 10px 36px rgba(0,0,0,.16);border:2px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:center;animation:splashPop .65s var(--ease-overshoot) both}
+#loading .splash-logo img{width:100%;height:100%;object-fit:cover}
+#loading .splash-name{font-size:21px;font-weight:800;color:var(--t);letter-spacing:.4px;text-align:center;padding:0 32px;animation:splashFadeUp .55s .18s var(--ease-standard) both}
+#loading .splash-tag{font-size:12px;color:var(--text2);text-align:center;padding:0 32px;animation:splashFadeUp .55s .32s var(--ease-standard) both}
+#loading .sp{width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--t);border-radius:50%;animation:spin .8s linear infinite;margin-top:6px}
+@keyframes splashPop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.07)}100%{transform:scale(1);opacity:1}}
+@keyframes splashFadeUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
 @keyframes spin{to{transform:rotate(360deg)}}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [style*="display:grid"]>*{min-width:0;overflow-wrap:break-word;max-width:100%}
@@ -485,7 +492,12 @@ textarea.form-input{resize:vertical;min-height:70px}
 </head>
 <body>
 
-<div id="loading"><div class="sp"></div>Carregando...</div>
+<div id="loading">
+  <div class="splash-logo"><img class="js-logo splash-logo-img" src="icon-512.png" alt="Logo"></div>
+  <div class="splash-name js-company">Agenda Serviços Turísticos</div>
+  <div class="splash-tag js-tagline">Serviços Turísticos - Maragogi-AL</div>
+  <div class="sp"></div>
+</div>
 
 <!-- Header -->
 <header class="header" id="appHeader" style="display:none">
@@ -1251,12 +1263,9 @@ let initDone = false;
 document.addEventListener('DOMContentLoaded',()=>{
   if(initDone) return;
   initDone = true;
+  const _splashStart = Date.now();
   try {
     initFirebase();
-    const ld = document.getElementById('loading');
-    if(ld) ld.style.display='none';
-    const hd = document.getElementById('appHeader');
-    if(hd) hd.style.display='';
     loadSettings();
     loadRoutes();
 
@@ -1271,7 +1280,21 @@ document.addEventListener('DOMContentLoaded',()=>{
     applySettings();
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    // Splash screen: keep visible at least ~1.8s, then fade out
+    const ld = document.getElementById('loading');
+    const hd = document.getElementById('appHeader');
+    const elapsed = Date.now() - _splashStart;
+    const wait = Math.max(0, 1800 - elapsed);
+    setTimeout(function(){
+      if(ld) ld.classList.add('hide');
+      if(hd) hd.style.display='';
+      setTimeout(function(){ if(ld) ld.style.display='none'; }, 500);
+    }, wait);
   } catch(e) {
+    const ld = document.getElementById('loading');
+    if(ld) ld.style.display='none';
+    const hd = document.getElementById('appHeader');
+    if(hd) hd.style.display='';
     alert('Erro ao iniciar: '+e.message);
   }
 });
