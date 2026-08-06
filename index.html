@@ -17,16 +17,14 @@
 <script defer src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
 <style>
-#loading{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;font-family:var(--font);color:var(--text2);font-size:14px;background:var(--bg);transition:opacity .45s ease;overflow:hidden}
-#loading.hide{opacity:0;pointer-events:none}
-#loading .splash-logo{width:108px;height:108px;border-radius:26px;overflow:hidden;box-shadow:0 10px 36px rgba(0,0,0,.16);border:2px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:center;animation:splashPop .65s var(--ease-overshoot) both}
-#loading .splash-logo img{width:100%;height:100%;object-fit:cover}
-#loading .splash-name{font-size:21px;font-weight:800;color:var(--t);letter-spacing:.4px;text-align:center;padding:0 32px;animation:splashFadeUp .55s .18s var(--ease-standard) both}
-#loading .splash-tag{font-size:12px;color:var(--text2);text-align:center;padding:0 32px;animation:splashFadeUp .55s .32s var(--ease-standard) both}
-#loading .sp{width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--t);border-radius:50%;animation:spin .8s linear infinite;margin-top:6px}
-@keyframes splashPop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.07)}100%{transform:scale(1);opacity:1}}
-@keyframes splashFadeUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
-@keyframes spin{to{transform:rotate(360deg)}}
+#loading{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:linear-gradient(170deg,var(--t2) 0%,var(--t) 55%,var(--o) 100%);transition:opacity .5s ease,visibility .5s ease;overflow:hidden}
+#loading.splash--hide{opacity:0;visibility:hidden}
+#loading .splash__content{text-align:center;animation:splashIn .7s ease-out both}
+#loading .splash__logo{width:110px;height:110px;margin:0 auto 20px;border-radius:34px;background:rgba(255,255,255,.14);display:grid;place-items:center;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);box-shadow:0 18px 40px rgba(0,60,60,.28);overflow:hidden}
+#loading .splash__logo img{width:100%;height:100%;object-fit:cover}
+#loading .splash__title{font-size:40px;font-weight:800;color:#fff;text-align:center;padding:0 24px}
+#loading .splash__tagline{color:rgba(255,255,255,.85);font-size:16px;font-weight:500;margin-top:6px;text-align:center;padding:0 24px}
+@keyframes splashIn{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [style*="display:grid"]>*{min-width:0;overflow-wrap:break-word;max-width:100%}
 [style*="display:grid"]{overflow:hidden}
@@ -493,10 +491,13 @@ textarea.form-input{resize:vertical;min-height:70px}
 <body>
 
 <div id="loading">
-  <div class="splash-logo"><img class="js-logo splash-logo-img" src="icon-512.png" alt="Logo"></div>
-  <div class="splash-name js-company">Agenda Serviços Turísticos</div>
-  <div class="splash-tag js-tagline">Serviços Turísticos - Maragogi-AL</div>
-  <div class="sp"></div>
+  <div class="splash__content">
+    <div class="splash__logo">
+      <img src="icon-512.png" alt="Logo">
+    </div>
+    <h1 class="splash__title js-company">Agenda Serviços Turísticos</h1>
+    <p class="splash__tagline js-tagline">Serviços Turísticos - Maragogi-AL</p>
+  </div>
 </div>
 
 <!-- Header -->
@@ -1227,7 +1228,7 @@ function importBackup(event){
 }
 
 // ─── Version & Service Worker ───
-const APP_VERSION = '8';
+const APP_VERSION = '9';
 
 // Force-kill old service workers and caches on version mismatch
 (async ()=>{
@@ -1263,7 +1264,6 @@ let initDone = false;
 document.addEventListener('DOMContentLoaded',()=>{
   if(initDone) return;
   initDone = true;
-  const _splashStart = Date.now();
   try {
     initFirebase();
     loadSettings();
@@ -1280,23 +1280,19 @@ document.addEventListener('DOMContentLoaded',()=>{
     applySettings();
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-    // Splash screen: keep visible at least ~1.8s, then fade out
-    const ld = document.getElementById('loading');
-    const hd = document.getElementById('appHeader');
-    const elapsed = Date.now() - _splashStart;
-    const wait = Math.max(0, 1800 - elapsed);
-    setTimeout(function(){
-      if(ld) ld.classList.add('hide');
-      if(hd) hd.style.display='';
-      setTimeout(function(){ if(ld) ld.style.display='none'; }, 500);
-    }, wait);
   } catch(e) {
-    const ld = document.getElementById('loading');
-    if(ld) ld.style.display='none';
-    const hd = document.getElementById('appHeader');
-    if(hd) hd.style.display='';
     alert('Erro ao iniciar: '+e.message);
   }
+  // Splash: padrao validado - esconde aos 1400ms, remove do DOM aos 2000ms
+  const ld = document.getElementById('loading');
+  const hd = document.getElementById('appHeader');
+  setTimeout(function(){
+    if(ld) ld.classList.add('splash--hide');
+  }, 1400);
+  setTimeout(function(){
+    if(ld) ld.style.display='none';
+    if(hd) hd.style.display='';
+  }, 2000);
 });
 
 // ─── Storage ───
